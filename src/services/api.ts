@@ -1,17 +1,16 @@
 import axios from 'axios';
-
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+import { apiConfig } from '../config';
+import { storageUtils } from '../utils';
 
 export const api = axios.create({
-  baseURL: BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  baseURL: apiConfig.baseURL,
+  timeout: apiConfig.timeout,
+  headers: apiConfig.headers,
 });
 
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
+    const token = storageUtils.getToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -26,8 +25,10 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      window.location.href = '/login';
+      storageUtils.removeToken();
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }

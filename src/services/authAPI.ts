@@ -1,44 +1,25 @@
 import { api } from './api';
-
-export interface LoginCredentials {
-  email: string;
-  password: string;
-}
-
-export interface RegisterData {
-  name: string;
-  email: string;
-  password: string;
-}
-
-export interface AuthResponse {
-  user: {
-    id: string;
-    email: string;
-    name: string;
-  };
-  token: string;
-  message: string;
-}
+import { apiConfig } from '../config';
+import type { LoginCredentials, RegisterData, AuthResponse } from '../types';
 
 export const authAPI = {
   login: (credentials: LoginCredentials) => {
-    return api.post<AuthResponse>('/auth/login', credentials);
+    return api.post<AuthResponse>(apiConfig.endpoints.auth.login, credentials);
   },
 
   register: (userData: RegisterData) => {
-    return api.post<AuthResponse>('/auth/register', userData);
+    return api.post<AuthResponse>(apiConfig.endpoints.auth.register, userData);
   },
 
   logout: () => {
-    return api.post('/auth/logout');
+    return api.post(apiConfig.endpoints.auth.logout);
   },
 
   verifyToken: () => {
-    return api.get('/auth/verify');
+    return api.get(apiConfig.endpoints.auth.verify);
   },
 
   refreshToken: () => {
-    return api.post('/auth/refresh');
+    return api.post(apiConfig.endpoints.auth.refresh);
   },
 };

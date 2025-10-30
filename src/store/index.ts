@@ -1,5 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit';
 import authSlice from './slices/authSlice';
+import { authMiddleware, apiMiddleware } from './middleware';
 
 export const store = configureStore({
   reducer: {
@@ -10,7 +11,9 @@ export const store = configureStore({
       serializableCheck: {
         ignoredActions: ['persist/PERSIST', 'persist/REHYDRATE'],
       },
-    }),
+    })
+    .prepend(authMiddleware.middleware)
+    .prepend(apiMiddleware.middleware),
 });
 
 export type RootState = ReturnType<typeof store.getState>;

@@ -1,28 +1,13 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import LoginForm from '../../components/auth/LoginForm';
-import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { loginUser, clearError } from '../../store/slices/authSlice';
+import React, { useState } from 'react';
+import { GuestGuard, AuthForm } from '../../components';
+import { useAuth } from '../../hooks';
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const router = useRouter();
-  const dispatch = useAppDispatch();
-  
-  const { isLoading, error, isAuthenticated } = useAppSelector((state) => state.auth);
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      router.push('/dashboard');
-    }
-  }, [isAuthenticated, router]);
-
-  useEffect(() => {
-    dispatch(clearError());
-  }, [dispatch]);
+  const { login, isLoading, error, clearAuthError } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,40 +16,63 @@ const LoginPage: React.FC = () => {
       return;
     }
 
-    try {
-      const result = await dispatch(loginUser({ email, password }));
-      if (loginUser.fulfilled.match(result)) {
-        router.push('/dashboard');
-      }
-    } catch (error) {
-      console.error('Login error:', error);
-    }
+    await login({ email, password });
   };
 
   const handleEmailChange = (value: string) => {
     setEmail(value);
     if (error) {
-      dispatch(clearError());
+      clearAuthError();
     }
   };
 
   const handlePasswordChange = (value: string) => {
     setPassword(value);
     if (error) {
-      dispatch(clearError());
+      clearAuthError();
     }
   };
 
+  const fields = [
+    {
+      name: 'email',
+      type: 'email',
+      label: 'Email address',
+      placeholder: 'Enter your email',
+      value: email,
+      onChange: handleEmailChange,
+    },
+    {
+      name: 'password',
+      type: 'password',
+      label: 'Password',
+      placeholder: 'Enter your password',
+      value: password,
+      onChange: handlePasswordChange,
+    },
+  ];
+
+  const footerContent = (
+    <p className="text-sm text-gray-600">
+      Don&apos;t have an account?{' '}
+      <a href="/register" className="font-medium text-indigo-600 hover:text-indigo-500">
+        Sign up here
+      </a>
+    </p>
+  );
+
   return (
-    <LoginForm
-      email={email}
-      password={password}
-      isLoading={isLoading}
-      error={error}
-      onEmailChange={handleEmailChange}
-      onPasswordChange={handlePasswordChange}
-      onSubmit={handleSubmit}
-    />
+    <GuestGuard>
+      <AuthForm
+        title="Sign in to your account"
+        fields={fields}
+        isLoading={isLoading}
+        error={error}
+        submitButtonText="Sign in"
+        onSubmit={handleSubmit}
+        footerContent={footerContent}
+      />
+    </GuestGuard>
   );
 };
 

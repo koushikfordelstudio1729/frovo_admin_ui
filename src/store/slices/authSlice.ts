@@ -1,19 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { authAPI } from '../../services/authAPI';
-
-export interface User {
-  id: string;
-  email: string;
-  name: string;
-}
-
-export interface AuthState {
-  user: User | null;
-  token: string | null;
-  isLoading: boolean;
-  error: string | null;
-  isAuthenticated: boolean;
-}
+import type { User, AuthState, LoginCredentials, RegisterData } from '../../types';
 
 const initialState: AuthState = {
   user: null,
@@ -25,7 +12,7 @@ const initialState: AuthState = {
 
 export const loginUser = createAsyncThunk(
   'auth/login',
-  async (credentials: { email: string; password: string }, { rejectWithValue }) => {
+  async (credentials: LoginCredentials, { rejectWithValue }) => {
     try {
       const response = await authAPI.login(credentials);
       localStorage.setItem('token', response.data.token);
@@ -41,7 +28,7 @@ export const loginUser = createAsyncThunk(
 
 export const registerUser = createAsyncThunk(
   'auth/register',
-  async (userData: { name: string; email: string; password: string }, { rejectWithValue }) => {
+  async (userData: RegisterData, { rejectWithValue }) => {
     try {
       const response = await authAPI.register(userData);
       localStorage.setItem('token', response.data.token);
