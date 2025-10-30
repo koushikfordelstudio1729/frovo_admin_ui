@@ -1,0 +1,132 @@
+import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { authAPI } from '../../services/authAPI';
+
+export interface User {
+  id: string;
+  email: string;
+  name: string;
+}
+
+export interface AuthState {
+  user: User | null;
+  token: string | null;
+  isLoading: boolean;
+  error: string | null;
+  isAuthenticated: boolean;
+}
+
+const initialState: AuthState = {
+  user: null,
+  token: null,
+  isLoading: false,
+  error: null,
+  isAuthenticated: false,
+};
+
+export const loginUser = createAsyncThunk(
+  'auth/login',
+  async (credentials: { email: string; password: string }, { rejectWithValue }) => {
+    try {
+      const response = await authAPI.login(credentials);
+      localStorage.setItem('token', response.data.token);
+      return response.data;
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error && 'response' in error 
+        ? (error as { response?: { data?: { message?: string } } }).response?.data?.message || 'Login failed'
+        : 'Login failed';
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
+export const registerUser = createAsyncThunk(
+  'auth/register',
+  async (userData: { name: string; email: string; password: string }, { rejectWithValue }) => {
+    try {
+      const response = await authAPI.register(userData);
+      localStorage.setItem('token', response.data.token);
+      return response.data;
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error && 'response' in error 
+        ? (error as { response?: { data?: { message?: string } } }).response?.data?.message || 'Registration failed'
+        : 'Registration failed';
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
+export const logoutUser = createAsyncThunk(
+  'auth/logout',
+  async () => {
+    localStorage.removeItem('token');
+    return null;
+  }
+);
+
+const authSlice = createSlice({
+  name: 'auth',
+  initialState,
+  reducers: {
+    clearError: (state) => {
+      state.error = null;
+    },
+    setCredentials: (state, action: PayloadAction<{ user: User; token: string }>) => {
+      state.user = action.payload.user;
+      state.token = action.payload.token;
+      state.isAuthenticated = true;
+    },
+    clearCredentials: (state) => {
+      state.user = null;
+      state.token = null;
+      state.isAuthenticated = false;
+    },
+  },
+  extraReducers: (builder) => {
+    builder
+      // Login cases
+      .addCase(loginUser.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(loginUser.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.user = action.payload.user;
+        state.token = action.payload.token;
+        state.isAuthenticated = true;
+        state.error = null;
+      })
+      .addCase(loginUser.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+        state.isAuthenticated = false;
+      })
+      // Register cases
+      .addCase(registerUser.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(registerUser.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.user = action.payload.user;
+        state.token = action.payload.token;
+        state.isAuthenticated = true;
+        state.error = null;
+      })
+      .addCase(registerUser.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+        state.isAuthenticated = false;
+      })
+      // Logout cases
+      .addCase(logoutUser.fulfilled, (state) => {
+        state.user = null;
+        state.token = null;
+        state.isAuthenticated = false;
+        state.isLoading = false;
+        state.error = null;
+      });
+  },
+});
+
+export const { clearError, setCredentials, clearCredentials } = authSlice.actions;
+export default authSlice.reducer;
