@@ -1,3 +1,4 @@
+import { AdminHeader } from "@/components/layout/AdminHeader/AdminHeader";
 import { AdminSidebar } from "@/components/layout/AdminSidebar";
 import React from "react";
 
@@ -13,7 +14,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
       {/* Main content */}
       <main className="ml-64 flex-1 bg-gray-50 min-h-screen">
-        <div className="p-8">{children}</div>
+        {/* Header */}
+        <AdminHeader />
+        <div className="pt-20 p-8">{children}</div>
       </main>
     </div>
   );
