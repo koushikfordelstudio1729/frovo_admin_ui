@@ -9,7 +9,7 @@ const CreateRoleForm: React.FC = () => {
   return (
     <div className="min-h-full">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-8">
+      <div className="flex items-center gap-3 mb-8 mt-4">
         <button onClick={() => router.back()} className="text-gray-900 mt-8 ">
           <ArrowLeft size={28} />
         </button>
@@ -47,7 +47,7 @@ const CreateRoleForm: React.FC = () => {
             </div>
             {/* Description */}
             <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">
+              <label className="block text-xl font-medium text-gray-900 mb-2">
                 Description
               </label>
               <textarea
@@ -57,10 +57,10 @@ const CreateRoleForm: React.FC = () => {
             </div>
             {/* Buttons */}
             <div className="flex gap-4 justify-center pt-4">
-              <button className="px-8 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 font-medium">
+              <button className="px-12 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 font-medium">
                 Publish
               </button>
-              <button className="px-8 py-2 bg-gray-700 text-white rounded hover:bg-gray-700 font-medium">
+              <button className="px-12 py-2 bg-gray-700 text-white rounded hover:bg-gray-700 font-medium">
                 Save draft
               </button>
             </div>
