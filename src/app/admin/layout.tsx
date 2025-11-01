@@ -16,7 +16,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       <main className="ml-64 flex-1 bg-gray-50 min-h-screen">
         {/* Header */}
         <AdminHeader />
-        <div className="pt-20 p-8">{children}</div>
+        <div className="pt-10 p-8">{children}</div>
       </main>
     </div>
   );
