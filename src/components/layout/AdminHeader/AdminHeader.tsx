@@ -13,7 +13,7 @@ export const AdminHeader: React.FC = () => {
   const title = currentPage?.label || "Admin Dashboard";
 
   return (
-    <header className="top-0 right-0 left-64 bg-white h-16 flex items-center justify-between px-8 z-40">
+    <header className="fixed top-0 right-0 left-64 bg-white h-16 flex items-center justify-between px-8 z-40">
       {/* Page title */}
       <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
       {/* Right Section */}
