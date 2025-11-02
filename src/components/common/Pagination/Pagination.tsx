@@ -20,7 +20,7 @@ export const Pagination: React.FC<PaginationProps> = ({
         <button
           onClick={() => onPageChange(1)}
           disabled={currentPage === 1}
-          className="px-3 py-2 text-sm text-gray-900 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-3 py-2 text-sm text-gray-900 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
         >
           {"<< First"}
         </button>
@@ -29,7 +29,7 @@ export const Pagination: React.FC<PaginationProps> = ({
         <button
           onClick={() => onPageChange(Math.max(1, currentPage - 1))}
           disabled={currentPage === 1}
-          className="px-3 py-2 text-sm text-gray-900 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-3 py-2 text-sm text-gray-900 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
         >
           {"< Back"}
         </button>
@@ -41,8 +41,8 @@ export const Pagination: React.FC<PaginationProps> = ({
             onClick={() => onPageChange(i + 1)}
             className={`px-3 py-2 text-sm rounded ${
               currentPage === i + 1
-                ? "bg-gray-900 text-white"
-                : "border border-gray-300 text-gray-900 hover:bg-gray-50"
+                ? "bg-gray-900 text-white cursor-pointer"
+                : "border border-gray-300 text-gray-900 hover:bg-gray-50 cursor-pointer"
             }`}
           >
             {i + 1}
@@ -53,7 +53,7 @@ export const Pagination: React.FC<PaginationProps> = ({
         <button
           onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
           disabled={currentPage === totalPages}
-          className="px-3 py-2 text-sm text-gray-900 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-3 py-2 text-sm text-gray-900 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
         >
           {"Next >"}
         </button>
@@ -62,7 +62,7 @@ export const Pagination: React.FC<PaginationProps> = ({
         <button
           onClick={() => onPageChange(totalPages)}
           disabled={currentPage === totalPages}
-          className="px-3 py-2 text-sm text-gray-900 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-3 py-2 text-sm text-gray-900 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
         >
           {"Last >>"}
         </button>

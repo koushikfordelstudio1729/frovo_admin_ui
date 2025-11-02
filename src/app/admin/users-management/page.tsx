@@ -1,8 +1,8 @@
 "use client";
 
-import { UserDataTable, UserTableHeader } from "@/components";
+import { Table, TableName } from "@/components";
 import { Pagination } from "@/components/common";
-import { Column } from "@/components/user-management/UserTable";
+import { Column } from "@/components/name&table/Table";
 import { useUsers } from "@/hooks/useUsers";
 
 export default function UserManagementPage() {
@@ -36,8 +36,8 @@ export default function UserManagementPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <UserTableHeader
+    <div className="min-h-screen bg-gray-50 p-4 pt-8">
+      <TableName
         title="User Management"
         searchPlaceholder="Search user"
         searchValue=""
@@ -46,9 +46,9 @@ export default function UserManagementPage() {
         buttonLink="/admin/create-user"
       />
 
-      <UserDataTable columns={columns} data={users} renderCell={renderCell} />
+      <Table columns={columns} data={users} renderCell={renderCell} />
 
-      <div className="flex items-center justify-end px-6 py-8 bg-gray-50">
+      <div className="flex items-center justify-end px-6 pt-6 bg-gray-50">
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}

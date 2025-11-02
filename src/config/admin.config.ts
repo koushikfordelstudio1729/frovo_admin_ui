@@ -26,8 +26,8 @@ export const adminNavigation: AdminMenuItem[] = [
     icon: "users",
   },
   {
-    label: "Permissions",
-    href: "/admin/permissions",
+    label: "Permissions Management",
+    href: "/admin/permissions-management",
     icon: "key",
   },
   {
