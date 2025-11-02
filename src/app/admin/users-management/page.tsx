@@ -2,12 +2,15 @@
 
 import { Table, TableName } from "@/components";
 import { Pagination } from "@/components/common";
+import AddUserModal from "@/components/modals/AddUserModal";
 import { Column } from "@/components/name&table/Table";
 import { useUsers } from "@/hooks/useUsers";
+import { useState } from "react";
 
 export default function UserManagementPage() {
   const { users, currentPage, totalPages, handleSearch, handlePageChange } =
     useUsers();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const columns: Column[] = [
     { key: "name", label: "Name" },
@@ -35,6 +38,12 @@ export default function UserManagementPage() {
     return value;
   };
 
+  const handleAddUser = (formData: any) => {
+    console.log("New user added:", formData);
+    setIsModalOpen(false);
+    // Add API call here to save user
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 p-4 pt-8">
       <TableName
@@ -43,7 +52,8 @@ export default function UserManagementPage() {
         searchValue=""
         onSearchChange={handleSearch}
         buttonText="Add new user"
-        buttonLink="/admin/create-user"
+        buttonLink="#"
+        onButtonClick={() => setIsModalOpen(true)}
       />
 
       <Table columns={columns} data={users} renderCell={renderCell} />
@@ -55,6 +65,12 @@ export default function UserManagementPage() {
           onPageChange={handlePageChange}
         />
       </div>
+      {/* Add User Modal */}
+      <AddUserModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={handleAddUser}
+      />
     </div>
   );
 }

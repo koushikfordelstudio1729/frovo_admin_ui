@@ -12,6 +12,7 @@ interface TableNameProps {
   buttonText: string;
   buttonLink: string;
   showSearch?: boolean;
+  onButtonClick?: () => void;
 }
 
 export const TableName: React.FC<TableNameProps> = ({
@@ -22,6 +23,7 @@ export const TableName: React.FC<TableNameProps> = ({
   buttonText,
   buttonLink,
   showSearch = true,
+  onButtonClick,
 }) => {
   return (
     <>
@@ -29,17 +31,27 @@ export const TableName: React.FC<TableNameProps> = ({
       {!showSearch && (
         <div className="flex items-center justify-between mb-8 mt-4">
           <h1 className="text-3xl font-bold text-gray-900">{title}</h1>
-          <Link
-            href={buttonLink}
-            className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 font-medium whitespace-nowrap"
-          >
-            <Plus size={20} />
-            {buttonText}
-          </Link>
+          {onButtonClick ? (
+            <button
+              onClick={onButtonClick}
+              className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 font-medium whitespace-nowrap"
+            >
+              <Plus size={20} />
+              {buttonText}
+            </button>
+          ) : (
+            <Link
+              href={buttonLink}
+              className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 font-medium whitespace-nowrap"
+            >
+              <Plus size={20} />
+              {buttonText}
+            </Link>
+          )}
         </div>
       )}
 
-      {/* Title only when searchbar exist) */}
+      {/* Title only when searchbar exist */}
       {showSearch && (
         <div className="mb-8 mt-4">
           <h1 className="text-3xl font-bold text-gray-900">{title}</h1>
@@ -62,13 +74,23 @@ export const TableName: React.FC<TableNameProps> = ({
               className="w-sm pl-10 pr-4 text-black py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white"
             />
           </div>
-          <Link
-            href={buttonLink}
-            className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 font-medium whitespace-nowrap"
-          >
-            <Plus size={20} />
-            {buttonText}
-          </Link>
+          {onButtonClick ? (
+            <button
+              onClick={onButtonClick}
+              className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 font-medium whitespace-nowrap"
+            >
+              <Plus size={20} />
+              {buttonText}
+            </button>
+          ) : (
+            <Link
+              href={buttonLink}
+              className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 font-medium whitespace-nowrap"
+            >
+              <Plus size={20} />
+              {buttonText}
+            </Link>
+          )}
         </div>
       )}
     </>
