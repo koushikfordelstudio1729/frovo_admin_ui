@@ -1,14 +1,4 @@
 import { RoleStats, RoleType } from "@/types/roles.types";
-import {
-  Shield,
-  Briefcase,
-  Users,
-  Wrench,
-  DollarSign,
-  Headphones,
-  Warehouse,
-  ClipboardCheck,
-} from "lucide-react";
 
 // Predefined roles with their stats
 export const PREDEFINED_ROLES: RoleType[] = [

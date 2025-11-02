@@ -4,7 +4,7 @@ import { useState, useMemo } from "react";
 import { RoleList, RoleFilters } from "@/types/roles.types";
 import { ROLE_STATS, ROLES_PAGINATION } from "@/config/roles.config";
 
-// Mock data 
+// Mock data
 const MOCK_ROLES: RoleList[] = [
   {
     id: 1,
@@ -96,7 +96,6 @@ const MOCK_ROLES: RoleList[] = [
   },
 ];
 
-
 export const useRoles = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [filters, setFilters] = useState<RoleFilters>({
@@ -170,3 +169,5 @@ export const useRoles = () => {
     filters,
   };
 };
+
+export default useRoles;

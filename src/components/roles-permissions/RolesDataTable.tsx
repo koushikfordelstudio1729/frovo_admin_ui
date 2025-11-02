@@ -4,6 +4,7 @@ import { RoleList } from "@/types/roles.types";
 import React from "react";
 import Badge from "../common/Badge";
 import { Eye, Trash2 } from "lucide-react";
+import { Pagination } from "../common";
 
 interface RoleDataTableProps {
   roles: RoleList[];
@@ -20,8 +21,8 @@ export const RolesDataTable: React.FC<RoleDataTableProps> = ({
   totalItems,
   onPageChange,
 }) => {
-  const itemsPerPage = 9;
-  const startIndex = (currentPage - 1) * itemsPerPage;
+  //const itemsPerPage = 9;
+  //const startIndex = (currentPage - 1) * itemsPerPage;
   return (
     <div className="bg-white rounded-lg">
       {/* Table */}
@@ -90,49 +91,11 @@ export const RolesDataTable: React.FC<RoleDataTableProps> = ({
 
       {/* Pagination */}
       <div className="flex items-center justify-end px-6 py-8 bg-gray-50">
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => onPageChange(1)}
-            disabled={currentPage == 1}
-            className="px-3 py-1 text-gray-900 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50"
-          >
-            {"<< First"}
-          </button>
-          <button
-            onClick={() => onPageChange(Math.max(1, currentPage - 1))}
-            disabled={currentPage === 1}
-            className="px-3 py-1 text-gray-900 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50"
-          >
-            {"< Back"}
-          </button>
-          {Array.from({ length: totalPages }, (_, i) => (
-            <button
-              key={i + 1}
-              onClick={() => onPageChange(i + 1)}
-              className={`px-3 py-1 rounded ${
-                currentPage === i + 1
-                  ? "bg-gray-900 text-white"
-                  : "border border-gray-300 hover:bg-gray-50 text-gray-900"
-              }`}
-            >
-              {i + 1}
-            </button>
-          ))}
-          <button
-            onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
-            disabled={currentPage === totalPages}
-            className="px-3 py-1 text-gray-900 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50"
-          >
-            {"Next >"}
-          </button>
-          <button
-            onClick={() => onPageChange(totalPages)}
-            disabled={currentPage === totalPages}
-            className="px-3 py-1 text-gray-900 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50"
-          >
-            {"Last >>"}
-          </button>
-        </div>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={onPageChange}
+        />
       </div>
     </div>
   );

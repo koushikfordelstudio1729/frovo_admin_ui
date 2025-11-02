@@ -17,12 +17,12 @@ export const adminNavigation: AdminMenuItem[] = [
   },
   {
     label: "Department Management",
-    href: "/admin/departments",
+    href: "/admin/department-management",
     icon: "building",
   },
   {
     label: "User Management",
-    href: "/admin/users",
+    href: "/admin/users-management",
     icon: "users",
   },
   {
