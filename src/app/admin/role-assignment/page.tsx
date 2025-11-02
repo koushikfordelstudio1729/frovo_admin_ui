@@ -45,7 +45,7 @@ export default function ScopedRoleAssignmentPage() {
           </h2>
 
           {/* Blank Map Container */}
-          <div className="w-xl h-96 bg-gray-200 rounded-xl "></div>
+          <div className="w-lg h-96 bg-gray-200 rounded-xl "></div>
         </div>
 
         {/* Selected Entities */}

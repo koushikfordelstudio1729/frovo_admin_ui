@@ -25,7 +25,7 @@ export default function UserProfilePage() {
           <img
             src={user.avatar}
             alt={user.name}
-            className="w-48 h-48 rounded-full border-4 border-orange-500 shrink-0"
+            className="w-48 h-48 rounded-full border-r-8 border-orange-500 shrink-0"
           />
 
           {/* Name and Email*/}
