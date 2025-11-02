@@ -150,12 +150,12 @@ export default function AddUserModal({
 
           {/* Submit Button */}
           <div className="flex justify-center">
-          <button
-            type="submit"
-            className="px-10 py-2 mt-8 bg-orange-500 text-white font-bold rounded-lg hover:bg-orange-600 transition-colors"
-          >
-            Send Invites
-          </button>
+            <button
+              type="submit"
+              className="px-10 py-2 mt-4 bg-orange-500 text-white font-bold rounded-lg hover:bg-orange-600 transition-colors"
+            >
+              Send Invites
+            </button>
           </div>
         </form>
       </div>

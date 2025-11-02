@@ -20,7 +20,6 @@ export const RolesDataTable: React.FC<RoleDataTableProps> = ({
   roles,
   currentPage,
   totalPages,
-  totalItems,
   onPageChange,
 }) => {
   const columns: Column[] = [
