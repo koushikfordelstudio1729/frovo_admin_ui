@@ -42,7 +42,7 @@ export const adminNavigation: AdminMenuItem[] = [
   },
   {
     label: "Scoped Role Assignment",
-    href: "/admin/special-roles",
+    href: "/admin/role-assignment",
     icon: "star",
   },
   {
