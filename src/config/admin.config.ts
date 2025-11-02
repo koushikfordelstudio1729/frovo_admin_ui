@@ -47,12 +47,12 @@ export const adminNavigation: AdminMenuItem[] = [
   },
   {
     label: "User Profile",
-    href: "/admin/profile",
+    href: "/admin/user-profile",
     icon: "user",
   },
   {
     label: "Security Settings",
-    href: "/admin/settings",
+    href: "/admin/security-settings",
     icon: "settings",
   },
 ];

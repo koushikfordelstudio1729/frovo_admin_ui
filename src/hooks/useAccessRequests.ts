@@ -1,10 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import {
-  AccessRequest,
-  AccessRequestFilters,
-} from "@/types/access-requests.types";
+import { AccessRequestFilters } from "@/types/access-requests.types";
 import {
   MOCK_ACCESS_REQUESTS,
   ACCESS_REQUESTS_PAGINATION,

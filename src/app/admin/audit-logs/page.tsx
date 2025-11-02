@@ -1,24 +1,24 @@
 "use client";
 
-import { Pagination } from "@/components/common";
-import { useAccessRequests } from "@/hooks/useAccessRequests";
 import { Column } from "@/components/name&table/Table";
-import { TableName, Table } from "@/components";
+import { TableName, Table, Pagination } from "@/components";
+import { useAuditLogs } from "@/hooks/useAuditLogs";
+import React from "react";
 
-export default function AccessRequestsApprovalsPage() {
-  const { requests, currentPage, totalPages, handleSearch, handlePageChange } =
-    useAccessRequests();
+export default function AuditLogsPage() {
+  const { logs, currentPage, totalPages, handleSearch, handlePageChange } =
+    useAuditLogs();
 
   const columns: Column[] = [
-    { key: "requester", label: "Requester" },
-    { key: "permission", label: "Permission" },
-    { key: "duration", label: "Duration" },
-    { key: "status", label: "Status" },
-    { key: "actions", label: "Actions" },
+    { key: "timestamp", label: "Timestamp" },
+    { key: "actor", label: "Actor" },
+    { key: "action", label: "Action" },
+    { key: "target", label: "Target" },
+    { key: "beforeAfterDiff", label: "Before/After Diff" },
   ];
 
-  const renderCell = (key: string, value: any, row?: any) => {
-    if (key === "status") {
+  const renderCell = (key: string, value: any) => {
+    if (key === "target") {
       return (
         <span
           className={`px-4 py-2 rounded-full text-sm font-medium ${
@@ -33,8 +33,7 @@ export default function AccessRequestsApprovalsPage() {
         </span>
       );
     }
-
-    if (key === "actions") {
+    if (key === "beforeAfterDiff") {
       return (
         <div className="flex gap-2">
           <button className="px-3 py-1 bg-[#0B9F00] text-white text-sm rounded hover:bg-green-800 font-medium cursor-pointer">
@@ -53,13 +52,19 @@ export default function AccessRequestsApprovalsPage() {
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <TableName
-        title="Access Requests & Approvals"
+        title="Audit Trail"
+        buttonText="Export Logs"
+        buttonLink="/admin/export-logs"
         showSearch={false}
-        buttonText="Request Access"
-        buttonLink="/admin/request-access"
       />
 
-      <Table columns={columns} data={requests} renderCell={renderCell} />
+      <Table
+        columns={columns}
+        data={logs}
+        renderCell={renderCell}
+        showSeparators={true}
+        alternateRowColors={true}
+      />
 
       <div className="flex items-center justify-end px-6 pt-2 bg-gray-50">
         <Pagination

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { User, UserFilters } from "@/types/users.types";
+import { UserFilters } from "@/types/users.types";
 import { MOCK_USERS, USERS_PAGINATION } from "@/config/users.config";
 
 export const useUsers = () => {
