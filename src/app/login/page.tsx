@@ -1,79 +1,75 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { GuestGuard, AuthForm } from '../../components';
-import { useAuth } from '../../hooks';
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import AuthForm from "@/components/forms/AuthForm/AuthForm";
 
-const LoginPage: React.FC = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const { login, isLoading, error, clearAuthError } = useAuth();
+export default function LoginPage() {
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+    setError("");
+
     if (!email || !password) {
+      setError("Please fill in all fields");
       return;
     }
 
-    await login({ email, password });
-  };
+    setIsLoading(true);
 
-  const handleEmailChange = (value: string) => {
-    setEmail(value);
-    if (error) {
-      clearAuthError();
-    }
-  };
-
-  const handlePasswordChange = (value: string) => {
-    setPassword(value);
-    if (error) {
-      clearAuthError();
+    try {
+      // API call here
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      router.push("/admin");
+    } catch (err) {
+      setError("Invalid credentials. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const fields = [
     {
-      name: 'email',
-      type: 'email',
-      label: 'Email address',
-      placeholder: 'Enter your email',
+      name: "email",
+      type: "email",
+      label: "Username",
+      placeholder: "name@frovo.in",
       value: email,
-      onChange: handleEmailChange,
+      onChange: setEmail,
     },
     {
-      name: 'password',
-      type: 'password',
-      label: 'Password',
-      placeholder: 'Enter your password',
+      name: "password",
+      type: "password",
+      label: "Password",
+      placeholder: "••••••••••••••••••",
       value: password,
-      onChange: handlePasswordChange,
+      onChange: setPassword,
+      showPassword,
+      togglePassword: () => setShowPassword(!showPassword),
     },
   ];
 
-  const footerContent = (
-    <p className="text-sm text-gray-600">
-      Don&apos;t have an account?{' '}
-      <a href="/register" className="font-medium text-indigo-600 hover:text-indigo-500">
-        Sign up here
-      </a>
-    </p>
-  );
-
   return (
-    <GuestGuard>
-      <AuthForm
-        title="Sign in to your account"
-        fields={fields}
-        isLoading={isLoading}
-        error={error}
-        submitButtonText="Sign in"
-        onSubmit={handleSubmit}
-        footerContent={footerContent}
-      />
-    </GuestGuard>
+    <AuthForm
+      title="Login"
+      logoPath="/images/logo.svg"
+      fields={fields}
+      isLoading={isLoading}
+      error={error}
+      submitButtonText="Login"
+      onSubmit={handleSubmit}
+      rememberMe={rememberMe}
+      onRememberMeChange={setRememberMe}
+      forgotPasswordLink="/login"
+      illustration="/images/login_page_vm.png"
+      illustrationAlt="Frovo Vending Machine"
+    />
   );
-};
-
-export default LoginPage;
+}
