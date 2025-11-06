@@ -23,7 +23,7 @@ export const useAuth = () => {
     try {
       const result = await dispatch(loginUser(credentials));
       if (loginUser.fulfilled.match(result)) {
-        router.push('/dashboard');
+        router.push('/admin');
         return { success: true };
       }
       return { success: false, error: result.payload };
@@ -36,7 +36,7 @@ export const useAuth = () => {
     try {
       const result = await dispatch(registerUser(userData));
       if (registerUser.fulfilled.match(result)) {
-        router.push('/dashboard');
+        router.push('/admin');
         return { success: true };
       }
       return { success: false, error: result.payload };

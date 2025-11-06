@@ -3,6 +3,7 @@
 import React from "react";
 import { ArrowLeft } from "lucide-react";
 import { MOCK_USER_PROFILE } from "@/config/user-profile.config";
+import { Button } from "@/components";
 
 export default function UserProfilePage() {
   const user = MOCK_USER_PROFILE;
@@ -92,9 +93,9 @@ export default function UserProfilePage() {
 
         {/* Request More Access Button */}
         <div className="flex justify-center">
-          <button className="px-10 py-3 bg-orange-500 text-white font-medium text-lg rounded-lg hover:bg-orange-600 transition-colors">
+          <Button variant="primary" size="lg" className="px-10">
             Request More Access
-          </button>
+          </Button>
         </div>
       </div>
     </div>

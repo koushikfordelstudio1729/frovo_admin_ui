@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { X } from "lucide-react";
+import { Button } from "../common";
 
 interface AddUserModalProps {
   isOpen: boolean;
@@ -150,12 +151,14 @@ export default function AddUserModal({
 
           {/* Submit Button */}
           <div className="flex justify-center">
-            <button
+            <Button
               type="submit"
-              className="px-10 py-2 mt-4 bg-orange-500 text-white font-bold rounded-lg hover:bg-orange-600 transition-colors"
+              variant="primary"
+              size="md"
+              className="px-10 mt-4"
             >
               Send Invites
-            </button>
+            </Button>
           </div>
         </form>
       </div>

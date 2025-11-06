@@ -1,26 +1,26 @@
-'use client';
+"use client";
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAppSelector } from '../../store/hooks';
-import { authUtils } from '../../utils';
-import type { RouteGuardProps } from '../../types';
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAppSelector } from "../../store/hooks";
+import { authUtils } from "../../utils";
+import type { RouteGuardProps } from "../../types";
 
 interface GuestGuardProps extends RouteGuardProps {
   redirectTo?: string;
 }
 
-const GuestGuard: React.FC<GuestGuardProps> = ({ 
-  children, 
+const GuestGuard: React.FC<GuestGuardProps> = ({
+  children,
   fallback = null,
-  redirectTo = '/dashboard' 
+  redirectTo = "/admin",
 }) => {
   const router = useRouter();
   const { isAuthenticated, isLoading } = useAppSelector((state) => state.auth);
 
   useEffect(() => {
     const isClientAuthenticated = authUtils.isAuthenticated();
-    
+
     if (!isLoading && (isAuthenticated || isClientAuthenticated)) {
       router.push(redirectTo);
     }

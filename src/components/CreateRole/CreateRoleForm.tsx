@@ -3,6 +3,7 @@
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React from "react";
+import { Button } from "../common";
 
 const CreateRoleForm: React.FC = () => {
   const router = useRouter();
@@ -55,14 +56,15 @@ const CreateRoleForm: React.FC = () => {
                 className="w-130 text-black px-4 py-3 border-2 bg-gray-100 border-orange-300 rounded-lg focus:outline-none focus:outline-orange-500"
               />
             </div>
+
             {/* Buttons */}
             <div className="flex gap-4 justify-center pt-4">
-              <button className="px-12 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 font-medium">
+              <Button variant="primary" size="md" className="px-12">
                 Publish
-              </button>
-              <button className="px-12 py-2 bg-gray-700 text-white rounded hover:bg-gray-700 font-medium">
+              </Button>
+              <Button variant="secondary" size="md" className="px-12">
                 Save draft
-              </button>
+              </Button>
             </div>
           </div>
         </div>

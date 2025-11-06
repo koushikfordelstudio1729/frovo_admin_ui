@@ -4,6 +4,7 @@ import { useState } from "react";
 import { SCOPE_OPTIONS } from "@/config/scoped-roles.config";
 import { ScopeType } from "@/types/scoped-roles.types";
 import { ChevronDown } from "lucide-react";
+import { Button } from "@/components";
 
 export default function ScopedRoleAssignmentPage() {
   const [selectedScope, setSelectedScope] = useState<ScopeType>("Global");
@@ -65,9 +66,9 @@ export default function ScopedRoleAssignmentPage() {
 
       {/* Save Button */}
       <div className="flex justify-center">
-        <button className="px-8 py-3 text-xl  bg-orange-500 text-white font-medium rounded-lg hover:bg-orange-600 transition-colors">
+        <Button variant="primary" size="lg" className="px-8 text-xl">
           Save Role Scope
-        </button>
+        </Button>
       </div>
     </div>
   );

@@ -3,6 +3,7 @@
 import { RoleFilters } from "@/types/roles.types";
 import { Plus, Search, ChevronDown } from "lucide-react";
 import React, { useState } from "react";
+import { Button } from "../common";
 
 interface RoleTableHeadProps {
   onSearch: (query: string) => void;
@@ -178,10 +179,14 @@ export const RoleTableHeader: React.FC<RoleTableHeadProps> = ({
         </div>
 
         {/* Add Button */}
-        <button className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors ml-auto">
+        <Button
+          variant="primary"
+          size="md"
+          className="ml-auto flex items-center gap-2 bg-orange-500 hover:bg-orange-600"
+        >
           <Plus size={18} />
           Add new role
-        </button>
+        </Button>
       </div>
     </div>
   );

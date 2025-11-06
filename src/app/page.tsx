@@ -8,8 +8,8 @@ export default function Home() {
   const router = useRouter();
   const { isAuthenticated } = useAppSelector((state) => state.auth);
 
-  useEffect(() => {   
-    router.push("/dashboard");
+  useEffect(() => {
+    router.push("/admin");
   }, [router]);
 
   return (

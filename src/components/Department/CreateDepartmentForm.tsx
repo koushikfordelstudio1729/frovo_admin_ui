@@ -1,6 +1,6 @@
 import { ArrowLeft, ChevronDown } from "lucide-react";
 import { useRouter } from "next/navigation";
-
+import { Button } from "../common";
 
 export const CreateDepartmentForm = () => {
   const router = useRouter();
@@ -69,12 +69,12 @@ export const CreateDepartmentForm = () => {
             </div>
             {/* Buttons */}
             <div className="flex gap-4 justify-center pt-4">
-              <button className="px-12 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 font-medium">
+              <Button variant="primary" size="md" className="px-12">
                 Save
-              </button>
-              <button className="px-12 py-2 bg-gray-700 text-white rounded hover:bg-gray-700 font-medium">
+              </Button>
+              <Button variant="secondary" size="md" className="px-12">
                 Save draft
-              </button>
+              </Button>
             </div>
           </div>
         </div>

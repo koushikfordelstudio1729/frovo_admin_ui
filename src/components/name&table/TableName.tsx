@@ -3,6 +3,7 @@
 import { Plus, Search } from "lucide-react";
 import Link from "next/link";
 import React from "react";
+import Button from "@/components/common/Button"; // ← Import Button
 
 interface TableNameProps {
   title: string;
@@ -32,20 +33,25 @@ export const TableName: React.FC<TableNameProps> = ({
         <div className="flex items-center justify-between mb-8 mt-4">
           <h1 className="text-3xl font-bold text-gray-900">{title}</h1>
           {onButtonClick ? (
-            <button
+            <Button
+              variant="primary"
+              size="md"
               onClick={onButtonClick}
-              className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 font-medium whitespace-nowrap"
+              className="flex items-center gap-2 whitespace-nowrap"
             >
               <Plus size={20} />
               {buttonText}
-            </button>
+            </Button>
           ) : (
-            <Link
-              href={buttonLink}
-              className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 font-medium whitespace-nowrap"
-            >
-              <Plus size={20} />
-              {buttonText}
+            <Link href={buttonLink}>
+              <Button
+                variant="primary"
+                size="md"
+                className="flex items-center gap-2 whitespace-nowrap"
+              >
+                <Plus size={20} />
+                {buttonText}
+              </Button>
             </Link>
           )}
         </div>
@@ -75,20 +81,25 @@ export const TableName: React.FC<TableNameProps> = ({
             />
           </div>
           {onButtonClick ? (
-            <button
+            <Button
+              variant="primary"
+              size="md"
               onClick={onButtonClick}
-              className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 font-medium whitespace-nowrap"
+              className="flex items-center gap-2 whitespace-nowrap"
             >
               <Plus size={20} />
               {buttonText}
-            </button>
+            </Button>
           ) : (
-            <Link
-              href={buttonLink}
-              className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 font-medium whitespace-nowrap"
-            >
-              <Plus size={20} />
-              {buttonText}
+            <Link href={buttonLink}>
+              <Button
+                variant="primary"
+                size="md"
+                className="flex items-center gap-2 whitespace-nowrap"
+              >
+                <Plus size={20} />
+                {buttonText}
+              </Button>
             </Link>
           )}
         </div>
