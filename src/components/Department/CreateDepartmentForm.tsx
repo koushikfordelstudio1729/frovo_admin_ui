@@ -1,9 +1,11 @@
 import { ArrowLeft, ChevronDown } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "../common";
+import { useState } from "react";
 
 export const CreateDepartmentForm = () => {
   const router = useRouter();
+  const [selectedRole, setSelectedRole] = useState("");
   return (
     <>
       {/* Header */}
@@ -47,8 +49,16 @@ export const CreateDepartmentForm = () => {
                   Available roles
                 </label>
                 <div className="relative">
-                  <select className="w-full text-black  px-4 py-4 border-2 border-orange-300 rounded-lg focus:outline-none focus:outline-orange-500 appearance-none">
-                    <option>Select role</option>
+                  <select
+                    value={selectedRole}
+                    onChange={(e) => setSelectedRole(e.target.value)}
+                    className="w-full text-black px-4 py-4 border-2 border-orange-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 appearance-none pr-12"
+                  >
+                    <option value="" disabled>
+                      Select role
+                    </option>
+                    <option value="ops-manager">Ops Manager</option>
+                    <option value="technician">Technician</option>
                   </select>
                   <ChevronDown
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none"

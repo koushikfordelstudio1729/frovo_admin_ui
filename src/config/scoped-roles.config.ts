@@ -1,2 +1,1 @@
-export const SCOPE_OPTIONS = ["Global", "Partner", "Machine"];
-
+export const SCOPE_OPTIONS = ["Global", "Partner", "Region", "Machine"];

@@ -1,12 +1,13 @@
 "use client";
 
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ChevronDown } from "lucide-react";
 import { useRouter } from "next/navigation";
-import React from "react";
+import { useState } from "react";
 import { Button } from "../common";
 
 const CreateRoleForm: React.FC = () => {
   const router = useRouter();
+  const [roleType, setRoleType] = useState("");
   return (
     <div className="min-h-full">
       {/* Header */}
@@ -36,13 +37,24 @@ const CreateRoleForm: React.FC = () => {
                   className="w-full text-black px-4 py-4 border-2 bg-gray-100 border-orange-300 rounded-lg focus:outline-none focus:outline-orange-500"
                 />
               </div>
-              <div>
+              <div className="relative">
                 <label className="block text-xl font-medium text-gray-900 mb-2">
                   Role Type
                 </label>
-                <input
-                  type="text"
-                  className="w-full text-black px-4 py-4 border-2 bg-gray-100 border-orange-300 rounded-lg focus:outline-none focus:outline-orange-500"
+                <select
+                  value={roleType}
+                  onChange={(e) => setRoleType(e.target.value)}
+                  className="w-full text-black px-4 py-4 border-2 bg-gray-100 border-orange-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 appearance-none pr-10"
+                >
+                  <option value="" disabled>
+                    Select Role Type
+                  </option>
+                  <option value="system">System</option>
+                  <option value="custom">Custom</option>
+                </select>
+                <ChevronDown
+                  className="absolute right-4 top-[58px] pointer-events-none text-gray-600"
+                  size={20}
                 />
               </div>
             </div>
