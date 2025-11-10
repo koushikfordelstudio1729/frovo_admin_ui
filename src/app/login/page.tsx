@@ -27,7 +27,7 @@ export default function LoginPage() {
     try {
       // API call here
       await new Promise((resolve) => setTimeout(resolve, 1500));
-      router.push("/admin");
+      router.push("/admin/roles-permissions");
     } catch (err) {
       setError("Invalid credentials. Please try again.");
     } finally {
@@ -68,7 +68,7 @@ export default function LoginPage() {
       rememberMe={rememberMe}
       onRememberMeChange={setRememberMe}
       forgotPasswordLink="/login"
-      illustration="/images/login_page_vm.png"
+      illustration="/images/login_page_vm.svg"
       illustrationAlt="Frovo Vending Machine"
     />
   );

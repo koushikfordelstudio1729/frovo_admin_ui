@@ -79,13 +79,13 @@ export const FORM_FIELDS = {
 
 export const DEFAULT_PERMISSIONS: PermissionsState = {
   [PERMISSION_GROUPS.MACHINE]: [
-    { key: "machine:view", checked: true },
+    { key: "machine:view", checked: false },
     { key: "machine:edit", checked: false },
     { key: "machine:delete", checked: false },
   ],
   [PERMISSION_GROUPS.ORDERS]: [
     { key: "order:view", checked: false },
-    { key: "order:refund", checked: true },
+    { key: "order:refund", checked: false },
     { key: "order:cancel", checked: false },
   ],
   [PERMISSION_GROUPS.FINANCE]: [
@@ -94,7 +94,7 @@ export const DEFAULT_PERMISSIONS: PermissionsState = {
   ],
   [PERMISSION_GROUPS.AUDIT]: [
     { key: "audit:view", checked: false },
-    { key: "planogram:edit", checked: true },
+    { key: "planogram:edit", checked: false },
   ],
 };
 

@@ -39,10 +39,16 @@ export const RolesDataTable: React.FC<RoleDataTableProps> = ({
     if (key === "actions") {
       return (
         <div className="flex items-center gap-3">
-          <button className="text-blue-500 hover:text-blue-700 transition-colors">
+          <button
+            type="button"
+            className="text-blue-500 hover:text-blue-700 transition-colors"
+          >
             <Eye size={18} />
           </button>
-          <button className="text-red-500 hover:text-red-700 transition-colors">
+          <button
+            type="button"
+            className="text-red-500 hover:text-red-700 transition-colors"
+          >
             <Trash2 size={18} />
           </button>
         </div>

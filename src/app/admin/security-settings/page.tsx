@@ -1,10 +1,8 @@
-// src/app/settings/security/page.tsx
 "use client";
 
 import { useState } from "react";
 import { Toggle } from "@/components/common/Toggle/Toggle";
 import Button from "@/components/common/Button/Button";
-import Input from "@/components/common/Input/Input";
 import { SecuritySettings } from "@/types/security.types";
 import { DEFAULT_SECURITY_SETTINGS } from "@/utils/constants";
 
@@ -67,23 +65,22 @@ const SecuritySettingsPage = () => {
   };
 
   return (
-    <div className="min-h-screens">
-      <div className="max-w-7xl bg-white p-8 mt-12">
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl bg-white p-8 mt-12 mx-auto">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-6">
           <h1 className="text-3xl font-bold text-black mb-3">
             Security Settings
           </h1>
         </div>
-        <div className="w-full h-px bg-gray-300"></div>
+        <div className="w-full h-px bg-gray-300 mb-8"></div>
 
-        <div className="space-y-8 mt-6">
+        <div className="space-y-8">
           {/* MFA Enforcement */}
           <div>
-            <h2 className="text-xl font-bold text-black mb-2">
+            <h2 className="text-xl font-bold text-black mb-4">
               MFA Enforcement
             </h2>
-
             <Toggle
               enabled={settings.mfaEnabled}
               onChange={toggleMFA}
@@ -93,10 +90,10 @@ const SecuritySettingsPage = () => {
 
           {/* IP Allowlist */}
           <div>
-            <h2 className="text-xl font-bold text-black mb-2">IP Allowlist</h2>
+            <h2 className="text-xl font-bold text-black mb-4">IP Allowlist</h2>
 
             {settings.ipAllowlist.length > 0 && (
-              <div className="space-y-3 mb-4 w-md">
+              <div className="space-y-3 mb-4 max-w-sm">
                 {settings.ipAllowlist.map((ip) => (
                   <div
                     key={ip.id}
@@ -114,14 +111,13 @@ const SecuritySettingsPage = () => {
               </div>
             )}
 
-            <div className="space-y-6">
-              <Input
+            <div className="space-y-3">
+              <input
                 type="text"
                 value={newIpRange}
                 onChange={(e) => setNewIpRange(e.target.value)}
                 placeholder="192.168.0.0/24"
-                fullWidth={false}
-                inputClassName="text-gray-500"
+                className="block w-full max-w-sm px-4 py-3 bg-gray-50 border border-gray-200 rounded-md text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
               />
               <Button onClick={addIPRange} variant="primary" className="px-6">
                 + Add IP range
@@ -133,49 +129,75 @@ const SecuritySettingsPage = () => {
 
           {/* SSO Setup */}
           <div>
-            <h2 className="text-xl font-bold text-black mb-2">SSO Setup</h2>
+            <h2 className="text-xl font-bold text-black mb-6">SSO Setup</h2>
 
-            <div className="space-y-6">
-              <Input
-                label="Client ID"
-                type="text"
-                value={settings.sso.clientId}
-                onChange={(e) => handleSSOChange("clientId", e.target.value)}
-                placeholder="Enter Client ID"
-                fullWidth={false}
-                inputClassName="text-gray-500"
-              />
+            <div className="space-y-6 max-w-md">
+              {/* Client ID */}
+              <div>
+                <label
+                  htmlFor="clientId"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  Client ID
+                </label>
+                <input
+                  id="clientId"
+                  type="text"
+                  value={settings.sso.clientId}
+                  onChange={(e) => handleSSOChange("clientId", e.target.value)}
+                  placeholder="Enter Client ID"
+                  className="block w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-md text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+                />
+              </div>
 
-              <Input
-                label="Secret"
-                type="password"
-                value={settings.sso.secret}
-                onChange={(e) => handleSSOChange("secret", e.target.value)}
-                placeholder="Enter Secret"
-                fullWidth={false}
-                inputClassName="text-gray-500"
-              />
+              {/* Secret */}
+              <div>
+                <label
+                  htmlFor="secret"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  Secret
+                </label>
+                <input
+                  id="secret"
+                  type="password"
+                  value={settings.sso.secret}
+                  onChange={(e) => handleSSOChange("secret", e.target.value)}
+                  placeholder="Enter Secret"
+                  className="block w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-md text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+                />
+              </div>
 
-              <Input
-                label="Metadata URL"
-                type="url"
-                value={settings.sso.metadataUrl}
-                onChange={(e) => handleSSOChange("metadataUrl", e.target.value)}
-                placeholder="Enter Metadata URL"
-                fullWidth={false}
-                inputClassName="text-gray-500 "
-              />
+              {/* Metadata URL */}
+              <div>
+                <label
+                  htmlFor="metadataUrl"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  Metadata URL
+                </label>
+                <input
+                  id="metadataUrl"
+                  type="url"
+                  value={settings.sso.metadataUrl}
+                  onChange={(e) =>
+                    handleSSOChange("metadataUrl", e.target.value)
+                  }
+                  placeholder="Enter Metadata URL"
+                  className="block w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-md text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+                />
+              </div>
             </div>
           </div>
         </div>
       </div>
       {/* Save Button */}
-      <div className="flex justify-center pt-8 pb-6">
+      <div className="flex justify-center pt-10 pb-6">
         <Button
           onClick={handleSave}
           variant="primary"
           disabled={isLoading}
-          className="px-6"
+          className="px-8"
         >
           {isLoading ? "Saving..." : "Save changes"}
         </Button>

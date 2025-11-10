@@ -34,7 +34,7 @@ const CreateRoleForm: React.FC = () => {
                 </label>
                 <input
                   type="text"
-                  className="w-full text-black px-4 py-4 border-2 bg-gray-100 border-orange-300 rounded-lg focus:outline-none focus:outline-orange-500"
+                  className="w-full text-black px-4 py-4 border-2 border-orange-300 rounded-lg focus:outline-none focus:outline-orange-500"
                 />
               </div>
               <div className="relative">
@@ -44,7 +44,7 @@ const CreateRoleForm: React.FC = () => {
                 <select
                   value={roleType}
                   onChange={(e) => setRoleType(e.target.value)}
-                  className="w-full text-black px-4 py-4 border-2 bg-gray-100 border-orange-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 appearance-none pr-10"
+                  className="w-full text-black px-4 py-4 border-2 border-orange-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 appearance-none pr-10"
                 >
                   <option value="" disabled>
                     Select Role Type
@@ -65,7 +65,7 @@ const CreateRoleForm: React.FC = () => {
               </label>
               <textarea
                 rows={4}
-                className="w-130 text-black px-4 py-3 border-2 bg-gray-100 border-orange-300 rounded-lg focus:outline-none focus:outline-orange-500"
+                className="w-130 text-black px-4 py-3 border-2 border-orange-300 rounded-lg focus:outline-none focus:outline-orange-500"
               />
             </div>
 

@@ -19,11 +19,17 @@ export const AdminHeader: React.FC = () => {
       {/* Right Section */}
       <div className="flex items-center gap-6 text-black">
         {/* Notification Bell */}
-        <button className="relative p-2 text-gray-600 hover:text-orange-500 transition-colors">
+        <button
+          type="button"
+          className="relative p-2 text-gray-600 hover:text-orange-500 transition-colors"
+        >
           <Bell size={24} />
         </button>
         {/* Profile Icon */}
-        <button className="flex items-center justify-center w-10 h-10 rounded-full bg-orange-500 text-white hover:bg-orange-600 transition-colors">
+        <button
+          type="button"
+          className="flex items-center justify-center w-10 h-10 rounded-full bg-orange-500 text-white hover:bg-orange-600 transition-colors"
+        >
           <User size={20} />
         </button>
       </div>
