@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -7,6 +7,8 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   fullWidth?: boolean;
   startIcon?: React.ReactNode;
   endIcon?: React.ReactNode;
+  inputClassName?: string;
+  labelClassName?: string;
 }
 
 const Input: React.FC<InputProps> = ({
@@ -16,64 +18,55 @@ const Input: React.FC<InputProps> = ({
   fullWidth = true,
   startIcon,
   endIcon,
-  className = '',
+  className = "",
+  inputClassName = "",
+  labelClassName = "",
+
   id,
   ...props
 }) => {
-  const inputId = id || label?.toLowerCase().replace(/\s+/g, '-');
+  const inputId = id || label?.toLowerCase().replace(/\s+/g, "-");
   const hasError = !!error;
 
-  const baseInputClasses = 'block px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-1 sm:text-sm transition-colors';
-  const errorClasses = hasError 
-    ? 'border-red-300 text-red-900 placeholder-red-300 focus:ring-red-500 focus:border-red-500' 
-    : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500';
-  const widthClass = fullWidth ? 'w-full' : '';
-  const iconPadding = startIcon ? 'pl-10' : endIcon ? 'pr-10' : '';
+  const baseInputClasses =
+    "block px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-1 sm:text-sm transition-colors";
+  const errorClasses = hasError
+    ? "border-red-300 text-red-900 placeholder-red-300 focus:ring-red-500 focus:border-red-500"
+    : "border-gray-300 focus:ring-indigo-500 focus:border-indigo-500";
+  const widthClass = fullWidth ? "w-full" : "";
+  const iconPadding = startIcon ? "pl-10" : endIcon ? "pr-10" : "";
 
-  const inputClasses = `${baseInputClasses} ${errorClasses} ${widthClass} ${iconPadding} ${className}`;
+  const inputClasses = `${baseInputClasses} ${errorClasses} ${widthClass} ${iconPadding} ${inputClassName}`;
+  const labelClasses = `block text-sm font-medium text-gray-700 mb-1 ${labelClassName}`;
 
   return (
-    <div className={fullWidth ? 'w-full' : ''}>
+    <div className={fullWidth ? "w-full" : ""}>
       {label && (
-        <label htmlFor={inputId} className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor={inputId} className={labelClasses}>
           {label}
         </label>
       )}
-      
+
       <div className="relative">
         {startIcon && (
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <div className="h-5 w-5 text-gray-400">
-              {startIcon}
-            </div>
+            <div className="h-5 w-5 text-gray-400">{startIcon}</div>
           </div>
         )}
-        
-        <input
-          id={inputId}
-          className={inputClasses}
-          {...props}
-        />
-        
+
+        <input id={inputId} className={inputClasses} {...props} />
+
         {endIcon && (
           <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-            <div className="h-5 w-5 text-gray-400">
-              {endIcon}
-            </div>
+            <div className="h-5 w-5 text-gray-400">{endIcon}</div>
           </div>
         )}
       </div>
 
-      {error && (
-        <p className="mt-1 text-sm text-red-600">
-          {error}
-        </p>
-      )}
-      
+      {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+
       {helperText && !error && (
-        <p className="mt-1 text-sm text-gray-500">
-          {helperText}
-        </p>
+        <p className="mt-1 text-sm text-gray-500">{helperText}</p>
       )}
     </div>
   );

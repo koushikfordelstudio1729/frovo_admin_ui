@@ -10,6 +10,7 @@ export const ROUTES = {
 } as const;
 
 import { PERMISSION_GROUPS, PermissionsState } from "@/types/permissions.types";
+import { SecuritySettings } from "@/types/security.types";
 
 export const HTTP_STATUS = {
   OK: 200,
@@ -74,6 +75,8 @@ export const FORM_FIELDS = {
   LAST_NAME: "lastName",
 } as const;
 
+// Permission Management
+
 export const DEFAULT_PERMISSIONS: PermissionsState = {
   [PERMISSION_GROUPS.MACHINE]: [
     { key: "machine:view", checked: true },
@@ -96,3 +99,23 @@ export const DEFAULT_PERMISSIONS: PermissionsState = {
 };
 
 export const PERMISSION_GROUP_KEYS = Object.values(PERMISSION_GROUPS);
+
+// Security Settings
+export const DEFAULT_SECURITY_SETTINGS: SecuritySettings = {
+  mfaEnabled: false,
+  ipAllowlist: [],
+  sso: {
+    clientId: "",
+    secret: "",
+    metadataUrl: "",
+  },
+};
+
+export const SECURITY_MESSAGES = {
+  MFA_ENABLED: "Multi-factor authentication enabled",
+  MFA_DISABLED: "Multi-factor authentication disabled",
+  IP_ADDED: "IP range added successfully",
+  IP_REMOVED: "IP range removed successfully",
+  SETTINGS_SAVED: "Security settings saved successfully",
+  SAVE_ERROR: "Failed to save security settings",
+} as const;
