@@ -91,8 +91,8 @@ const SignUpForm: React.FC = () => {
         />
       </div>
 
-      {/* Form Section - Left Side */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-gradient-to-br from-gray-50 to-white">
+      {/* Form Section */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-linear-to-br from-gray-50 to-white">
         <div className="w-full max-w-md">
           {/* Title */}
           <h2 className="text-4xl font-bold text-gray-900 mb-8">Sign Up</h2>
@@ -192,7 +192,7 @@ const SignUpForm: React.FC = () => {
         </div>
       </div>
 
-      {/* Vending Machine Illustration - Right Side */}
+      {/* Vending Machine Illustration */}
       <div className="hidden lg:flex lg:w-1/2 items-center justify-center p-12 bg-white">
         <div className="relative w-full h-full max-w-lg max-h-[600px] flex items-center justify-center">
           <Image
