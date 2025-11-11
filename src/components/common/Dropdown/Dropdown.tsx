@@ -58,7 +58,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
         </span>
         <ChevronDown
           size={18}
-          className={`flex-shrink-0 transition-transform ${
+          className={`shrink-0 transition-transform ${
             isOpen ? "rotate-180" : ""
           }`}
         />

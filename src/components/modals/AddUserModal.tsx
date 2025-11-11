@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { X } from "lucide-react";
-import { Button } from "../common";
+import { Button, Input } from "../common";
 
 interface AddUserModalProps {
   isOpen: boolean;
@@ -23,19 +23,79 @@ export default function AddUserModal({
     role: "",
   });
 
+  const [errors, setErrors] = useState<{
+    name?: string;
+    email?: string;
+    phone?: string;
+    department?: string;
+    role?: string;
+  }>({});
+
+  const [isLoading, setIsLoading] = useState(false);
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
+    const { name, value } = e.target;
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [name]: value,
     });
+    // Clear error when user starts typing
+    if (errors[name as keyof typeof errors]) {
+      setErrors({
+        ...errors,
+        [name]: undefined,
+      });
+    }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
-    setFormData({ name: "", email: "", phone: "", department: "", role: "" });
+
+    // Validation
+    const newErrors: typeof errors = {};
+
+    if (!formData.name.trim()) {
+      newErrors.name = "Name is required";
+    }
+
+    if (!formData.email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = "Please enter a valid email";
+    }
+
+    if (!formData.phone.trim()) {
+      newErrors.phone = "Phone is required";
+    }
+
+    if (!formData.department.trim()) {
+      newErrors.department = "Department is required";
+    }
+
+    if (!formData.role.trim()) {
+      newErrors.role = "Role is required";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      onSubmit(formData);
+      // Reset form
+      setFormData({ name: "", email: "", phone: "", department: "", role: "" });
+      setErrors({});
+      onClose();
+    } catch (error) {
+      console.error("Error submitting form:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Close modal when clicking outside
@@ -52,19 +112,19 @@ export default function AddUserModal({
       className="fixed w-full inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50"
       onClick={handleBackdropClick}
     >
-      {/* Modal Container */}
-      <div className="bg-white rounded-2xl p-8 w-full max-w-xl">
+      <div className="bg-white rounded-2xl p-8 w-full max-w-xl shadow-2xl">
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h2 className="text-xl font-semibold text-gray-900">Add user</h2>
-            <p className="text-sm  text-gray-400 mt-1">
+            <h2 className="text-2xl font-bold text-gray-900">Add user</h2>
+            <p className="text-sm text-gray-500 mt-1">
               Tell us about your project so we can set things up for you.
             </p>
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-800"
+            className="text-gray-400 hover:text-gray-600 transition-colors"
+            aria-label="Close modal"
           >
             <X size={24} />
           </button>
@@ -73,89 +133,89 @@ export default function AddUserModal({
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Name */}
-          <div>
-            <label className="block text-xl font-semibold text-gray-900 mb-2">
-              Name
-            </label>
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              placeholder="Enter name"
-              className="w-full text-black px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-              required
-            />
-          </div>
+          <Input
+            variant="default"
+            type="text"
+            label="Name"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            placeholder="Enter name"
+            error={errors.name}
+            disabled={isLoading}
+            fullWidth
+            required
+          />
 
           {/* Email */}
-          <div>
-            <label className="block text-xl font-semibold text-gray-900 mb-2">
-              Email
-            </label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="Enter email"
-              className="w-full text-black px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-              required
-            />
-          </div>
+          <Input
+            variant="default"
+            type="email"
+            label="Email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            placeholder="Enter email"
+            error={errors.email}
+            disabled={isLoading}
+            fullWidth
+            required
+          />
 
           {/* Phone */}
-          <div>
-            <label className="block text-xl font-semibold text-gray-900 mb-2">
-              Phone
-            </label>
-            <input
-              type="text"
-              name="name"
-              value={formData.phone}
-              onChange={handleChange}
-              placeholder="Enter phone number"
-              className="w-full text-black px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-            />
-          </div>
+          <Input
+            variant="default"
+            type="tel"
+            label="Phone"
+            name="phone"
+            value={formData.phone}
+            onChange={handleChange}
+            placeholder="Enter phone number"
+            error={errors.phone}
+            disabled={isLoading}
+            fullWidth
+            required
+          />
 
           {/* Department */}
-          <div>
-            <label className="block text-xl font-semibold text-gray-900 mb-2">
-              Department
-            </label>
-            <input
-              type="tel"
-              name="phone"
-              value={formData.phone}
-              onChange={handleChange}
-              placeholder="Select Department"
-              className="w-full text-black px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-            />
-          </div>
+          <Input
+            variant="default"
+            type="text"
+            label="Department"
+            name="department"
+            value={formData.department}
+            onChange={handleChange}
+            placeholder="Select Department"
+            error={errors.department}
+            disabled={isLoading}
+            fullWidth
+            required
+          />
 
           {/* Role */}
-          <div>
-            <label className="block text-xl font-semibold text-gray-900 mb-2">
-              Role
-            </label>
-            <input
-              type="text"
-              name="role"
-              value={formData.role}
-              onChange={handleChange}
-              placeholder="Add role"
-              className="w-full text-black px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-            />
-          </div>
+          <Input
+            variant="default"
+            type="text"
+            label="Role"
+            name="role"
+            value={formData.role}
+            onChange={handleChange}
+            placeholder="Add role"
+            error={errors.role}
+            disabled={isLoading}
+            fullWidth
+            required
+          />
 
           {/* Submit Button */}
-          <div className="flex justify-center">
+          <div className="flex justify-center pt-4">
             <Button
               type="submit"
               variant="primary"
-              size="md"
-              className="px-10 mt-4"
+              size="lg"
+              isLoading={isLoading}
+              disabled={isLoading}
+              className="px-12 bg-[#FF5722] hover:bg-[#F4511E]"
             >
               Send Invites
             </Button>
