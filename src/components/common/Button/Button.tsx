@@ -1,7 +1,13 @@
 import React from "react";
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "primary" | "secondary" | "danger" | "outline";
+  variant?:
+    | "primary"
+    | "secondary"
+    | "danger"
+    | "outline"
+    | "approve"
+    | "reject";
   size?: "sm" | "md" | "lg";
   isLoading?: boolean;
   fullWidth?: boolean;
@@ -23,13 +29,15 @@ const Button: React.FC<ButtonProps> = ({
 
   const variantClasses = {
     primary: "bg-[#FF5722] text-white hover:bg-[#F4511E]",
-    secondary: "bg-gray-700 text-white hover:bg-gray-800 ",
+    secondary: "bg-gray-700 text-white hover:bg-gray-800",
     danger: "bg-red-600 text-white hover:bg-red-700 focus:ring-red-500",
     outline: "border border-gray-300 bg-white text-gray-700 hover:bg-gray-50",
+    approve: "bg-[#0B9F00] text-white hover:bg-green-800",
+    reject: "bg-gray-700 text-white hover:bg-red-700",
   };
 
   const sizeClasses = {
-    sm: "px-3 py-2 text-sm",
+    sm: "px-3 py-1 text-sm",
     md: "px-4 py-3 text-sm",
     lg: "px-6 py-3 text-base",
   };

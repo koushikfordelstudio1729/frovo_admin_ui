@@ -1,9 +1,11 @@
+// src/components/roles-permissions/RoleTableHeader.tsx
 "use client";
 
 import { RoleFilters } from "@/types/roles.types";
-import { Plus, Search, ChevronDown } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import React, { useState } from "react";
-import { Button } from "../common";
+import { Button, Input, Dropdown } from "@/components/common";
+import { useRouter } from "next/navigation";
 
 interface RoleTableHeadProps {
   onSearch: (query: string) => void;
@@ -14,8 +16,8 @@ export const RoleTableHeader: React.FC<RoleTableHeadProps> = ({
   onSearch,
   onFilterChange,
 }) => {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
-  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [selectedFilters, setSelectedFilters] = useState({
     scope: "All",
     roleType: "All",
@@ -34,7 +36,6 @@ export const RoleTableHeader: React.FC<RoleTableHeadProps> = ({
     };
     setSelectedFilters(newFilters);
 
-    // Type-safe filter change
     const update: Partial<RoleFilters> = {};
     if (value !== "All") {
       if (filterType === "scope") {
@@ -49,22 +50,32 @@ export const RoleTableHeader: React.FC<RoleTableHeadProps> = ({
     }
 
     onFilterChange(update);
-    setOpenDropdown(null);
   };
 
-  const scopes = ["All", "Global", "Machine", "Partner"];
-  const roleTypes = [
-    "All",
-    "Super Admin",
-    "Ops Manager",
-    "Field Agent",
-    "Technician",
-    "Finance Manager",
-    "Support Agent",
-    "Warehouse Manager",
-    "Auditor",
+  const scopeOptions = [
+    { value: "All", label: "All" },
+    { value: "Global", label: "Global" },
+    { value: "Machine", label: "Machine" },
+    { value: "Partner", label: "Partner" },
   ];
-  const statuses = ["All", "Active", "Inactive"];
+
+  const roleTypeOptions = [
+    { value: "All", label: "All" },
+    { value: "Super Admin", label: "Super Admin" },
+    { value: "Ops Manager", label: "Ops Manager" },
+    { value: "Field Agent", label: "Field Agent" },
+    { value: "Technician", label: "Technician" },
+    { value: "Finance Manager", label: "Finance Manager" },
+    { value: "Support Agent", label: "Support Agent" },
+    { value: "Warehouse Manager", label: "Warehouse Manager" },
+    { value: "Auditor", label: "Auditor" },
+  ];
+
+  const statusOptions = [
+    { value: "All", label: "All" },
+    { value: "Active", label: "Active" },
+    { value: "Inactive", label: "Inactive" },
+  ];
 
   return (
     <div className="mb-6">
@@ -73,116 +84,49 @@ export const RoleTableHeader: React.FC<RoleTableHeadProps> = ({
 
       {/* Search and Filters */}
       <div className="flex items-center gap-4">
-        {/* Search Bar */}
-        <div className="relative flex-1 max-w-sm">
-          <Search
-            size={20}
-            className="absolute left-3 top-1/2 text-gray-400 transform -translate-y-1/2"
-          />
-          <input
-            type="text"
-            placeholder="Search Name"
+        {/* Search Bar - Using "search" variant */}
+        <div className="flex-1 max-w-sm">
+          <Input
+            variant="search"
             value={searchQuery}
             onChange={(e) => handleSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none text-gray-600"
+            placeholder="Search Name"
+            startIcon={<Search size={20} />}
           />
         </div>
 
         {/* Scope Dropdown */}
-        <div className="relative">
-          <button
-            onClick={() =>
-              setOpenDropdown(openDropdown === "scope" ? null : "scope")
-            }
-            className="flex items-center gap-2 px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors min-w-[120px]"
-          >
-            Scope: {selectedFilters.scope}
-            <ChevronDown size={18} />
-          </button>
-          {openDropdown === "scope" && (
-            <div className="absolute top-full left-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-10 min-w-[150px]">
-              {scopes.map((scope) => (
-                <button
-                  key={scope}
-                  onClick={() => handleFilterSelect("scope", scope)}
-                  className={`block w-full text-left px-4 py-2 hover:bg-gray-100 ${
-                    selectedFilters.scope === scope
-                      ? "bg-orange-50 text-orange-600 font-medium"
-                      : "text-gray-700"
-                  }`}
-                >
-                  {scope}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
+        <Dropdown
+          label="Scope"
+          options={scopeOptions}
+          value={selectedFilters.scope}
+          onChange={(value) => handleFilterSelect("scope", value)}
+        />
 
         {/* Role Type Dropdown */}
-        <div className="relative">
-          <button
-            onClick={() =>
-              setOpenDropdown(openDropdown === "roleType" ? null : "roleType")
-            }
-            className="flex items-center gap-2 px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors min-w-[140px]"
-          >
-            Type: {selectedFilters.roleType}
-            <ChevronDown size={18} />
-          </button>
-          {openDropdown === "roleType" && (
-            <div className="absolute top-full left-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-10 min-w-[200px] max-h-[300px] overflow-y-auto">
-              {roleTypes.map((role) => (
-                <button
-                  key={role}
-                  onClick={() => handleFilterSelect("roleType", role)}
-                  className={`block w-full text-left px-4 py-2 hover:bg-gray-100 ${
-                    selectedFilters.roleType === role
-                      ? "bg-orange-50 text-orange-600 font-medium"
-                      : "text-gray-700"
-                  }`}
-                >
-                  {role}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
+        <Dropdown
+          label="Type"
+          options={roleTypeOptions}
+          value={selectedFilters.roleType}
+          onChange={(value) => handleFilterSelect("roleType", value)}
+          className="min-w-[140px]"
+        />
 
         {/* Status Dropdown */}
-        <div className="relative">
-          <button
-            onClick={() =>
-              setOpenDropdown(openDropdown === "status" ? null : "status")
-            }
-            className="flex items-center gap-2 px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors min-w-[130px]"
-          >
-            Status: {selectedFilters.status}
-            <ChevronDown size={18} />
-          </button>
-          {openDropdown === "status" && (
-            <div className="absolute top-full left-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-10 min-w-[150px]">
-              {statuses.map((status) => (
-                <button
-                  key={status}
-                  onClick={() => handleFilterSelect("status", status)}
-                  className={`block w-full text-left px-4 py-2 hover:bg-gray-100 ${
-                    selectedFilters.status === status
-                      ? "bg-orange-50 text-orange-600 font-medium"
-                      : "text-gray-700"
-                  }`}
-                >
-                  {status}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
+        <Dropdown
+          label="Status"
+          options={statusOptions}
+          value={selectedFilters.status}
+          onChange={(value) => handleFilterSelect("status", value)}
+        />
 
         {/* Add Button */}
         <Button
+          type="button"
           variant="primary"
           size="md"
-          className="ml-auto flex items-center gap-2 bg-orange-500 hover:bg-orange-600"
+          onClick={() => router.push("/admin/roles/create")}
+          className="ml-auto flex items-center gap-2"
         >
           <Plus size={18} />
           Add new role

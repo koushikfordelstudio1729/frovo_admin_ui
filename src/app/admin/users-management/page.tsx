@@ -1,7 +1,7 @@
 "use client";
 
 import { Table, TableName } from "@/components";
-import { Pagination } from "@/components/common";
+import { Pagination, Badge } from "@/components/common";
 import AddUserModal from "@/components/modals/AddUserModal";
 import { Column } from "@/components/name&table/Table";
 import { useUsers } from "@/hooks/useUsers";
@@ -24,15 +24,11 @@ export default function UserManagementPage() {
   const renderCell = (key: string, value: any) => {
     if (key === "status") {
       return (
-        <span
-          className={`px-4 py-2 rounded-full text-sm font-medium ${
-            value === "Active"
-              ? "bg-[#79EE52] text-green-800"
-              : "bg-[#6B6B6B] text-gray-200"
-          }`}
-        >
-          {value === "Active" && "● "} {value}
-        </span>
+        <Badge
+          label={value}
+          variant={value === "Active" ? "active" : "inactive"}
+          showDot={value === "Active"}
+        />
       );
     }
     return value;
@@ -41,7 +37,6 @@ export default function UserManagementPage() {
   const handleAddUser = (formData: any) => {
     console.log("New user added:", formData);
     setIsModalOpen(false);
-    // Add API call here to save user
   };
 
   return (
@@ -65,7 +60,7 @@ export default function UserManagementPage() {
           onPageChange={handlePageChange}
         />
       </div>
-      {/* Add User Modal */}
+
       <AddUserModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

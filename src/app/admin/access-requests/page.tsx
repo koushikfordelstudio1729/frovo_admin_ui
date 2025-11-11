@@ -1,6 +1,6 @@
 "use client";
 
-import { Pagination } from "@/components/common";
+import { Pagination, Badge, Button } from "@/components/common";
 import { useAccessRequests } from "@/hooks/useAccessRequests";
 import { Column } from "@/components/name&table/Table";
 import { TableName, Table } from "@/components";
@@ -8,6 +8,16 @@ import { TableName, Table } from "@/components";
 export default function AccessRequestsApprovalsPage() {
   const { requests, currentPage, totalPages, handleSearch, handlePageChange } =
     useAccessRequests();
+
+  const handleApprove = (requestId: string) => {
+    console.log("Approve request:", requestId);
+    // TODO: Add API call to approve request
+  };
+
+  const handleReject = (requestId: string) => {
+    console.log("Reject request:", requestId);
+    // TODO: Add API call to reject request
+  };
 
   const columns: Column[] = [
     { key: "requester", label: "Requester" },
@@ -19,30 +29,26 @@ export default function AccessRequestsApprovalsPage() {
 
   const renderCell = (key: string, value: any, row?: any) => {
     if (key === "status") {
-      return (
-        <span
-          className={`px-4 py-2 rounded-full text-sm font-medium ${
-            value === "Pending"
-              ? "bg-gray-400 text-gray-800"
-              : value === "Approved"
-              ? "bg-green-500 text-white"
-              : "bg-red-500 text-white"
-          }`}
-        >
-          {value}
-        </span>
-      );
+      return <Badge label={value} />;
     }
 
     if (key === "actions") {
       return (
         <div className="flex gap-2">
-          <button className="px-3 py-1 bg-[#0B9F00] text-white text-sm rounded hover:bg-green-800 font-medium cursor-pointer">
+          <Button
+            variant="approve"
+            size="sm"
+            onClick={() => handleApprove(row.id)}
+          >
             Approve
-          </button>
-          <button className="px-3 py-1 bg-gray-700 text-white text-sm rounded hover:bg-red-700 font-medium cursor-pointer">
+          </Button>
+          <Button
+            variant="reject"
+            size="sm"
+            onClick={() => handleReject(row.id)}
+          >
             Reject
-          </button>
+          </Button>
         </div>
       );
     }

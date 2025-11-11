@@ -3,7 +3,7 @@
 import { Plus, Search } from "lucide-react";
 import Link from "next/link";
 import React from "react";
-import Button from "@/components/common/Button"; // ← Import Button
+import { Button, Input } from "@/components/common";
 
 interface TableNameProps {
   title: string;
@@ -18,91 +18,71 @@ interface TableNameProps {
 
 export const TableName: React.FC<TableNameProps> = ({
   title,
-  searchPlaceholder,
-  searchValue,
+  searchPlaceholder = "Search...",
+  searchValue = "",
   onSearchChange,
   buttonText,
   buttonLink,
   showSearch = true,
   onButtonClick,
 }) => {
+  // Render button component
+  const renderButton = () => {
+    const buttonContent = (
+      <Button
+        type="button"
+        variant="primary"
+        size="md"
+        onClick={onButtonClick}
+        className="flex items-center gap-2 whitespace-nowrap"
+      >
+        <Plus size={20} />
+        {buttonText}
+      </Button>
+    );
+
+    // If onButtonClick is provided, use it; otherwise wrap in Link
+    if (onButtonClick) {
+      return buttonContent;
+    }
+
+    return <Link href={buttonLink}>{buttonContent}</Link>;
+  };
+
   return (
     <>
-      {/* Title + Button when no searchbar */}
+      {/* Layout: Title + Button (when no search) */}
       {!showSearch && (
         <div className="flex items-center justify-between mb-8 mt-4">
           <h1 className="text-3xl font-bold text-gray-900">{title}</h1>
-          {onButtonClick ? (
-            <Button
-              variant="primary"
-              size="md"
-              onClick={onButtonClick}
-              className="flex items-center gap-2 whitespace-nowrap"
-            >
-              <Plus size={20} />
-              {buttonText}
-            </Button>
-          ) : (
-            <Link href={buttonLink}>
-              <Button
-                variant="primary"
-                size="md"
-                className="flex items-center gap-2 whitespace-nowrap"
-              >
-                <Plus size={20} />
-                {buttonText}
-              </Button>
-            </Link>
-          )}
+          {renderButton()}
         </div>
       )}
 
-      {/* Title only when searchbar exist */}
+      {/* Layout: Title + Search + Button (when search exists) */}
       {showSearch && (
-        <div className="mb-8 mt-4">
-          <h1 className="text-3xl font-bold text-gray-900">{title}</h1>
-        </div>
-      )}
-
-      {/* Search + Button only when searchbar exist */}
-      {showSearch && (
-        <div className="flex items-center gap-4 mb-8">
-          <div className="flex-1 relative">
-            <Search
-              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-              size={20}
-            />
-            <input
-              type="text"
-              placeholder={searchPlaceholder}
-              value={searchValue}
-              onChange={(e) => onSearchChange?.(e.target.value)}
-              className="w-sm pl-10 pr-4 text-black py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white"
-            />
+        <>
+          {/* Title */}
+          <div className="mb-4 mt-4">
+            <h1 className="text-3xl font-bold text-gray-900">{title}</h1>
           </div>
-          {onButtonClick ? (
-            <Button
-              variant="primary"
-              size="md"
-              onClick={onButtonClick}
-              className="flex items-center gap-2 whitespace-nowrap"
-            >
-              <Plus size={20} />
-              {buttonText}
-            </Button>
-          ) : (
-            <Link href={buttonLink}>
-              <Button
-                variant="primary"
-                size="md"
-                className="flex items-center gap-2 whitespace-nowrap"
-              >
-                <Plus size={20} />
-                {buttonText}
-              </Button>
-            </Link>
-          )}
-        </div>
+
+          <div className="flex items-center justify-between gap-4 mb-8">
+            {/* Search Input*/}
+            <div className="flex-1 max-w-md">
+              <Input
+                variant="search"
+                placeholder={searchPlaceholder}
+                value={searchValue}
+                onChange={(e) => onSearchChange?.(e.target.value)}
+                startIcon={<Search size={20} />}
+              />
+            </div>
+
+            {/* Button */}
+            {renderButton()}
+          </div>
+        </>
       )}
     </>
   );

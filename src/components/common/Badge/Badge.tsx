@@ -2,36 +2,105 @@
 
 import React from "react";
 
+type BadgeVariant =
+  | "global"
+  | "machine"
+  | "partner"
+  | "active"
+  | "inactive"
+  | "pending"
+  | "approved"
+  | "rejected"
+  | "success"
+  | "error"
+  | "warning"
+  | "info"
+  | "custom";
+
+type BadgeSize = "sm" | "md" | "lg";
+
 interface BadgeProps {
   label: string;
-  variant?: "global" | "machine" | "partner";
+  variant?: BadgeVariant;
+  size?: BadgeSize;
+  icon?: React.ReactNode;
+  showDot?: boolean;
+  className?: string;
 }
 
-const variantStyles = {
+const variantStyles: Record<BadgeVariant, string> = {
+  // Scope badges (from RolesDataTable)
   global: "bg-green-100 text-green-800",
   machine: "bg-blue-100 text-blue-800",
   partner: "bg-purple-100 text-purple-800",
+
+  // Status badges (from UserManagementPage)
+  active: "bg-[#79EE52] text-green-800",
+  inactive: "bg-[#6B6B6B] text-gray-200",
+
+  // Request status badges (from AccessRequestsApprovalsPage)
+  pending: "bg-gray-400 text-gray-800",
+  approved: "bg-green-500 text-white",
+  rejected: "bg-red-500 text-white",
+
+  // Generic badges
+  success: "bg-green-100 text-green-800",
+  error: "bg-red-100 text-red-800",
+  warning: "bg-yellow-100 text-yellow-800",
+  info: "bg-blue-100 text-blue-800",
+
+  // Custom (allows override via className)
+  custom: "",
 };
 
-export const Badge: React.FC<BadgeProps> = ({ label, variant }) => {
-  // Auto-detect variant from label if not provided
-  let detectedVariant: "global" | "machine" | "partner" = variant || "global";
+const sizeStyles: Record<BadgeSize, string> = {
+  sm: "px-3 py-1 text-xs",
+  md: "px-4 py-2 text-sm",
+  lg: "px-6 py-2 text-base",
+};
 
-  if (label.toLowerCase() === "global") {
-    detectedVariant = "global";
-  } else if (label.toLowerCase() === "machine") {
-    detectedVariant = "machine";
-  } else if (label.toLowerCase() === "partner") {
-    detectedVariant = "partner";
-  }
+export const Badge: React.FC<BadgeProps> = ({
+  label,
+  variant,
+  size = "md",
+  icon,
+  showDot = false,
+  className = "",
+}) => {
+  // Auto-detect variant from label if not provided
+  const detectedVariant: BadgeVariant = variant || detectVariant(label);
 
   return (
     <span
-      className={`inline-flex items-center rounded-full font-medium ${variantStyles[detectedVariant]} px-6 py-1 text-sm`}
+      className={`inline-flex items-center gap-1.5 rounded-full font-medium ${variantStyles[detectedVariant]} ${sizeStyles[size]} ${className}`}
     >
+      {showDot && <span className="w-2 h-2 rounded-full bg-current" />}
+      {icon && <span className="shrink-0">{icon}</span>}
       {label}
     </span>
   );
 };
+
+// Auto-detect variant helper function
+function detectVariant(label: string): BadgeVariant {
+  const lower = label.toLowerCase();
+
+  // Scope detection
+  if (lower === "global") return "global";
+  if (lower === "machine") return "machine";
+  if (lower === "partner") return "partner";
+
+  // Status detection
+  if (lower === "active") return "active";
+  if (lower === "inactive") return "inactive";
+
+  // Request status detection
+  if (lower === "pending") return "pending";
+  if (lower === "approved") return "approved";
+  if (lower === "rejected") return "rejected";
+
+  // Default
+  return "info";
+}
 
 export default Badge;

@@ -1,13 +1,22 @@
 "use client";
 
 import { Column } from "@/components/name&table/Table";
-import { TableName, Table, Pagination } from "@/components";
+import { TableName, Table, Pagination, Badge, Button } from "@/components";
 import { useAuditLogs } from "@/hooks/useAuditLogs";
-import React from "react";
 
 export default function AuditLogsPage() {
   const { logs, currentPage, totalPages, handleSearch, handlePageChange } =
     useAuditLogs();
+
+  const handleApprove = (logId: string) => {
+    console.log("Approve log:", logId);
+    // TODO: Add API call
+  };
+
+  const handleReject = (logId: string) => {
+    console.log("Reject log:", logId);
+    // TODO: Add API call
+  };
 
   const columns: Column[] = [
     { key: "timestamp", label: "Timestamp" },
@@ -17,31 +26,34 @@ export default function AuditLogsPage() {
     { key: "beforeAfterDiff", label: "Before/After Diff" },
   ];
 
-  const renderCell = (key: string, value: any) => {
-    if (key === "target") {
-      return (
-        <span
-          className={`px-4 py-2 rounded-full text-sm font-medium ${
-            value === "Pending"
-              ? "bg-gray-400 text-gray-800"
-              : value === "Approved"
-              ? "bg-green-500 text-white"
-              : "bg-red-500 text-white"
-          }`}
-        >
-          {value}
-        </span>
-      );
+  const renderCell = (key: string, value: any, row?: any) => {
+    // Render plain text for action column
+    if (key === "action") {
+      return <span className="text-gray-700">{value}</span>;
     }
+
+    if (key === "target") {
+      return <Badge label={value} />;
+    }
+
+    // Render action buttons for beforeAfterDiff column
     if (key === "beforeAfterDiff") {
       return (
         <div className="flex gap-2">
-          <button className="px-3 py-1 bg-[#0B9F00] text-white text-sm rounded hover:bg-green-800 font-medium cursor-pointer">
+          <Button
+            variant="approve"
+            size="sm"
+            onClick={() => handleApprove(row.id)}
+          >
             Approve
-          </button>
-          <button className="px-3 py-1 bg-gray-700 text-white text-sm rounded hover:bg-red-700 font-medium cursor-pointer">
+          </Button>
+          <Button
+            variant="reject"
+            size="sm"
+            onClick={() => handleReject(row.id)}
+          >
             Reject
-          </button>
+          </Button>
         </div>
       );
     }

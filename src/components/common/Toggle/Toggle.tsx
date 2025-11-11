@@ -1,4 +1,3 @@
-
 import React from "react";
 
 interface ToggleProps {
@@ -36,3 +35,5 @@ export const Toggle: React.FC<ToggleProps> = ({
     </div>
   );
 };
+
+export default Toggle;

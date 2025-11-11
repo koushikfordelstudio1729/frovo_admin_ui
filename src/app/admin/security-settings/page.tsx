@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Toggle } from "@/components/common/Toggle/Toggle";
-import Button from "@/components/common/Button/Button";
+import { Button, Input } from "@/components/common";
 import { SecuritySettings } from "@/types/security.types";
 import { DEFAULT_SECURITY_SETTINGS } from "@/utils/constants";
 
@@ -101,8 +101,9 @@ const SecuritySettingsPage = () => {
                   >
                     <span className="text-black text-sm">{ip.range}</span>
                     <button
+                      type="button"
                       onClick={() => removeIPRange(ip.id)}
-                      className="text-red-600 hover:text-red-700 text-sm font-medium"
+                      className="text-red-600 hover:text-red-700 text-sm font-medium transition-colors"
                     >
                       Remove
                     </button>
@@ -111,13 +112,13 @@ const SecuritySettingsPage = () => {
               </div>
             )}
 
-            <div className="space-y-3">
-              <input
-                type="text"
+            <div className="space-y-3 max-w-sm">
+              <Input
+                variant="default"
                 value={newIpRange}
                 onChange={(e) => setNewIpRange(e.target.value)}
                 placeholder="192.168.0.0/24"
-                className="block w-full max-w-sm px-4 py-3 bg-gray-50 border border-gray-200 rounded-md text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+                inputClassName="bg-gray-50"
               />
               <Button onClick={addIPRange} variant="primary" className="px-6">
                 + Add IP range
@@ -133,67 +134,48 @@ const SecuritySettingsPage = () => {
 
             <div className="space-y-6 max-w-md">
               {/* Client ID */}
-              <div>
-                <label
-                  htmlFor="clientId"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  Client ID
-                </label>
-                <input
-                  id="clientId"
-                  type="text"
-                  value={settings.sso.clientId}
-                  onChange={(e) => handleSSOChange("clientId", e.target.value)}
-                  placeholder="Enter Client ID"
-                  className="block w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-md text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
-                />
-              </div>
+              <Input
+                label="Client ID"
+                variant="default"
+                value={settings.sso.clientId}
+                onChange={(e) => handleSSOChange("clientId", e.target.value)}
+                placeholder="Enter Client ID"
+                inputClassName="bg-gray-50"
+                labelClassName="text-sm font-medium text-gray-700"
+              />
 
               {/* Secret */}
-              <div>
-                <label
-                  htmlFor="secret"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  Secret
-                </label>
-                <input
-                  id="secret"
-                  type="password"
-                  value={settings.sso.secret}
-                  onChange={(e) => handleSSOChange("secret", e.target.value)}
-                  placeholder="Enter Secret"
-                  className="block w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-md text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
-                />
-              </div>
+              <Input
+                label="Secret"
+                type="password"
+                variant="default"
+                value={settings.sso.secret}
+                onChange={(e) => handleSSOChange("secret", e.target.value)}
+                placeholder="Enter Secret"
+                inputClassName="bg-gray-50"
+                labelClassName="text-sm font-medium text-gray-700"
+              />
 
               {/* Metadata URL */}
-              <div>
-                <label
-                  htmlFor="metadataUrl"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  Metadata URL
-                </label>
-                <input
-                  id="metadataUrl"
-                  type="url"
-                  value={settings.sso.metadataUrl}
-                  onChange={(e) =>
-                    handleSSOChange("metadataUrl", e.target.value)
-                  }
-                  placeholder="Enter Metadata URL"
-                  className="block w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-md text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
-                />
-              </div>
+              <Input
+                label="Metadata URL"
+                type="url"
+                variant="default"
+                value={settings.sso.metadataUrl}
+                onChange={(e) => handleSSOChange("metadataUrl", e.target.value)}
+                placeholder="Enter Metadata URL"
+                inputClassName="bg-gray-50"
+                labelClassName="text-sm font-medium text-gray-700"
+              />
             </div>
           </div>
         </div>
       </div>
+
       {/* Save Button */}
       <div className="flex justify-center pt-10 pb-6">
         <Button
+          type="button"
           onClick={handleSave}
           variant="primary"
           disabled={isLoading}

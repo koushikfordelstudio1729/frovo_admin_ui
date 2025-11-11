@@ -3,11 +3,21 @@
 import { useState } from "react";
 import { SCOPE_OPTIONS } from "@/config/scoped-roles.config";
 import { ScopeType } from "@/types/scoped-roles.types";
-import { ChevronDown } from "lucide-react";
-import { Button } from "@/components";
+import { Button, Select } from "@/components/common";
 
 export default function ScopedRoleAssignmentPage() {
   const [selectedScope, setSelectedScope] = useState<ScopeType>("Global");
+
+  // Convert SCOPE_OPTIONS to Select format
+  const scopeOptions = SCOPE_OPTIONS.map((scope) => ({
+    value: scope,
+    label: scope,
+  }));
+
+  const handleSave = () => {
+    console.log("Saving role scope:", selectedScope);
+    // TODO: Add API call
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
@@ -17,24 +27,13 @@ export default function ScopedRoleAssignmentPage() {
       </h1>
 
       {/* Scope Dropdown */}
-      <div className="mb-8 w-full relative bg-gray-100">
-        <select
+      <div className="mb-8 w-full">
+        <Select
+          variant="default"
+          options={scopeOptions}
           value={selectedScope}
-          onChange={(e) => {
-            setSelectedScope(e.target.value as ScopeType);
-          }}
-          className="w-full px-4 py-3 bg-gray-100 border border-gray-300 rounded-lg text-gray-900 font-medium focus:outline-none appearance-none pr-12"
-        >
-          {SCOPE_OPTIONS.map((scope) => (
-            <option key={scope} value={scope}>
-              {scope}
-            </option>
-          ))}
-        </select>
-
-        <ChevronDown
-          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none"
-          size={28}
+          onChange={(e) => setSelectedScope(e.target.value as ScopeType)}
+          selectClassName="bg-gray-100 py-3 text-base font-medium"
         />
       </div>
 
@@ -46,7 +45,9 @@ export default function ScopedRoleAssignmentPage() {
           </h2>
 
           {/* Blank Map Container */}
-          <div className="w-lg h-96 bg-gray-200 rounded-xl "></div>
+          <div className="w-full h-96 bg-gray-200 rounded-xl flex items-center justify-center">
+            <p className="text-gray-500 text-sm">Map View</p>
+          </div>
         </div>
 
         {/* Selected Entities */}
@@ -66,7 +67,12 @@ export default function ScopedRoleAssignmentPage() {
 
       {/* Save Button */}
       <div className="flex justify-center">
-        <Button variant="primary" size="lg" className="px-8 text-xl">
+        <Button
+          variant="primary"
+          size="lg"
+          onClick={handleSave}
+          className="px-8 text-xl"
+        >
           Save Role Scope
         </Button>
       </div>

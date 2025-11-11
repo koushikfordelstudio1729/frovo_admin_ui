@@ -2,9 +2,8 @@
 
 import { RoleList } from "@/types/roles.types";
 import React from "react";
-import Badge from "../common/Badge";
+import { Badge, Pagination } from "@/components/common";
 import { Eye, Trash2 } from "lucide-react";
-import { Pagination } from "../common";
 import { Column } from "@/components/name&table/Table";
 import { Table } from "@/components";
 
@@ -33,7 +32,7 @@ export const RolesDataTable: React.FC<RoleDataTableProps> = ({
 
   const renderCell = (key: string, value: any, row?: Record<string, any>) => {
     if (key === "scope") {
-      return <Badge label={value} />;
+      return <Badge label={value} size="lg" />;
     }
 
     if (key === "actions") {
@@ -42,12 +41,14 @@ export const RolesDataTable: React.FC<RoleDataTableProps> = ({
           <button
             type="button"
             className="text-blue-500 hover:text-blue-700 transition-colors"
+            aria-label="View details"
           >
             <Eye size={18} />
           </button>
           <button
             type="button"
             className="text-red-500 hover:text-red-700 transition-colors"
+            aria-label="Delete"
           >
             <Trash2 size={18} />
           </button>
@@ -68,7 +69,6 @@ export const RolesDataTable: React.FC<RoleDataTableProps> = ({
         alternateRowColors={true}
       />
 
-      {/* Pagination */}
       <div className="flex items-center justify-end px-6 pt-8 bg-gray-50">
         <Pagination
           currentPage={currentPage}
