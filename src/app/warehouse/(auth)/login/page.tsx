@@ -5,8 +5,8 @@ import LoginForm from "@/components/auth/LoginForm";
 export default function Login() {
   return (
     <LoginForm
-      redirectPath="/admin/roles-permissions"
-      signupLink="/admin/signup"
+      redirectPath="/warehouse/dashboard"
+      signupLink="/warehouse/signup"
     />
   );
 }

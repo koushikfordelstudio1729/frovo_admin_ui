@@ -6,7 +6,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button, Input } from "@/components/common";
 
-const SignUpForm: React.FC = () => {
+interface SignUpFormProps {
+  redirectPath: string;
+  loginLink: string;
+}
+
+const SignUpForm: React.FC<SignUpFormProps> = ({ redirectPath, loginLink }) => {
   const router = useRouter();
 
   // Form State
@@ -69,7 +74,7 @@ const SignUpForm: React.FC = () => {
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
       // Redirect to login or dashboard
-      router.push("/login");
+      router.push(redirectPath);
     } catch (err) {
       console.error("Sign up error:", err);
       setError("Failed to create account. Please try again.");
@@ -95,7 +100,7 @@ const SignUpForm: React.FC = () => {
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-linear-to-br from-gray-50 to-white">
         <div className="w-full max-w-md">
           {/* Title */}
-          <h2 className="text-4xl font-bold text-gray-900 mb-8">Sign Up</h2>
+          <h2 className="text-3xl font-bold text-gray-900 mb-8">Sign Up</h2>
 
           {/* General Error Message */}
           {error && (
@@ -181,7 +186,7 @@ const SignUpForm: React.FC = () => {
               <p className="text-sm text-gray-600">
                 Already have an account?{" "}
                 <Link
-                  href="/admin/login"
+                  href={loginLink}
                   className="text-orange-500 hover:text-orange-600 font-medium transition-colors"
                 >
                   Login

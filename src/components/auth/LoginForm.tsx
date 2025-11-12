@@ -7,7 +7,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button, Input } from "@/components/common";
 
-const LoginForm: React.FC = () => {
+interface LoginFormProps {
+  redirectPath: string;
+  signupLink: string;
+}
+
+const LoginForm: React.FC<LoginFormProps> = ({ redirectPath, signupLink }) => {
   const router = useRouter();
 
   // Form State
@@ -56,7 +61,7 @@ const LoginForm: React.FC = () => {
         localStorage.setItem("email", email);
       }
 
-      router.push("/admin/roles-permissions");
+      router.push(redirectPath);
     } catch (err) {
       console.error("Login error:", err);
       setError("Invalid credentials. Please try again.");
@@ -170,7 +175,7 @@ const LoginForm: React.FC = () => {
               <p className="text-sm text-gray-600">
                 Don&apos;t have an account?{" "}
                 <Link
-                  href="/admin/signup"
+                  href={signupLink}
                   className="text-orange-500 hover:text-orange-600 font-medium transition-colors"
                 >
                   Sign up
