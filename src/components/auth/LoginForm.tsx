@@ -56,7 +56,7 @@ const LoginForm: React.FC = () => {
         localStorage.setItem("email", email);
       }
 
-      router.push("/admin");
+      router.push("/admin/roles-permissions");
     } catch (err) {
       console.error("Login error:", err);
       setError("Invalid credentials. Please try again.");
@@ -166,11 +166,11 @@ const LoginForm: React.FC = () => {
             </Button>
 
             {/* Footer Content */}
-            <div className="mt-8 text-left">
+            <div className="mt-4 text-left">
               <p className="text-sm text-gray-600">
                 Don&apos;t have an account?{" "}
                 <Link
-                  href="/register"
+                  href="/admin/signup"
                   className="text-orange-500 hover:text-orange-600 font-medium transition-colors"
                 >
                   Sign up

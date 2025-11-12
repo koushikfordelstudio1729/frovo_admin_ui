@@ -1,0 +1,20 @@
+// src/app/admin/(dashboard)/layout.tsx
+import { AdminHeader } from "@/components/layout/AdminHeader/AdminHeader";
+import { AdminSidebar } from "@/components/layout/AdminSidebar";
+import React from "react";
+
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex">
+      <AdminSidebar />
+      <main className="ml-64 flex-1 bg-gray-50 min-h-screen">
+        <AdminHeader />
+        <div className="pt-10 p-8">{children}</div>
+      </main>
+    </div>
+  );
+}

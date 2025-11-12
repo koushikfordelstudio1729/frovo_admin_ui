@@ -28,7 +28,7 @@ export default function UserManagementPage() {
           label={value}
           size="md"
           variant={value === "Active" ? "active" : "inactive"}
-          showDot={value === "Active"}
+          showDot={true}
         />
       );
     }
