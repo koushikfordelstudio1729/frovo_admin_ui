@@ -37,12 +37,12 @@ export const AdminSidebar: React.FC = () => {
   return (
     <aside className="w-64 bg-white text-white min-h-screen fixed left-0 top-0 overflow-auto p-6">
       {/* Logo Section */}
-      <div className="mb-2 pb-2 px-10">
+      <div className="mb-6 flex justify-center">
         <Image
           src="/images/logo.svg"
           alt="frovo logo"
-          width={140}
-          height={140}
+          width={130}
+          height={50}
           priority
         />
       </div>

@@ -1,5 +1,6 @@
-import { WarehouseHeader, WarehouseSidebar } from "@/components";
-
+"use client";
+import { WarehouseHeader } from "@/components/layout/Warehouse/WarehouseHeader/WarehouseHeader";
+import { WarehouseSidebar } from "@/components/layout/Warehouse/WarehouseSidebar/WarehouseSidebar";
 import React from "react";
 
 export default function DashboardLayout({
