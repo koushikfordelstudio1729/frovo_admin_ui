@@ -38,8 +38,8 @@ const Input: React.FC<InputProps> = ({
   // Variant styles
   const variantStyles = {
     default: {
-      base: "bg-white border border-gray-300",
-      label: "text-gray-700 text-sm",
+      base: "bg-gray-100 border border-gray-300",
+      label: "text-gray-700 text-sm font-semibold",
       input: "px-4 py-3",
     },
     orange: {

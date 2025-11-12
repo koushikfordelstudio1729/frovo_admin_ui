@@ -26,6 +26,7 @@ export default function UserManagementPage() {
       return (
         <Badge
           label={value}
+          size="md"
           variant={value === "Active" ? "active" : "inactive"}
           showDot={value === "Active"}
         />

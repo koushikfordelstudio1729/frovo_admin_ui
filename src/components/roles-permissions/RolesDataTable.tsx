@@ -32,7 +32,7 @@ export const RolesDataTable: React.FC<RoleDataTableProps> = ({
 
   const renderCell = (key: string, value: any, row?: Record<string, any>) => {
     if (key === "scope") {
-      return <Badge label={value} size="lg" />;
+      return <Badge label={value} size="md" />;
     }
 
     if (key === "actions") {

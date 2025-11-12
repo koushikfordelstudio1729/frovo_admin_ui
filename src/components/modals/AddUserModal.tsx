@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { X } from "lucide-react";
-import { Button, Input } from "../common";
+import { Button, Input, Toggle } from "../common";
 
 interface AddUserModalProps {
   isOpen: boolean;
@@ -21,6 +21,7 @@ export default function AddUserModal({
     phone: "",
     department: "",
     role: "",
+    isActive: true,
   });
 
   const [errors, setErrors] = useState<{
@@ -48,6 +49,13 @@ export default function AddUserModal({
         [name]: undefined,
       });
     }
+  };
+
+  const handleToggleChange = (enabled: boolean) => {
+    setFormData({
+      ...formData,
+      isActive: enabled,
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -88,7 +96,14 @@ export default function AddUserModal({
     try {
       onSubmit(formData);
       // Reset form
-      setFormData({ name: "", email: "", phone: "", department: "", role: "" });
+      setFormData({
+        name: "",
+        email: "",
+        phone: "",
+        department: "",
+        role: "",
+        isActive: true,
+      });
       setErrors({});
       onClose();
     } catch (error) {
@@ -112,7 +127,7 @@ export default function AddUserModal({
       className="fixed w-full inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50"
       onClick={handleBackdropClick}
     >
-      <div className="bg-white rounded-2xl p-8 w-full max-w-xl shadow-2xl">
+      <div className="bg-white rounded-2xl p-8 w-full max-w-2xl shadow-2xl">
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <div>
@@ -205,6 +220,12 @@ export default function AddUserModal({
             disabled={isLoading}
             fullWidth
             required
+          />
+
+          <Toggle
+            enabled={formData.isActive}
+            onChange={handleToggleChange}
+            label={"Active"}
           />
 
           {/* Submit Button */}

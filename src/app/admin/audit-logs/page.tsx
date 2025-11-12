@@ -33,7 +33,7 @@ export default function AuditLogsPage() {
     }
 
     if (key === "target") {
-      return <Badge label={value} />;
+      return <Badge size="md" label={value} />;
     }
 
     // Render action buttons for beforeAfterDiff column

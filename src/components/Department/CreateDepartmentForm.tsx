@@ -18,7 +18,6 @@ export const CreateDepartmentForm = () => {
   const roleOptions = [
     { value: "ops-manager", label: "Ops Manager" },
     { value: "technician", label: "Technician" },
-    { value: "supervisor", label: "Supervisor" },
   ];
 
   const handleSubmit = (e: React.FormEvent) => {

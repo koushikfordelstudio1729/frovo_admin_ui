@@ -1,4 +1,3 @@
-// src/components/roles-permissions/RoleTableHeader.tsx
 "use client";
 
 import { RoleFilters } from "@/types/roles.types";
@@ -84,13 +83,13 @@ export const RoleTableHeader: React.FC<RoleTableHeadProps> = ({
 
       {/* Search and Filters */}
       <div className="flex items-center gap-4">
-        {/* Search Bar - Using "search" variant */}
+        {/* Search Bar   */}
         <div className="flex-1 max-w-sm">
           <Input
             variant="search"
             value={searchQuery}
             onChange={(e) => handleSearch(e.target.value)}
-            placeholder="Search Name"
+            placeholder="Search Role"
             startIcon={<Search size={20} />}
           />
         </div>
@@ -125,7 +124,7 @@ export const RoleTableHeader: React.FC<RoleTableHeadProps> = ({
           type="button"
           variant="primary"
           size="md"
-          onClick={() => router.push("/admin/roles/create")}
+          onClick={() => router.push("/admin/create-role")}
           className="ml-auto flex items-center gap-2"
         >
           <Plus size={18} />

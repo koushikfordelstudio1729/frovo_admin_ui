@@ -11,7 +11,7 @@ interface DropdownProps {
   options: DropdownOption[];
   value: string;
   onChange: (value: string) => void;
-  placeholder?: string;
+  //placeholder?: string;
   className?: string;
 }
 
@@ -20,7 +20,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
   options,
   value,
   onChange,
-  placeholder = "Select an option",
+  //placeholder = "Select an option",
   className = "",
 }) => {
   const [isOpen, setIsOpen] = useState(false);

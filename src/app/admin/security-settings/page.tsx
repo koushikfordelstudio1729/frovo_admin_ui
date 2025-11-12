@@ -52,7 +52,7 @@ const SecuritySettingsPage = () => {
   const handleSave = async () => {
     setIsLoading(true);
     try {
-      // TODO: API call to save settings
+      // API call to save settings
       console.log("Saving settings:", settings);
 
       // Log event in audit system

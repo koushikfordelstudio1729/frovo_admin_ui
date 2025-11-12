@@ -30,9 +30,9 @@ interface BadgeProps {
 
 const variantStyles: Record<BadgeVariant, string> = {
   // Scope badges (from RolesDataTable)
-  global: "bg-green-100 text-green-800",
-  machine: "bg-blue-100 text-blue-800",
-  partner: "bg-purple-100 text-purple-800",
+  global: "bg-green-400 text-green-900",
+  machine: "bg-blue-300 text-blue-900",
+  partner: "bg-purple-300 text-purple-900",
 
   // Status badges (from UserManagementPage)
   active: "bg-[#79EE52] text-green-800",
@@ -55,8 +55,8 @@ const variantStyles: Record<BadgeVariant, string> = {
 
 const sizeStyles: Record<BadgeSize, string> = {
   sm: "px-3 py-1 text-xs",
-  md: "px-4 py-2 text-sm",
-  lg: "px-6 py-2 text-base",
+  md: "px-6 py-2 text-sm",
+  lg: "px-8 py-4 text-base",
 };
 
 export const Badge: React.FC<BadgeProps> = ({

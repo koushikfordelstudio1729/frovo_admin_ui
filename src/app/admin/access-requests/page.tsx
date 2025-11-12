@@ -29,7 +29,7 @@ export default function AccessRequestsApprovalsPage() {
 
   const renderCell = (key: string, value: any, row?: any) => {
     if (key === "status") {
-      return <Badge label={value} />;
+      return <Badge size="md" label={value} />;
     }
 
     if (key === "actions") {
