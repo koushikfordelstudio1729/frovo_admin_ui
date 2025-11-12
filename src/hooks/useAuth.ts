@@ -1,9 +1,15 @@
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { loginUser, registerUser, logoutUser, clearError } from '../store/slices/authSlice';
-import { authUtils } from '../utils';
-import type { LoginCredentials, RegisterData } from '../types';
+"use client";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAppDispatch, useAppSelector } from "../store/hooks";
+import {
+  loginUser,
+  registerUser,
+  logoutUser,
+  clearError,
+} from "../store/slices/authSlice";
+import { authUtils } from "../utils";
+import type { LoginCredentials, RegisterData } from "../types";
 
 export const useAuth = () => {
   const router = useRouter();
@@ -23,12 +29,12 @@ export const useAuth = () => {
     try {
       const result = await dispatch(loginUser(credentials));
       if (loginUser.fulfilled.match(result)) {
-        router.push('/admin');
+        router.push("/admin");
         return { success: true };
       }
       return { success: false, error: result.payload };
     } catch {
-      return { success: false, error: 'Login failed' };
+      return { success: false, error: "Login failed" };
     }
   };
 
@@ -36,21 +42,21 @@ export const useAuth = () => {
     try {
       const result = await dispatch(registerUser(userData));
       if (registerUser.fulfilled.match(result)) {
-        router.push('/admin');
+        router.push("/admin");
         return { success: true };
       }
       return { success: false, error: result.payload };
     } catch {
-      return { success: false, error: 'Registration failed' };
+      return { success: false, error: "Registration failed" };
     }
   };
 
   const logout = async () => {
     try {
       await dispatch(logoutUser());
-      router.push('/login');
+      router.push("/login");
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error("Logout error:", error);
     }
   };
 

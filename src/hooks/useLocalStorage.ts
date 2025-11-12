@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import { storageUtils } from '../utils';
+"use client";
+import { useState } from "react";
+import { storageUtils } from "../utils";
 
 export function useLocalStorage<T>(
   key: string,
@@ -17,7 +18,8 @@ export function useLocalStorage<T>(
 
   const setValue = (value: T | ((val: T) => T)) => {
     try {
-      const valueToStore = value instanceof Function ? value(storedValue) : value;
+      const valueToStore =
+        value instanceof Function ? value(storedValue) : value;
       setStoredValue(valueToStore);
       storageUtils.setItem(key, valueToStore);
     } catch (error) {

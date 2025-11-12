@@ -1,5 +1,5 @@
-import { AdminHeader } from "@/components";
-import { AdminSidebar } from "@/components";
+import { WarehouseHeader, WarehouseSidebar } from "@/components";
+
 import React from "react";
 
 export default function DashboardLayout({
@@ -9,9 +9,9 @@ export default function DashboardLayout({
 }) {
   return (
     <div className="flex">
-      <AdminSidebar />
+      <WarehouseSidebar />
       <main className="ml-64 flex-1 bg-gray-50 min-h-screen">
-        <AdminHeader />
+        <WarehouseHeader />
         <div className="pt-10 p-8">{children}</div>
       </main>
     </div>

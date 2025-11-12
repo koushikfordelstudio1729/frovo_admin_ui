@@ -1,5 +1,6 @@
-import { useState, useCallback } from 'react';
-import { validation } from '../utils';
+"use client";
+import { useState, useCallback } from "react";
+import { validation } from "../utils";
 
 interface FormField {
   value: string;
@@ -21,10 +22,14 @@ interface UseFormOptions {
   onSubmit?: (values: { [key: string]: string }) => void | Promise<void>;
 }
 
-export const useForm = ({ initialValues, validationRules, onSubmit }: UseFormOptions) => {
+export const useForm = ({
+  initialValues,
+  validationRules,
+  onSubmit,
+}: UseFormOptions) => {
   const [formState, setFormState] = useState<FormState>(() => {
     const initialState: FormState = {};
-    Object.keys(initialValues).forEach(key => {
+    Object.keys(initialValues).forEach((key) => {
       initialState[key] = {
         value: initialValues[key],
         error: undefined,
@@ -36,13 +41,16 @@ export const useForm = ({ initialValues, validationRules, onSubmit }: UseFormOpt
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const validateField = useCallback((name: string, value: string): string | undefined => {
-    if (!validationRules || !validationRules[name]) return undefined;
-    return validationRules[name](value, formState);
-  }, [validationRules, formState]);
+  const validateField = useCallback(
+    (name: string, value: string): string | undefined => {
+      if (!validationRules || !validationRules[name]) return undefined;
+      return validationRules[name](value, formState);
+    },
+    [validationRules, formState]
+  );
 
   const setFieldValue = useCallback((name: string, value: string) => {
-    setFormState(prev => ({
+    setFormState((prev) => ({
       ...prev,
       [name]: {
         value: validation.sanitizeInput(value),
@@ -53,7 +61,7 @@ export const useForm = ({ initialValues, validationRules, onSubmit }: UseFormOpt
   }, []);
 
   const setFieldError = useCallback((name: string, error: string) => {
-    setFormState(prev => ({
+    setFormState((prev) => ({
       ...prev,
       [name]: {
         ...prev[name],
@@ -63,7 +71,7 @@ export const useForm = ({ initialValues, validationRules, onSubmit }: UseFormOpt
   }, []);
 
   const clearFieldError = useCallback((name: string) => {
-    setFormState(prev => ({
+    setFormState((prev) => ({
       ...prev,
       [name]: {
         ...prev[name],
@@ -78,7 +86,7 @@ export const useForm = ({ initialValues, validationRules, onSubmit }: UseFormOpt
     let isValid = true;
     const newFormState = { ...formState };
 
-    Object.keys(formState).forEach(name => {
+    Object.keys(formState).forEach((name) => {
       const error = validateField(name, formState[name].value);
       newFormState[name] = {
         ...newFormState[name],
@@ -92,31 +100,34 @@ export const useForm = ({ initialValues, validationRules, onSubmit }: UseFormOpt
     return isValid;
   }, [formState, validateField, validationRules]);
 
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!validateForm()) return;
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
 
-    setIsSubmitting(true);
-    try {
-      const values: { [key: string]: string } = {};
-      Object.keys(formState).forEach(key => {
-        values[key] = formState[key].value;
-      });
+      if (!validateForm()) return;
 
-      if (onSubmit) {
-        await onSubmit(values);
+      setIsSubmitting(true);
+      try {
+        const values: { [key: string]: string } = {};
+        Object.keys(formState).forEach((key) => {
+          values[key] = formState[key].value;
+        });
+
+        if (onSubmit) {
+          await onSubmit(values);
+        }
+      } catch (error) {
+        console.error("Form submission error:", error);
+      } finally {
+        setIsSubmitting(false);
       }
-    } catch (error) {
-      console.error('Form submission error:', error);
-    } finally {
-      setIsSubmitting(false);
-    }
-  }, [formState, validateForm, onSubmit]);
+    },
+    [formState, validateForm, onSubmit]
+  );
 
   const reset = useCallback(() => {
     const resetState: FormState = {};
-    Object.keys(initialValues).forEach(key => {
+    Object.keys(initialValues).forEach((key) => {
       resetState[key] = {
         value: initialValues[key],
         error: undefined,
@@ -127,16 +138,19 @@ export const useForm = ({ initialValues, validationRules, onSubmit }: UseFormOpt
     setIsSubmitting(false);
   }, [initialValues]);
 
-  const getFieldProps = useCallback((name: string) => ({
-    value: formState[name]?.value || '',
-    onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
-      setFieldValue(name, e.target.value);
-    },
-    onBlur: () => {
-      const error = validateField(name, formState[name].value);
-      setFieldError(name, error || '');
-    },
-  }), [formState, setFieldValue, validateField, setFieldError]);
+  const getFieldProps = useCallback(
+    (name: string) => ({
+      value: formState[name]?.value || "",
+      onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+        setFieldValue(name, e.target.value);
+      },
+      onBlur: () => {
+        const error = validateField(name, formState[name].value);
+        setFieldError(name, error || "");
+      },
+    }),
+    [formState, setFieldValue, validateField, setFieldError]
+  );
 
   return {
     formState,

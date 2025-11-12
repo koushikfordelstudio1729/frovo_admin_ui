@@ -1,42 +1,36 @@
 "use client";
 
 import React from "react";
-
 import {
-  Shield,
-  SquarePen,
-  Building2,
-  CircleUserRound,
-  Key,
-  Clipboard,
-  History,
-  UserRoundCog,
+  LayoutDashboard,
+  Boxes,
+  ArrowDownLeft,
+  ArrowUpRight,
+  Wallet,
+  BarChart2,
   User,
   Settings,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { adminNavigation } from "@/config/admin.config";
-import SidebarItem from "./SidebarItem";
+import { warehouseNavigation } from "@/config/warehouse.config";
+import SidebarItem from "@/components/common/SidebarItem";
 import Image from "next/image";
 
 const iconMap: Record<string, React.ComponentType<{ size?: number }>> = {
-  shield: Shield,
-  squarePen: SquarePen,
-  building: Building2,
-  users: CircleUserRound,
-  key: Key,
-  clipboard: Clipboard,
-  history: History,
-  star: UserRoundCog,
+  layoutDashboard: LayoutDashboard,
+  boxes: Boxes,
+  arrowDownLeft: ArrowDownLeft,
+  arrowUpRight: ArrowUpRight,
+  wallet: Wallet,
+  barChart2: BarChart2,
   user: User,
   settings: Settings,
 };
 
-export const AdminSidebar: React.FC = () => {
+export const WarehouseSidebar: React.FC = () => {
   const pathname = usePathname();
   return (
     <aside className="w-64 bg-white text-white min-h-screen fixed left-0 top-0 overflow-auto p-6">
-      {/* Logo Section */}
       <div className="mb-2 pb-2 px-10">
         <Image
           src="/images/logo.svg"
@@ -47,11 +41,10 @@ export const AdminSidebar: React.FC = () => {
         />
       </div>
 
-      {/* Navigation Items */}
       <nav className="space-y-4">
         {/* Group 1 */}
         <div className="bg-[#FFEAE4] rounded-2xl py-4">
-          {adminNavigation.slice(0, 4).map((item) => {
+          {warehouseNavigation.slice(0, 3).map((item) => {
             const Icon = iconMap[item.icon];
             const isActive = pathname === item.href;
             return (
@@ -65,10 +58,9 @@ export const AdminSidebar: React.FC = () => {
             );
           })}
         </div>
-
         {/* Group 2 */}
         <div className="space-y-1 bg-[#FFEAE4] rounded-2xl py-4">
-          {adminNavigation.slice(4, 8).map((item) => {
+          {warehouseNavigation.slice(3, 6).map((item) => {
             const Icon = iconMap[item.icon];
             const isActive = pathname === item.href;
             return (
@@ -82,10 +74,9 @@ export const AdminSidebar: React.FC = () => {
             );
           })}
         </div>
-
         {/* Group 3 */}
         <div className="space-y-1 bg-[#FFEAE4] rounded-2xl py-4">
-          {adminNavigation.slice(8).map((item) => {
+          {warehouseNavigation.slice(6).map((item) => {
             const Icon = iconMap[item.icon];
             const isActive = pathname === item.href;
             return (
@@ -104,4 +95,4 @@ export const AdminSidebar: React.FC = () => {
   );
 };
 
-export default AdminSidebar;
+export default WarehouseSidebar;
