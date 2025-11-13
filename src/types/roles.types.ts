@@ -1,4 +1,3 @@
-// Role data structure
 export interface RoleList {
   id: number;
   role: string;

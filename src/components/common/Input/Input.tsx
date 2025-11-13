@@ -1,6 +1,6 @@
 import React from "react";
 
-type InputVariant = "default" | "orange" | "search" | "underline";
+type InputVariant = "default" | "orange" | "search" | "underline" | "date";
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   variant?: InputVariant;
@@ -55,7 +55,12 @@ const Input: React.FC<InputProps> = ({
     underline: {
       base: "bg-transparent border",
       label: "text-gray-700 text-sm",
-      input: "px-0 py-2",
+      input: "px-4 py-2",
+    },
+    date: {
+      base: "bg-white border border-gray-300",
+      label: "text-gray-700 text-lg",
+      input: "px-6 py-2 text-sm",
     },
   };
 

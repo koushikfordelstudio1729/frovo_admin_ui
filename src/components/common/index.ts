@@ -10,3 +10,4 @@ export { default as Select } from "./Select";
 export { default as Dropdown } from "./Dropdown";
 export { default as SidebarItem } from "./SidebarItem";
 export { default as Header } from "./Header";
+export { default as Label } from "./Label";
