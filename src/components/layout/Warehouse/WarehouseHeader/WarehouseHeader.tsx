@@ -1,6 +1,9 @@
 "use client";
 
-import { warehouseNavigation } from "@/config/warehouse/warehouse.config"; // Create your warehouse config like admin
+import {
+  WarehouseMenuItem,
+  warehouseNavigation,
+} from "@/config/warehouse/warehouse.config";
 import { Bell, User } from "lucide-react";
 import { usePathname } from "next/navigation";
 import React from "react";
@@ -8,11 +11,22 @@ import React from "react";
 export const WarehouseHeader: React.FC = () => {
   const pathname = usePathname();
 
-  // Find the current page title from warehouseNavigation
-  const currentPage = warehouseNavigation.find(
-    (item) => item.href === pathname
-  );
-  const title = currentPage?.label || "Warehouse Dashboard";
+  function getCurrentPageLabel(items: WarehouseMenuItem[]) {
+    for (const item of items) {
+      if (item.href === pathname) {
+        return item.label;
+      }
+      if (item.children) {
+        const found = item.children.find((child) => child.href === pathname);
+        if (found) {
+          return found.label;
+        }
+      }
+    }
+    return null;
+  }
+  const title =
+    getCurrentPageLabel(warehouseNavigation) || "Warehouse Dashboard";
 
   return (
     <header className="fixed top-0 right-0 left-64 bg-white h-16 flex items-center justify-between px-8 z-40">

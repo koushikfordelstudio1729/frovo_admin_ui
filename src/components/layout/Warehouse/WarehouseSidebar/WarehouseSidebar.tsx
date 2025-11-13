@@ -19,10 +19,7 @@ import {
 } from "@/config/warehouse/warehouse.config";
 import Image from "next/image";
 
-const iconMap: Record<
-  string,
-  React.ComponentType<{ size?: number; className?: string }>
-> = {
+const iconMap = {
   layoutDashboard: LayoutDashboard,
   boxes: Boxes,
   arrowDownLeft: ArrowDownLeft,
@@ -31,11 +28,25 @@ const iconMap: Record<
   barChart2: BarChart2,
   user: User,
   settings: Settings,
-};
+} as const;
 
 export const WarehouseSidebar: React.FC = () => {
   const pathname = usePathname();
-  const [open, setOpen] = useState<Record<string, boolean>>({});
+
+  const getInitialOpenState = () => {
+    const state: Record<string, boolean> = {};
+    warehouseNavigation.forEach((item) => {
+      if (
+        item.children &&
+        item.children.some((child) => child.href === pathname)
+      ) {
+        state[item.label] = true;
+      }
+    });
+    return state;
+  };
+  const [open, setOpen] =
+    useState<Record<string, boolean>>(getInitialOpenState);
 
   const handleToggle = (label: string) =>
     setOpen((prev) => ({ ...prev, [label]: !prev[label] }));
@@ -45,27 +56,23 @@ export const WarehouseSidebar: React.FC = () => {
   const group3 = warehouseNavigation.slice(6);
 
   function TopLevelSidebar(item: WarehouseMenuItem) {
-    const Icon = iconMap[item.icon];
+    const Icon = iconMap[item.icon as keyof typeof iconMap] || Boxes;
     const isParentOnly = !item.href && item.children;
     const isActive = item.href ? pathname === item.href : false;
 
     return (
       <div key={item.label} className="w-full">
-        {/* Parent Row */}
         <div
           className={`flex items-center justify-between text-sm px-4 py-2 rounded-lg cursor-pointer transition-all duration-200
             ${isActive ? "bg-orange-500 text-white mx-1" : "text-gray-700"}
           `}
           onClick={() => isParentOnly && handleToggle(item.label)}
         >
-          {/* Left Side */}
           <span className="flex items-center gap-2">
             <Icon
               size={20}
               className={isActive ? "text-white" : "text-orange-400"}
             />
-
-            {/* Label or Link */}
             {isParentOnly ? (
               <span className="ml-1 text-sm">{item.label}</span>
             ) : (
@@ -74,8 +81,6 @@ export const WarehouseSidebar: React.FC = () => {
               </a>
             )}
           </span>
-
-          {/* Dropdown Icon */}
           <div className="w-5 flex justify-center">
             {item.children ? (
               <ChevronDown
@@ -91,8 +96,6 @@ export const WarehouseSidebar: React.FC = () => {
             )}
           </div>
         </div>
-
-        {/* Dropdown Items */}
         {item.children && open[item.label] && (
           <div className="pl-8 pr-4 mt-1 text-sm space-y-1 transition-all duration-300">
             {item.children.map((child) => {
@@ -104,7 +107,7 @@ export const WarehouseSidebar: React.FC = () => {
                   className={`block text-[12px] rounded-md px-3 py-1.5 font-medium transition
                     ${
                       isChildActive
-                        ? "text-orange-600 bg-orange-100"
+                        ? "text-white bg-orange-500"
                         : "text-gray-600"
                     }
                   `}
@@ -121,7 +124,6 @@ export const WarehouseSidebar: React.FC = () => {
 
   return (
     <aside className="w-64 bg-white min-h-screen fixed left-0 top-0 overflow-y-auto p-6">
-      {/* Logo */}
       <div className="mb-6 flex justify-center">
         <Image
           src="/images/logo.svg"
@@ -131,17 +133,13 @@ export const WarehouseSidebar: React.FC = () => {
           priority
         />
       </div>
-
-      {/* Sidebar Groups */}
       <nav className="space-y-5">
         <div className="bg-[#FFEAE4] rounded-2xl py-3 space-y-1">
           {group1.map(TopLevelSidebar)}
         </div>
-
         <div className="bg-[#FFEAE4] rounded-2xl py-3 space-y-1">
           {group2.map(TopLevelSidebar)}
         </div>
-
         <div className="bg-[#FFEAE4] rounded-2xl py-3 space-y-1">
           {group3.map(TopLevelSidebar)}
         </div>

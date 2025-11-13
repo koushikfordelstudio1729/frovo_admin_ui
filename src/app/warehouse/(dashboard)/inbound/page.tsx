@@ -21,11 +21,11 @@ export default function InboundLogisticsPage() {
 
   return (
     <div className="min-h-full bg-gray-50 p-4">
-      {/* Header */}
+      {/* Header with Back Button */}
       <div className="flex items-center gap-3 my-4">
         <button
           onClick={() => router.back()}
-          className="p-2"
+          className="p-2 hover:cursor-pointer"
           aria-label="Go back"
         >
           <ArrowLeft className="w-6 h-6 text-gray-700" />
@@ -36,7 +36,7 @@ export default function InboundLogisticsPage() {
       </div>
 
       {/* Main Form Card */}
-      <div className="bg-white rounded-2xl  p-8 max-w-full">
+      <div className="max-w-full bg-white rounded-2xl p-8">
         {/* Input Fields Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div>

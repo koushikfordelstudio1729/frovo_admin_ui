@@ -36,7 +36,7 @@ export const warehouseNavigation: WarehouseMenuItem[] = [
   {
     label: "Budget & Expense Management",
     icon: "wallet",
-    children: [{ label: "Expense Table", href: "/warehouse/budget/expenses" }],
+    children: [{ label: "Expense Table", href: "/warehouse/budget-expenses" }],
   },
   {
     label: "Reports & Analytics",
