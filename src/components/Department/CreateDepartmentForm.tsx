@@ -73,6 +73,7 @@ export const CreateDepartmentForm = () => {
               variant="orange"
               options={roleOptions}
               value={formData.role}
+              selectClassName="px-6 py-4 border-2 bg-white text-base"
               onChange={(e) =>
                 setFormData({ ...formData, role: e.target.value })
               }

@@ -1,6 +1,6 @@
 "use client";
 
-import { warehouseNavigation } from "@/config/warehouse.config"; // Create your warehouse config like admin
+import { warehouseNavigation } from "@/config/warehouse/warehouse.config"; // Create your warehouse config like admin
 import { Bell, User } from "lucide-react";
 import { usePathname } from "next/navigation";
 import React from "react";

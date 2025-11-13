@@ -5,3 +5,5 @@ export {
   dispatchedOrderData,
   lowStockData,
 } from "./dashboard.config";
+
+export { vendorOptions, storageOptions } from "./inbound.config";

@@ -16,7 +16,7 @@ import { usePathname } from "next/navigation";
 import {
   warehouseNavigation,
   WarehouseMenuItem,
-} from "@/config/warehouse.config";
+} from "@/config/warehouse/warehouse.config";
 import Image from "next/image";
 
 const iconMap: Record<
@@ -152,3 +152,5 @@ export const WarehouseSidebar: React.FC = () => {
     </aside>
   );
 };
+
+export default WarehouseSidebar;

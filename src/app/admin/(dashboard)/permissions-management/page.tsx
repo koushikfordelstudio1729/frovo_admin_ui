@@ -8,6 +8,7 @@ import {
   PermissionsState,
 } from "@/types/permissions.types";
 import { DEFAULT_PERMISSIONS, PERMISSION_GROUP_KEYS } from "@/utils/constants";
+import { Checkbox } from "@/components";
 
 const PermissionsManagement = () => {
   const [selectedGroup, setSelectedGroup] = useState<PermissionGroupKey>(
@@ -61,39 +62,13 @@ const PermissionsManagement = () => {
           </h2>
           <div className="space-y-4">
             {permissions[selectedGroup]?.map((permission) => (
-              <label
+              <Checkbox
                 key={permission.key}
-                className="flex items-center gap-4 cursor-pointer"
-              >
-                <div className="relative">
-                  <input
-                    type="checkbox"
-                    checked={permission.checked}
-                    onChange={() =>
-                      togglePermission(selectedGroup, permission.key)
-                    }
-                    className="sr-only peer"
-                  />
-                  <div className="w-6 h-6 bg-white border-2 border-gray-300 rounded peer-checked:bg-blue-600 peer-checked:border-blue-600 flex items-center justify-center">
-                    {permission.checked && (
-                      <svg
-                        className="w-4 h-4 text-white"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={3}
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                    )}
-                  </div>
-                </div>
-                <span className="text-lg text-gray-900">{permission.key}</span>
-              </label>
+                label={permission.key}
+                checked={permission.checked}
+                onChange={() => togglePermission(selectedGroup, permission.key)}
+                className="text-xl"
+              />
             ))}
           </div>
         </div>

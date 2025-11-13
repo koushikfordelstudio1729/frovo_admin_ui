@@ -68,6 +68,7 @@ const CreateRoleForm: React.FC = () => {
             <Select
               label="Role Type"
               variant="orange"
+              selectClassName="px-6 py-4 border-2 bg-white text-base"
               options={roleTypeOptions}
               value={formData.roleType}
               onChange={(e) =>

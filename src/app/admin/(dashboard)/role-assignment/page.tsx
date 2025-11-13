@@ -33,7 +33,7 @@ export default function ScopedRoleAssignmentPage() {
           options={scopeOptions}
           value={selectedScope}
           onChange={(e) => setSelectedScope(e.target.value as ScopeType)}
-          selectClassName="bg-gray-100 py-3 text-base font-medium"
+          selectClassName="bg-gray-100 py-3 px-4 text-base font-medium"
         />
       </div>
 
