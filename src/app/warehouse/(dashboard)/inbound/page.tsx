@@ -14,7 +14,9 @@ export default function InboundLogisticsPage() {
     expiry: false,
     label: false,
   });
-
+  const [formData, setFormData] = useState({
+    vendor: "",
+  });
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // Handle file upload logic here
   };
@@ -53,6 +55,7 @@ export default function InboundLogisticsPage() {
             <Select
               id="vendor"
               options={vendorOptions}
+              value={formData.vendor}
               placeholder="Select vendor"
               selectClassName="px-6 py-4 border-2 border-orange-300 bg-white text-base"
             />
