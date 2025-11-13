@@ -9,3 +9,8 @@ export {
 export { vendorOptions, storageOptions } from "./inbound.config";
 
 export { productOptions, agentOptions } from "./dispatch-order.config";
+
+export {
+  MOCK_RETURN_QUEUE,
+  RETURN_QUEUE_PAGINATION,
+} from "./return-queue.config";
