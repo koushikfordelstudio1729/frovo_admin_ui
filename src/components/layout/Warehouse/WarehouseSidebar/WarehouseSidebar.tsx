@@ -36,65 +36,63 @@ const iconMap: Record<
 export const WarehouseSidebar: React.FC = () => {
   const pathname = usePathname();
   const [open, setOpen] = useState<Record<string, boolean>>({});
+
   const handleToggle = (label: string) =>
     setOpen((prev) => ({ ...prev, [label]: !prev[label] }));
 
-  // Split sections
   const group1 = warehouseNavigation.slice(0, 3);
   const group2 = warehouseNavigation.slice(3, 6);
   const group3 = warehouseNavigation.slice(6);
 
   function TopLevelSidebar(item: WarehouseMenuItem) {
     const Icon = iconMap[item.icon];
-    const isActive = pathname === item.href;
+    const isParentOnly = !item.href && item.children;
+    const isActive = item.href ? pathname === item.href : false;
 
     return (
       <div key={item.label} className="w-full">
+        {/* Parent Row */}
         <div
-          className={`flex items-center justify-between text-sm px-4 py-2 rounded-lg cursor-pointer transition-all duration-200 ${
-            isActive ? "bg-orange-500 text-white mx-1" : "text-gray-700"
-          }`}
+          className={`flex items-center justify-between text-sm px-4 py-2 rounded-lg cursor-pointer transition-all duration-200
+            ${isActive ? "bg-orange-500 text-white mx-1" : "text-gray-700"}
+          `}
+          onClick={() => isParentOnly && handleToggle(item.label)}
         >
+          {/* Left Side */}
           <span className="flex items-center gap-2">
             <Icon
               size={20}
               className={isActive ? "text-white" : "text-orange-400"}
             />
-            {/* Main label */}
-            <a
-              href={item.href}
-              className="ml-1 text-sm"
-              onClick={(e) => {
-                // If dropdown is open, close it
-                if (item.children && open[item.label])
-                  setOpen((prev) => ({ ...prev, [item.label]: false }));
-              }}
-            >
-              {item.label}
-            </a>
+
+            {/* Label or Link */}
+            {isParentOnly ? (
+              <span className="ml-1 text-sm">{item.label}</span>
+            ) : (
+              <a href={item.href} className="ml-1 text-sm">
+                {item.label}
+              </a>
+            )}
           </span>
-          {/* toggles dropdown */}
-          {item.children && (
-            <button
-              type="button"
-              aria-label="Toggle Dropdown"
-              className="ml-2 p-0 bg-transparent border-none outline-none"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                handleToggle(item.label);
-              }}
-            >
+
+          {/* Dropdown Icon */}
+          <div className="w-5 flex justify-center">
+            {item.children ? (
               <ChevronDown
                 size={20}
-                className={`transition-transform duration-200 cursor-pointer ${
+                className={`transition-transform duration-200 ${
                   open[item.label] ? "rotate-180" : ""
-                } ${isActive ? "text-white" : "text-gray-700"}`}
+                } ${isActive ? "text-white" : "text-gray-600"}`}
               />
-            </button>
-          )}
+            ) : (
+              <span className="opacity-0">
+                <ChevronDown size={16} />
+              </span>
+            )}
+          </div>
         </div>
-        {/* Drop down section as before */}
+
+        {/* Dropdown Items */}
         {item.children && open[item.label] && (
           <div className="pl-8 pr-4 mt-1 text-sm space-y-1 transition-all duration-300">
             {item.children.map((child) => {
@@ -103,11 +101,13 @@ export const WarehouseSidebar: React.FC = () => {
                 <a
                   key={child.label}
                   href={child.href}
-                  className={`block text-[12px] rounded-md px-3 py-1.5 font-medium transition ${
-                    isChildActive
-                      ? "text-orange-600 bg-orange-100"
-                      : "text-gray-600"
-                  }`}
+                  className={`block text-[12px] rounded-md px-3 py-1.5 font-medium transition
+                    ${
+                      isChildActive
+                        ? "text-orange-600 bg-orange-100"
+                        : "text-gray-600"
+                    }
+                  `}
                 >
                   {child.label}
                 </a>
@@ -120,10 +120,7 @@ export const WarehouseSidebar: React.FC = () => {
   }
 
   return (
-    <aside
-      className="w-64 bg-white min-h-screen fixed left-0 top-0 overflow-y-auto p-6 
-    "
-    >
+    <aside className="w-64 bg-white min-h-screen fixed left-0 top-0 overflow-y-auto p-6">
       {/* Logo */}
       <div className="mb-6 flex justify-center">
         <Image
@@ -135,7 +132,7 @@ export const WarehouseSidebar: React.FC = () => {
         />
       </div>
 
-      {/* Sidebar Sections */}
+      {/* Sidebar Groups */}
       <nav className="space-y-5">
         <div className="bg-[#FFEAE4] rounded-2xl py-3 space-y-1">
           {group1.map(TopLevelSidebar)}

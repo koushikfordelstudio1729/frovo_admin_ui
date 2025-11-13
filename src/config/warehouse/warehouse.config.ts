@@ -1,6 +1,6 @@
 export interface WarehouseMenuItem {
   label: string;
-  href: string;
+  href?: string;
   icon: string;
   children?: { label: string; href: string }[];
 }
@@ -10,7 +10,6 @@ export const warehouseNavigation: WarehouseMenuItem[] = [
   { label: "Inbound", href: "/warehouse/inbound", icon: "arrowUpRight" },
   {
     label: "Outbound",
-    href: "/warehouse/outbond",
     icon: "arrowDownLeft",
     children: [
       { label: "Dispatch Order", href: "/warehouse/outbound/dispatch-order" },
@@ -36,7 +35,6 @@ export const warehouseNavigation: WarehouseMenuItem[] = [
   },
   {
     label: "Budget & Expense Management",
-    href: "/warehouse/budget",
     icon: "wallet",
     children: [{ label: "Expense Table", href: "/warehouse/budget/expenses" }],
   },
