@@ -30,7 +30,7 @@ export const warehouseNavigation: WarehouseMenuItem[] = [
 
   {
     label: "Inventory & Layout Management",
-    href: "/warehouse/inventory",
+    href: "/warehouse/inventory-layout",
     icon: "boxes",
   },
   {
@@ -40,7 +40,7 @@ export const warehouseNavigation: WarehouseMenuItem[] = [
   },
   {
     label: "Reports & Analytics",
-    href: "/warehouse/reports",
+    href: "/warehouse/reports-analytics",
     icon: "barChart2",
   },
 

@@ -16,7 +16,7 @@ export default function InboundLogisticsPage() {
   });
   const [formData, setFormData] = useState({
     vendor: "",
-    storage: ""
+    storage: "",
   });
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // Handle file upload logic here
@@ -169,7 +169,10 @@ export default function InboundLogisticsPage() {
 
         {/* Submit Button */}
         <div className="flex justify-center mt-10">
-          <Button className="py-2 px-8 text-xl font-medium" variant="primary">
+          <Button
+            className="py-2 px-8 text-xl font-medium rounded-lg"
+            variant="primary"
+          >
             Submit
           </Button>
         </div>

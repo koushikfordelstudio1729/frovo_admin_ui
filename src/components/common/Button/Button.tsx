@@ -7,7 +7,9 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
     | "danger"
     | "outline"
     | "approve"
-    | "reject";
+    | "reject"
+    | "archive"
+    | "edit";
   size?: "sm" | "md" | "lg";
   isLoading?: boolean;
   fullWidth?: boolean;
@@ -25,16 +27,17 @@ const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   const baseClasses =
-    "inline-flex items-center justify-center font-medium rounded-md transition-colors focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed";
+    "inline-flex items-center justify-center font-medium transition-colors focus:outline-none disabled:opacity-50 hover:cursor-pointe";
 
   const variantClasses = {
-    primary: "bg-[#FF5722] text-white hover:bg-[#F4511E] hover:cursor-pointer",
-    secondary: "bg-gray-700 text-white hover:bg-gray-800 hover:cursor-pointer",
+    primary: "bg-[#FF5722] text-white hover:bg-[#F4511E]",
+    secondary: "bg-gray-700 text-white hover:bg-gray-800",
     danger: "text-red-600 hover:text-red-700 hover:cursor-pointer",
-    outline:
-      "border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 hover:cursor-pointer",
-    approve: "bg-[#0B9F00] text-white hover:bg-green-800 hover:cursor-pointer",
-    reject: "bg-gray-700 text-white hover:bg-red-700 hover:cursor-pointer",
+    outline: "border border-gray-300 bg-white text-gray-700 hover:bg-gray-50",
+    approve: "bg-[#0B9F00] text-white hover:bg-green-800",
+    reject: "bg-gray-700 text-white hover:bg-red-700",
+    archive: "bg-gray-700 text-white hover:bg-gray-800 rounded-2xl",
+    edit: "bg-blue-500 text-white hover:bg-blue-600 rounded-2xl",
   };
 
   const sizeClasses = {

@@ -62,7 +62,7 @@ export default function AssignFieldAgentPage() {
           </div>
         </div>
         <div className="flex justify-center mb-10">
-          <Button variant="primary" size="lg">
+          <Button className="rounded-lg" variant="primary" size="lg">
             Confirm Assignment
           </Button>
         </div>

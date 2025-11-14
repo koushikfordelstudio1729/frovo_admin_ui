@@ -141,10 +141,20 @@ export default function DispatchOrderPage() {
 
         {/* Action Buttons */}
         <div className="flex justify-center gap-4">
-          <Button type="submit" variant="primary" size="lg">
+          <Button
+            className="rounded-lg"
+            type="submit"
+            variant="primary"
+            size="lg"
+          >
             Create Dispatch
           </Button>
-          <Button type="button" variant="secondary" size="lg">
+          <Button
+            className="rounded-lg"
+            type="button"
+            variant="secondary"
+            size="lg"
+          >
             Preview
           </Button>
         </div>

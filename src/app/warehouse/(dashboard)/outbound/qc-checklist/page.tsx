@@ -133,7 +133,12 @@ export default function QCChecklistTemplatesPage() {
             </div>
           ))}
           <div className="flex gap-3 mt-4">
-            <Button variant="primary" size="md" onClick={addParameter}>
+            <Button
+              className="rounded-lg"
+              variant="primary"
+              size="md"
+              onClick={addParameter}
+            >
               Add More
             </Button>
             <Button
@@ -151,10 +156,20 @@ export default function QCChecklistTemplatesPage() {
 
         {/* Action Buttons */}
         <div className="flex gap-4 justify-center">
-          <Button variant="primary" size="lg" onClick={handleSaveTemplate}>
+          <Button
+            className="rounded-lg"
+            variant="primary"
+            size="lg"
+            onClick={handleSaveTemplate}
+          >
             Save template
           </Button>
-          <Button variant="secondary" size="lg" onClick={handleApplyTemplate}>
+          <Button
+            className="rounded-lg"
+            variant="secondary"
+            size="lg"
+            onClick={handleApplyTemplate}
+          >
             Apply template
           </Button>
         </div>
