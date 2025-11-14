@@ -56,6 +56,7 @@ export default function RejectionReturnQueuePage() {
             return (
               <div className="flex gap-2">
                 <Button
+                  className="rounded-sm"
                   variant="approve"
                   size="sm"
                   onClick={() => {
@@ -65,6 +66,7 @@ export default function RejectionReturnQueuePage() {
                   Approve
                 </Button>
                 <Button
+                  className="rounded-sm"
                   variant="reject"
                   size="sm"
                   onClick={() => {

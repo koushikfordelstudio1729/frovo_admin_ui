@@ -1,6 +1,6 @@
 "use client";
 import { Button, Label, Table, Badge, Pagination } from "@/components";
-import { FileArchiveIcon, ArrowDownToLine } from "lucide-react";
+import { FileArchiveIcon, ArrowDownToLine, ArrowLeft } from "lucide-react";
 import { useInventoryLayout } from "@/hooks/warehouse/useInventoryLayout";
 import AgeRangeSelect from "@/components/age-range-select/AgeRangeSelect";
 import { useState } from "react";
@@ -21,7 +21,7 @@ const quarantineColumns = [
   { key: "expiry", label: "Expiry" },
 ];
 
-export default function InventoryLayoutPage() {
+export default function ArchivePage() {
   const router = useRouter();
   const [ageRange, setAgeRange] = useState(">60");
   const {
@@ -69,7 +69,7 @@ export default function InventoryLayoutPage() {
             variant="secondary"
             onClick={() => handleArchive(row)}
           >
-            Archive
+            Unarchive
           </Button>
         </div>
       );
@@ -78,9 +78,14 @@ export default function InventoryLayoutPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-full bg-gray-50 p-6">
       <div className="flex items-center justify-between flex-wrap gap-2">
-        <Label className="text-xl font-semibold">Stock Ageing</Label>
+        <div className="flex items-center gap-3 mt-2">
+          <button onClick={() => router.back()} type="button">
+            <ArrowLeft className="w-5 h-5 text-gray-800" />
+          </button>
+          <Label className="text-xl font-semibold">Stock Ageing</Label>
+        </div>
         <div className="flex gap-4 items-center mt-2">
           <Button
             className="rounded-lg"
@@ -127,33 +132,6 @@ export default function InventoryLayoutPage() {
           totalPages={totalPages}
           onPageChange={handlePageChange}
         />
-      </div>
-
-      <div className="w-lg flex gap-6 mt-10">
-        <div className="bg-white rounded-xl p-4 flex-1 mb-6">
-          <Label className="text-lg font-semibold">Expiry Alerts</Label>
-          <div className="bg-[#FDAEAE] p-4 my-2 mb-4 rounded-lg flex flex-col gap-2">
-            {expirySoon ? (
-              <>
-                <Label className="font-semibold text-red-600">
-                  Expiry Soon
-                </Label>
-                <Label className="font-semibold text-red-600">
-                  <span className="text-black">{expirySoon.sku} </span> expires
-                  in 10 days
-                </Label>
-              </>
-            ) : (
-              <Label className="font-semibold text-red-600">
-                No expiry soon alerts.
-              </Label>
-            )}
-          </div>
-          <div className="flex flex-col gap-2">
-            <Label className="text-lg font-semibold">Quarantine Table</Label>
-            <Table columns={quarantineColumns} data={quarantineData} />
-          </div>
-        </div>
       </div>
     </div>
   );
