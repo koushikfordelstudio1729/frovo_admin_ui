@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { X } from "lucide-react";
-import { Button, Input, Toggle } from "../common";
+import { Button, Input, Toggle } from "@/components";
 
 interface AddUserModalProps {
   isOpen: boolean;

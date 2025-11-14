@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { Button, Label } from "@/components";
 import EditableInput from "@/components/common/EditableInput";
 import AgeRangeSelect from "@/components/age-range-select/AgeRangeSelect";
+import { batchData } from "@/config/warehouse/inventory-layout.config";
 
 export default function BatchEditPage() {
   const router = useRouter();
@@ -13,11 +14,11 @@ export default function BatchEditPage() {
   const batchId = params.batchId as string;
 
   const [formData, setFormData] = useState({
-    batchId: "Batch - 102",
-    sku: "SNACKS - 45",
-    quantity: "343",
-    age: ">60",
-    expiry: "22-11-2025",
+    batchId: "",
+    sku: "",
+    quantity: "",
+    age: "",
+    expiry: "",
   });
 
   const [isEditing, setIsEditing] = useState({
@@ -26,6 +27,19 @@ export default function BatchEditPage() {
     expiry: false,
     quantity: false,
   });
+
+  useEffect(() => {
+    const found = batchData.find((row) => row.batchId === batchId);
+    if (found) {
+      setFormData({
+        batchId: found.batchId,
+        sku: found.sku,
+        quantity: found.quantity.toString(),
+        age: found.age.toString(),
+        expiry: found.expiry,
+      });
+    }
+  }, [batchId]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -44,7 +58,7 @@ export default function BatchEditPage() {
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="flex items-center justify-between flex-wrap gap-2 mb-6">
         <div className="flex items-center gap-3 mt-2">
-          <button onClick={() => router.back()} type="button">
+          <button onClick={handleCancel} type="button">
             <ArrowLeft className="w-5 h-5 text-gray-800" />
           </button>
           <Label className="text-xl font-semibold">{batchId} Edit</Label>
@@ -67,7 +81,6 @@ export default function BatchEditPage() {
                 }))
               }
             />
-
             <EditableInput
               id="sku"
               label="SKU"
@@ -81,23 +94,20 @@ export default function BatchEditPage() {
                 }))
               }
             />
-
-            <div>
-              <EditableInput
-                id="quantity"
-                label="Quantity"
-                value={formData.quantity}
-                isEditing={isEditing.quantity}
-                onChange={(val) => handleInputChange("quantity", val)}
-                toggleEdit={() =>
-                  setIsEditing((prev) => ({
-                    ...prev,
-                    quantity: !prev.quantity,
-                  }))
-                }
-              />
-            </div>
-
+            <EditableInput
+              id="quantity"
+              label="Quantity"
+              value={formData.quantity}
+              type="number"
+              isEditing={isEditing.quantity}
+              onChange={(val) => handleInputChange("quantity", val)}
+              toggleEdit={() =>
+                setIsEditing((prev) => ({
+                  ...prev,
+                  quantity: !prev.quantity,
+                }))
+              }
+            />
             <div>
               <Label>Age</Label>
               <AgeRangeSelect
@@ -106,25 +116,21 @@ export default function BatchEditPage() {
                 borderColor="border-orange-200"
               />
             </div>
-
-            <div>
-              <EditableInput
-                id="expiry"
-                label="Expiry"
-                value={formData.expiry}
-                placeholder="DD-MM-YYYY"
-                isEditing={isEditing.expiry}
-                onChange={(val) => handleInputChange("expiry", val)}
-                toggleEdit={() =>
-                  setIsEditing((prev) => ({
-                    ...prev,
-                    expiry: !prev.expiry,
-                  }))
-                }
-              />
-            </div>
+            <EditableInput
+              id="expiry"
+              label="Expiry"
+              value={formData.expiry}
+              placeholder="DD-MM-YYYY"
+              isEditing={isEditing.expiry}
+              onChange={(val) => handleInputChange("expiry", val)}
+              toggleEdit={() =>
+                setIsEditing((prev) => ({
+                  ...prev,
+                  expiry: !prev.expiry,
+                }))
+              }
+            />
           </div>
-
           <div className="flex justify-center gap-6 mt-8">
             <Button
               className="rounded-md px-8"

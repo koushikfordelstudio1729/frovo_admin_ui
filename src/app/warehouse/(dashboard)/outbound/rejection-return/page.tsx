@@ -1,9 +1,11 @@
 "use client";
 
-import { Badge, Button, Label, Pagination, Table } from "@/components";
+import { Badge, Button, Pagination, Table } from "@/components";
+import RepackModal from "@/components/modals/Repack/RepackModal";
 import useReturnQueue from "@/hooks/warehouse/useReturnQueue";
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 const columns = [
   { key: "batchId", label: "Batch ID" },
@@ -14,6 +16,8 @@ const columns = [
 ];
 
 export default function RejectionReturnQueuePage() {
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedRow, setSelectedRow] = useState<any>(null);
   const router = useRouter();
   const {
     rows,
@@ -38,7 +42,6 @@ export default function RejectionReturnQueuePage() {
           Rejection / Return Queue
         </h1>
       </div>
-
       <Table
         columns={columns}
         data={rows}
@@ -70,7 +73,8 @@ export default function RejectionReturnQueuePage() {
                   variant="reject"
                   size="sm"
                   onClick={() => {
-                    /* Repack logic */
+                    setSelectedRow(row);
+                    setModalOpen(true);
                   }}
                 >
                   Repack
@@ -81,7 +85,6 @@ export default function RejectionReturnQueuePage() {
           return value;
         }}
       />
-
       <div className="flex justify-end mt-6">
         <Pagination
           currentPage={currentPage}
@@ -89,6 +92,15 @@ export default function RejectionReturnQueuePage() {
           onPageChange={handlePageChange}
         />
       </div>
+      <RepackModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        batchId={selectedRow?.batchId}
+        onSubmit={(data) => {
+          console.log(data);
+        }}
+      />
+      ;
     </div>
   );
 }
