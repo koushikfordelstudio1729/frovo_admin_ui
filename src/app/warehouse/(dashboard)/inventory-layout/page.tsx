@@ -1,14 +1,10 @@
 "use client";
 import { Button, Label, Table, Badge, Pagination } from "@/components";
-import {
-  Pencil,
-  Archive,
-  ArrowDownToLine,
-  FileArchiveIcon,
-} from "lucide-react";
+import { FileArchiveIcon, ArrowDownToLine } from "lucide-react";
 import { useInventoryLayout } from "@/hooks/warehouse/useInventoryLayout";
 import AgeRangeSelect from "@/components/age-range-select/AgeRangeSelect";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 const batchColumns = [
   { key: "batchId", label: "Batch ID" },
@@ -26,6 +22,7 @@ const quarantineColumns = [
 ];
 
 export default function InventoryLayoutPage() {
+  const router = useRouter();
   const [ageRange, setAgeRange] = useState(">60");
   const {
     rows,
@@ -38,9 +35,6 @@ export default function InventoryLayoutPage() {
     quarantineData,
   } = useInventoryLayout();
 
-  const handleEdit = (row: any) => {
-    console.log("Edit:", row);
-  };
   const handleArchive = (row: any) => {
     console.log("Archive:", row);
   };
@@ -51,7 +45,6 @@ export default function InventoryLayoutPage() {
         return <Badge label={`${value} Days`} variant="active" size="md" />;
       if (value > 15 && value <= 45)
         return <Badge label={`${value} Days`} variant="warning" size="md" />;
-      // value > 45
       return <Badge label={`${value} Days`} variant="rejected" size="md" />;
     }
 
@@ -59,17 +52,21 @@ export default function InventoryLayoutPage() {
       return (
         <div className="flex gap-2">
           <Button
-            className="px-4 py-2"
+            className="px-4 py-2 rounded-3xl"
             size="sm"
             variant="edit"
-            onClick={() => handleEdit(row)}
+            onClick={() =>
+              router.push(
+                `/warehouse/inventory-layout/batch/${row.batchId}/edit`
+              )
+            }
           >
             Edit
           </Button>
           <Button
-            className="px-4 py-2"
+            className="px-4 py-2 rounded-3xl"
             size="sm"
-            variant="archive"
+            variant="secondary"
             onClick={() => handleArchive(row)}
           >
             Archive
@@ -107,11 +104,18 @@ export default function InventoryLayoutPage() {
           </Button>
         </div>
       </div>
+
       <div className="mb-4">
         <Label className="text-sm font-medium">Age Range</Label>
-        <AgeRangeSelect value={ageRange} onChange={setAgeRange} />
+        <AgeRangeSelect
+          value={ageRange}
+          onChange={setAgeRange}
+          className="w-48"
+        />
       </div>
+
       <Table columns={batchColumns} data={rows} renderCell={renderBatchCell} />
+
       <div className="flex justify-end mt-4">
         <Pagination
           currentPage={currentPage}
@@ -119,6 +123,7 @@ export default function InventoryLayoutPage() {
           onPageChange={handlePageChange}
         />
       </div>
+
       <div className="w-lg flex gap-6 mt-10">
         <div className="bg-white rounded-xl p-4 flex-1 mb-6">
           <Label className="text-lg font-semibold">Expiry Alerts</Label>
@@ -134,7 +139,7 @@ export default function InventoryLayoutPage() {
                 </Label>
               </>
             ) : (
-              <Label className=" -semibold text-red-600">
+              <Label className="font-semibold text-red-600">
                 No expiry soon alerts.
               </Label>
             )}

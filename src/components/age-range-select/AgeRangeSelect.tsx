@@ -4,17 +4,21 @@ import { ChevronDown } from "lucide-react";
 interface AgeRangeSelectProps {
   value: string;
   onChange: (val: string) => void;
+  className?: string;
+  borderColor?: string;
 }
 
 const AGE_OPTIONS = [
-  { value: ">60", label: ">60 Days", color: "bg-red-500 text-white" },
-  { value: ">45", label: ">45 Days", color: "bg-orange-400 text-white" },
+  { value: "> 60", label: ">60 Days", color: "bg-red-500 text-white" },
+  { value: "> 45", label: ">45 Days", color: "bg-orange-400 text-white" },
   { value: "15", label: "15 Days", color: "bg-green-500 text-white" },
 ];
 
 export default function AgeRangeSelect({
   value,
   onChange,
+  className = "",
+  borderColor = "border-gray-200",
 }: AgeRangeSelectProps) {
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -23,9 +27,9 @@ export default function AgeRangeSelect({
     AGE_OPTIONS.find((opt) => opt.value === value) || AGE_OPTIONS[0];
 
   return (
-    <div className="relative w-36 my-1">
+    <div className={`relative my-2 ${className}`}>
       <div
-        className="bg-white rounded-xl px-2 py-2 flex items-center gap-2 border border-gray-200 shadow"
+        className={`bg-white rounded-md px-4 py-3 border-2 flex items-center gap-2 shadow  ${borderColor}`}
         onClick={() => setOpen((v) => !v)}
         style={{ cursor: "pointer" }}
       >
@@ -43,7 +47,7 @@ export default function AgeRangeSelect({
               (opt) => (
                 <button
                   key={opt.value}
-                  className={`rounded border border-gray-300 px-4 py-2 font-medium text-left shadow text-xs ${opt.color}`}
+                  className={`rounded border border-gray-300 px-4 py-3 font-medium text-left shadow text-xs ${opt.color}`}
                   onClick={() => {
                     onChange(opt.value);
                     setOpen(false);
