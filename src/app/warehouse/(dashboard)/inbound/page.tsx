@@ -16,6 +16,7 @@ export default function InboundLogisticsPage() {
   });
   const [formData, setFormData] = useState({
     vendor: "",
+    storage: ""
   });
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // Handle file upload logic here
@@ -58,6 +59,7 @@ export default function InboundLogisticsPage() {
               value={formData.vendor}
               placeholder="Select vendor"
               selectClassName="px-6 py-4 border-2 border-orange-300 bg-white text-base"
+              onChange={(val) => setFormData({ ...formData, vendor: val })}
             />
           </div>
 
@@ -156,8 +158,10 @@ export default function InboundLogisticsPage() {
               <Select
                 id="storage"
                 options={storageOptions}
+                value={formData.storage ?? ""}
                 placeholder="Select storage location"
                 selectClassName="py-3 px-4"
+                onChange={(val) => setFormData({ ...formData, storage: val })}
               />
             </div>
           </div>

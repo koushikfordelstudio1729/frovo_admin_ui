@@ -43,9 +43,7 @@ export default function AssignFieldAgentPage() {
               options={agents}
               placeholder="Select Agent Name"
               selectClassName="py-4 px-4 border-2 border-orange-300"
-              onChange={(e) =>
-                setFormData({ ...formData, agentName: e.target.value })
-              }
+              onChange={(val) => setFormData({ ...formData, agentName: val })}
             />
           </div>
           <div>
@@ -59,9 +57,7 @@ export default function AssignFieldAgentPage() {
               options={routes}
               placeholder="Select Router ID"
               selectClassName="py-4 px-4 border-2 border-orange-300"
-              onChange={(e) =>
-                setFormData({ ...formData, routeId: e.target.value })
-              }
+              onChange={(val) => setFormData({ ...formData, routeId: val })}
             />
           </div>
         </div>

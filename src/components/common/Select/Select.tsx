@@ -10,7 +10,10 @@ interface SelectOption {
 }
 
 interface SelectProps
-  extends Omit<React.SelectHTMLAttributes<HTMLSelectElement>, "children"> {
+  extends Omit<
+    React.SelectHTMLAttributes<HTMLSelectElement>,
+    "children" | "onChange"
+  > {
   label?: string;
   error?: string;
   helperText?: string;
@@ -21,6 +24,7 @@ interface SelectProps
   selectClassName?: string;
   labelClassName?: string;
   iconSize?: number;
+  onChange: (value: string) => void;
 }
 
 const Select: React.FC<SelectProps> = ({
@@ -35,13 +39,14 @@ const Select: React.FC<SelectProps> = ({
   selectClassName = "",
   labelClassName = "",
   iconSize = 28,
+  onChange,
   id,
+  value,
   ...props
 }) => {
   const selectId = id || label?.toLowerCase().replace(/\s+/g, "-");
   const hasError = !!error;
 
-  // Variant styles
   const variantStyles = {
     default: {
       base: "border-gray-300",
@@ -76,12 +81,19 @@ const Select: React.FC<SelectProps> = ({
       )}
 
       <div className="relative">
-        <select id={selectId} className={selectClasses} {...props}>
+        <select
+          id={selectId}
+          className={selectClasses}
+          value={value ?? ""}
+          onChange={(e) => onChange(e.target.value)}
+          {...props}
+        >
           {placeholder && (
             <option value="" disabled>
               {placeholder}
             </option>
           )}
+
           {options.map((option) => (
             <option
               key={option.value}
@@ -100,7 +112,6 @@ const Select: React.FC<SelectProps> = ({
       </div>
 
       {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
-
       {helperText && !error && (
         <p className="mt-2 text-sm text-gray-500">{helperText}</p>
       )}

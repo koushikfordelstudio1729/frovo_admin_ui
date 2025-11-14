@@ -62,9 +62,7 @@ export default function DispatchOrderPage() {
               value={formData.vendor}
               placeholder="Select Vendor"
               selectClassName="py-4 px-4 border-2 border-orange-300"
-              onChange={(e) =>
-                setFormData({ ...formData, vendor: e.target.value })
-              }
+              onChange={(val) => setFormData({ ...formData, vendor: val })}
             />
           </div>
         </div>
@@ -81,9 +79,7 @@ export default function DispatchOrderPage() {
               value={formData.productSku}
               placeholder="SKU ID / Name"
               selectClassName="py-4 px-4 border-2 border-orange-300"
-              onChange={(e) =>
-                setFormData({ ...formData, productSku: e.target.value })
-              }
+              onChange={(val) => setFormData({ ...formData, productSku: val })}
             />
           </div>
           {/* Quantity */}
@@ -117,9 +113,7 @@ export default function DispatchOrderPage() {
             placeholder="Select agent name"
             className="w-lg"
             selectClassName="py-4 px-4 border-2 border-orange-300"
-            onChange={(e) =>
-              setFormData({ ...formData, assignedAgent: e.target.value })
-            }
+            onChange={(val) => setFormData({ ...formData, assignedAgent: val })}
           />
         </div>
 

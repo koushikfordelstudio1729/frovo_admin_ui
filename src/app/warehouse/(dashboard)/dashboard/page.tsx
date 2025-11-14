@@ -69,6 +69,10 @@ const lowStockColumns = [
 export default function Dashboard() {
   const [date, setDate] = useState("2025-01-18");
 
+  const [category, setCategory] = useState("");
+  const [partner, setPartner] = useState("");
+  const [warehouse, setWarehouse] = useState("");
+
   const handleView = (row: any) => {
     console.log("View", row);
   };
@@ -134,9 +138,10 @@ export default function Dashboard() {
           <Select
             label="Category"
             id="filter-category"
-            selectClassName="px-6 py-2 bg-white text-sm"
-            variant="default"
+            value={category}
             options={categoryOptions}
+            selectClassName="px-6 py-2 bg-white text-sm"
+            onChange={(val) => setCategory(val)}
           />
         </div>
 
@@ -147,6 +152,8 @@ export default function Dashboard() {
             id="filter-partner"
             selectClassName="px-6 py-2 bg-white text-sm"
             options={partnerOptions}
+            value={partner}
+            onChange={(val) => setPartner(val)}
           />
         </div>
         <div className="flex-1" />
@@ -158,6 +165,8 @@ export default function Dashboard() {
             id="filter-warehouse"
             selectClassName="px-6 py-2 bg-white text-sm"
             options={warehouseOptions}
+            value={warehouse}
+            onChange={(val) => setWarehouse(val)}
           />
         </div>
       </div>
