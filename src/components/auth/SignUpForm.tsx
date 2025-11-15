@@ -176,7 +176,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ redirectPath, loginLink }) => {
               fullWidth
               isLoading={isLoading}
               disabled={isLoading}
-              className="bg-[#FF5722] hover:bg-[#F4511E] text-white mt-6"
+              className="rounded-lg mt-6"
             >
               Sign up
             </Button>

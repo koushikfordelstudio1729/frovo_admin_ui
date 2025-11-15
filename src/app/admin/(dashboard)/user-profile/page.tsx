@@ -93,7 +93,7 @@ export default function UserProfilePage() {
 
         {/* Request More Access Button */}
         <div className="flex justify-center">
-          <Button variant="primary" size="lg" className="px-10">
+          <Button variant="primary" size="lg" className="px-10 rounded-lg">
             Request More Access
           </Button>
         </div>

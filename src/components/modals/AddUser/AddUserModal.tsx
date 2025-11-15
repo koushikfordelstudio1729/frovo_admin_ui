@@ -236,7 +236,7 @@ export default function AddUserModal({
               size="lg"
               isLoading={isLoading}
               disabled={isLoading}
-              className="px-12 bg-[#FF5722] hover:bg-[#F4511E]"
+              className="px-12 rounded-lg"
             >
               Send Invites
             </Button>

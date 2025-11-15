@@ -44,6 +44,7 @@ export default function AuditLogsPage() {
             variant="approve"
             size="sm"
             onClick={() => handleApprove(row.id)}
+            className="rounded-sm"
           >
             Approve
           </Button>
@@ -51,6 +52,7 @@ export default function AuditLogsPage() {
             variant="reject"
             size="sm"
             onClick={() => handleReject(row.id)}
+            className="rounded-sm"
           >
             Reject
           </Button>

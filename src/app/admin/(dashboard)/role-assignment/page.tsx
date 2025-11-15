@@ -71,7 +71,7 @@ export default function ScopedRoleAssignmentPage() {
           variant="primary"
           size="lg"
           onClick={handleSave}
-          className="px-8 text-xl"
+          className="px-8 rounded-lg"
         >
           Save Role Scope
         </Button>

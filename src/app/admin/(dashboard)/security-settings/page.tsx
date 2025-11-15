@@ -120,7 +120,11 @@ const SecuritySettingsPage = () => {
                 placeholder="192.168.0.0/24"
                 inputClassName="bg-gray-50"
               />
-              <Button onClick={addIPRange} variant="primary" className="px-6">
+              <Button
+                onClick={addIPRange}
+                variant="primary"
+                className="px-6 rounded-lg"
+              >
                 + Add IP range
               </Button>
             </div>
@@ -176,10 +180,11 @@ const SecuritySettingsPage = () => {
       <div className="flex justify-center pt-10 pb-6">
         <Button
           type="button"
+          size="md"
           onClick={handleSave}
           variant="primary"
           disabled={isLoading}
-          className="px-8"
+          className="px-8 rounded-lg"
         >
           {isLoading ? "Saving..." : "Save changes"}
         </Button>

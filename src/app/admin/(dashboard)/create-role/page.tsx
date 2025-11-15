@@ -90,14 +90,19 @@ const CreateRoleForm: React.FC = () => {
 
           {/* Buttons */}
           <div className="flex gap-4 justify-center pt-4">
-            <Button type="submit" variant="primary" size="md" className="px-12">
+            <Button
+              type="submit"
+              variant="primary"
+              size="md"
+              className="px-12 rounded-lg"
+            >
               Publish
             </Button>
             <Button
               type="button"
               variant="secondary"
               size="md"
-              className="px-12"
+              className="px-12 rounded-lg"
               onClick={handleSaveDraft}
             >
               Save draft

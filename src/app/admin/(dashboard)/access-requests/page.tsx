@@ -39,6 +39,7 @@ export default function AccessRequestsApprovalsPage() {
             variant="approve"
             size="sm"
             onClick={() => handleApprove(row.id)}
+            className="rounded-sm"
           >
             Approve
           </Button>
@@ -46,6 +47,7 @@ export default function AccessRequestsApprovalsPage() {
             variant="reject"
             size="sm"
             onClick={() => handleReject(row.id)}
+            className="rounded-sm"
           >
             Reject
           </Button>

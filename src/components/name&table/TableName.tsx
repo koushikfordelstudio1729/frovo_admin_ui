@@ -34,7 +34,7 @@ export const TableName: React.FC<TableNameProps> = ({
         variant="primary"
         size="md"
         onClick={onButtonClick}
-        className="flex items-center gap-2 whitespace-nowrap"
+        className="flex items-center gap-2 whitespace-nowrap rounded-lg"
       >
         <Plus size={20} />
         {buttonText}

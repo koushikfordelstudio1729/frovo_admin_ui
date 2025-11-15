@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { Button, Input } from "@/components/common";
+import { Button, Checkbox, Input } from "@/components/common";
 
 interface LoginFormProps {
   redirectPath: string;
@@ -138,16 +138,12 @@ const LoginForm: React.FC<LoginFormProps> = ({ redirectPath, signupLink }) => {
 
             {/* Remember Me & Forgot Password */}
             <div className="flex items-center justify-between">
-              <label className="flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                  className="w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500"
-                  disabled={isLoading}
-                />
-                <span className="ml-2 text-sm text-gray-700">Remember me</span>
-              </label>
+              <Checkbox
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                disabled={isLoading}
+                label="Remember me"
+              />
 
               <Link
                 href="/forgot-password"
@@ -165,7 +161,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ redirectPath, signupLink }) => {
               fullWidth
               isLoading={isLoading}
               disabled={isLoading}
-              className="bg-[#FF5722] hover:bg-[#F4511E] text-white"
+              className="rounded-lg"
             >
               Login
             </Button>

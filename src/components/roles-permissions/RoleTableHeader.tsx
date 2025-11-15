@@ -125,7 +125,7 @@ export const RoleTableHeader: React.FC<RoleTableHeadProps> = ({
           variant="primary"
           size="md"
           onClick={() => router.push("/admin/create-role")}
-          className="ml-auto flex items-center gap-2"
+          className="ml-auto flex items-center gap-2 rounded-lg"
         >
           <Plus size={18} />
           Add new role
