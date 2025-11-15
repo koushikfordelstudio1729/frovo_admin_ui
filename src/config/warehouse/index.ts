@@ -12,3 +12,4 @@ export {
   RETURN_QUEUE_PAGINATION,
 } from "./return-queue.config";
 export { agents, routes } from "./field-agent.config";
+export { expenseData } from "./expense-table.config";
