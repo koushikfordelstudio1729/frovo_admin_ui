@@ -13,3 +13,4 @@ export { default as Header } from "./Header";
 export { default as Label } from "./Label";
 export { default as Checkbox } from "./Checkbox";
 export { default as EditableInput } from "./EditableInput";
+export { default as FileUpload } from "./FileUpload";

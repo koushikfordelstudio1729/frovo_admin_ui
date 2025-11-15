@@ -135,7 +135,7 @@ export default function DispatchOrderPage() {
             }
             placeholder="Enter any additional notes..."
             rows={5}
-            textareaClassName="w-full"
+            textareaClassName="w-lg"
           />
         </div>
 

@@ -1,6 +1,13 @@
 "use client";
 
-import { Input, Select, Button, Label, Checkbox } from "@/components";
+import {
+  Input,
+  Select,
+  Button,
+  Label,
+  Checkbox,
+  FileUpload,
+} from "@/components";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Upload } from "lucide-react";
@@ -9,6 +16,7 @@ import { vendorOptions, storageOptions } from "@/config/warehouse";
 export default function InboundLogisticsPage() {
   const router = useRouter();
   const [autoFetch, setAutoFetch] = useState(false);
+  const [billFile, setBillFile] = useState<File | null>(null);
   const [qcChecks, setQcChecks] = useState({
     packaging: false,
     expiry: false,
@@ -123,30 +131,11 @@ export default function InboundLogisticsPage() {
             </div>
 
             {/* File Upload */}
-            <div className="max-w-xs">
-              <Label className="text-base font-semibold text-gray-900 mb-3 block">
-                File Upload
-              </Label>
-              <label
-                htmlFor="fileUpload"
-                className="flex flex-col items-center justify-center border-2 border-dashed border-orange-300 rounded-xl p-8 cursor-pointer hover:border-orange-400 transition-colors hover:bg-orange-50"
-              >
-                <input
-                  type="file"
-                  id="fileUpload"
-                  accept=".jpg,.jpeg,.pdf"
-                  className="hidden"
-                  onChange={handleFileChange}
-                />
-                <Upload className="w-8 h-8 text-orange-500 mb-3 pointer-events-none" />
-                <span className="bg-orange-500 px-4 py-1 rounded-lg text-white font-medium pointer-events-none">
-                  Upload
-                </span>
-                <span className="text-xs text-gray-500 mt-4 pointer-events-none">
-                  *File Supported: JPG & PDF
-                </span>
-              </label>
-            </div>
+            <FileUpload
+              label="File Upload"
+              file={billFile}
+              onChange={setBillFile}
+            />
           </div>
 
           {/* Storage Assignment */}

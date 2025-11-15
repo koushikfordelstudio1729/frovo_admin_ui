@@ -5,6 +5,7 @@ import { Badge, Button, Select, StatCard, Table } from "@/components";
 import { expenseData } from "@/config/warehouse";
 import { Cog, Plus } from "lucide-react";
 import SimpleLineChart from "@/components/charts/SimpleLineChart";
+import { useRouter } from "next/navigation";
 
 const expenseColumns = [
   { key: "date", label: "Date" },
@@ -39,8 +40,8 @@ const months = [
 
 export default function ExpenseTable() {
   const [month, setMonth] = useState("");
-
   const [category, setCategory] = useState("");
+  const router = useRouter();
 
   const handleEdit = (row: any) => {
     console.log("Edit", row);
@@ -120,8 +121,15 @@ export default function ExpenseTable() {
 
         {/* Add Expense */}
         <div>
-          <Button className="px-6 rounded-sm">
-            <Plus size={18} className="mr-2" /> Add Expense
+          <Button
+            className="px-6 rounded-sm"
+            variant="primary"
+            onClick={() =>
+              router.push("/warehouse/budget-expenses/expense-entry")
+            }
+          >
+            <Plus size={18} className="mr-2" />
+            Add Expense
           </Button>
         </div>
       </div>
