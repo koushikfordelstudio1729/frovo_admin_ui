@@ -44,8 +44,17 @@ export default function ExpenseTable() {
   const router = useRouter();
 
   const handleEdit = (row: any) => {
-    console.log("Edit", row);
+    const queryParams = new URLSearchParams({
+      id: row.id || "",
+      date: row.date || "",
+      category: row.category || "",
+      amount: row.amount || "",
+      vendor: row.vendor || "",
+    }).toString();
+
+    router.push(`/warehouse/budget-expenses/expense-edit?${queryParams}`);
   };
+
   const handleDelete = (row: any) => {
     console.log("Delete", row);
   };

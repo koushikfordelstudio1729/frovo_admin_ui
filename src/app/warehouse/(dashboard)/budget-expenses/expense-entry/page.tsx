@@ -70,7 +70,7 @@ export default function ExpenseEntryForm() {
               type="number"
               variant="orange"
               value={formData.amount}
-              placeholder="₹12,000"
+              placeholder="Enter Amount"
               onChange={(e) =>
                 setFormData({ ...formData, amount: e.target.value })
               }
