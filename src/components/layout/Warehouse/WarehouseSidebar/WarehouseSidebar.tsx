@@ -73,7 +73,7 @@ export const WarehouseSidebar: React.FC = () => {
       <div key={item.label} className="w-full">
         <div
           className={`flex items-center justify-between text-sm px-4 py-2 rounded-lg cursor-pointer transition-all duration-200
-            ${isActive ? "bg-orange-500 text-white mx-1" : "text-gray-700"}
+            ${isActive ? "bg-orange-500 text-white" : "text-gray-700"}
           `}
           onClick={handleItemClick}
         >
