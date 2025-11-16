@@ -12,7 +12,7 @@ import {
   Settings,
   ChevronDown,
 } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   warehouseNavigation,
   WarehouseMenuItem,
@@ -32,6 +32,7 @@ const iconMap = {
 
 export const WarehouseSidebar: React.FC = () => {
   const pathname = usePathname();
+  const router = useRouter();
 
   const getInitialOpenState = () => {
     const state: Record<string, boolean> = {};
@@ -60,26 +61,28 @@ export const WarehouseSidebar: React.FC = () => {
     const isParentOnly = !item.href && item.children;
     const isActive = item.href ? pathname === item.href : false;
 
+    const handleItemClick = () => {
+      if (item.href) {
+        router.push(item.href);
+      } else if (isParentOnly) {
+        handleToggle(item.label);
+      }
+    };
+
     return (
       <div key={item.label} className="w-full">
         <div
           className={`flex items-center justify-between text-sm px-4 py-2 rounded-lg cursor-pointer transition-all duration-200
             ${isActive ? "bg-orange-500 text-white mx-1" : "text-gray-700"}
           `}
-          onClick={() => isParentOnly && handleToggle(item.label)}
+          onClick={handleItemClick}
         >
           <span className="flex items-center gap-2">
             <Icon
               size={20}
               className={isActive ? "text-white" : "text-orange-400"}
             />
-            {isParentOnly ? (
-              <span className="ml-1 text-sm">{item.label}</span>
-            ) : (
-              <a href={item.href} className="ml-1 text-sm">
-                {item.label}
-              </a>
-            )}
+            <span className="ml-1 text-sm">{item.label}</span>
           </span>
           <div className="w-5 flex justify-center">
             {item.children ? (
@@ -123,7 +126,7 @@ export const WarehouseSidebar: React.FC = () => {
   }
 
   return (
-    <aside className="w-64 bg-white min-h-screen fixed left-0 top-0 overflow-y-auto p-6">
+    <aside className="w-64 bg-white min-h-full fixed left-0 top-0 overflow-y-auto p-6">
       <div className="mb-6 flex justify-center">
         <Image
           src="/images/logo.svg"
