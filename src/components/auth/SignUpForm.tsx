@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { Button, Input } from "@/components/common";
+import { storageUtils } from "@/utils";
 
 interface SignUpFormProps {
   redirectPath: string;
@@ -27,6 +28,23 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ redirectPath, loginLink }) => {
     email?: string;
     phoneNumber?: string;
   }>({});
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
+  // Check if user is already logged in
+  useEffect(() => {
+    const checkAuth = () => {
+      const token = storageUtils.getToken();
+
+      if (token) {
+        // User is already logged in, redirect to dashboard
+        router.push(redirectPath);
+      } else {
+        setIsCheckingAuth(false);
+      }
+    };
+
+    checkAuth();
+  }, [router, redirectPath]);
 
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
@@ -82,6 +100,15 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ redirectPath, loginLink }) => {
       setIsLoading(false);
     }
   };
+
+  // Show loading while checking authentication
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-xl text-gray-600">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white flex">

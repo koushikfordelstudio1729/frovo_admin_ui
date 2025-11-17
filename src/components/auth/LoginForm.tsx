@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import Image from "next/image";
@@ -27,6 +27,23 @@ const LoginForm: React.FC<LoginFormProps> = ({ redirectPath, signupLink }) => {
   const [errors, setErrors] = useState<{ email?: string; password?: string }>(
     {}
   );
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
+  // Check if user is already logged in
+  useEffect(() => {
+    const checkAuth = () => {
+      const token = storageUtils.getToken();
+
+      if (token) {
+        // User is already logged in, redirect to dashboard
+        router.push(redirectPath);
+      } else {
+        setIsCheckingAuth(false);
+      }
+    };
+
+    checkAuth();
+  }, [router, redirectPath]);
 
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
@@ -87,6 +104,15 @@ const LoginForm: React.FC<LoginFormProps> = ({ redirectPath, signupLink }) => {
       setIsLoading(false);
     }
   };
+
+  // Show loading while checking authentication
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-xl text-gray-600">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-100 flex">
