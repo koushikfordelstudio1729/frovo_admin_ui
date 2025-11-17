@@ -1,12 +1,55 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { ArrowLeft } from "lucide-react";
-import { MOCK_USER_PROFILE } from "@/config/user-profile.config";
 import { Button } from "@/components";
+import { authAPI } from "@/services/authAPI";
+import type { User } from "@/types";
 
 export default function UserProfilePage() {
-  const user = MOCK_USER_PROFILE;
+  const [user, setUser] = useState<User | null>(null);
+  const [permissions, setPermissions] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        setIsLoading(true);
+        const response = await authAPI.getCurrentUser();
+
+        if (response.data.success) {
+          setUser(response.data.data.user);
+          setPermissions(response.data.data.permissions);
+        } else {
+          setError("Failed to fetch user profile");
+        }
+      } catch (err) {
+        console.error("Error fetching user profile:", err);
+        setError("Failed to load user profile");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUserProfile();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-full bg-gray-50 p-8 flex items-center justify-center">
+        <div className="text-xl text-gray-600">Loading profile...</div>
+      </div>
+    );
+  }
+
+  if (error || !user) {
+    return (
+      <div className="min-h-full bg-gray-50 p-8 flex items-center justify-center">
+        <div className="text-xl text-red-600">{error || "User not found"}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-full bg-gray-50 p-8">
@@ -23,11 +66,11 @@ export default function UserProfilePage() {
         {/* Profile Section */}
         <div className="flex flex-col items-center justify-center gap-8 mb-8">
           {/* Avatar */}
-          <img
-            src={user.avatar}
-            alt={user.name}
-            className="w-48 h-48 rounded-full border-r-8 border-orange-500 shrink-0"
-          />
+          <div className="w-48 h-48 rounded-full border-8 border-orange-500 shrink-0 bg-orange-100 flex items-center justify-center">
+            <span className="text-6xl font-bold text-orange-600">
+              {user.name.charAt(0).toUpperCase()}
+            </span>
+          </div>
 
           {/* Name and Email*/}
           <div className="text-center">
@@ -55,7 +98,7 @@ export default function UserProfilePage() {
             {/* Body */}
             {user.roles.map((role, index) => (
               <div
-                key={index}
+                key={role.id}
                 className={`grid grid-cols-2 ${
                   index !== user.roles.length - 1
                     ? "border border-gray-200"
@@ -63,10 +106,10 @@ export default function UserProfilePage() {
                 }`}
               >
                 <div className="px-6 py-4 text-gray-900 font-medium text-xl border border-gray-400 rounded-bl-xl">
-                  {role.role}
+                  {role.name}
                 </div>
                 <div className="px-6 py-4 text-gray-700 font-medium text-xl  border border-gray-400 rounded-br-xl">
-                  {role.scope}
+                  {role.scope.level}
                 </div>
               </div>
             ))}
@@ -79,13 +122,13 @@ export default function UserProfilePage() {
             Permission Summary
           </h3>
 
-          <div className="flex gap-4 flex-wrap">
-            {user.permissions.map((perm, index) => (
+          <div className="flex gap-4 flex-wrap justify-center">
+            {permissions.map((perm, index) => (
               <div
                 key={index}
-                className="px-4 py-2 text-xl bg-white border border-gray-300 rounded-lg text-gray-400 font-medium"
+                className="px-4 py-2 text-xl bg-white border border-gray-300 rounded-lg text-gray-700 font-medium"
               >
-                {perm.label} : {perm.action}
+                {perm}
               </div>
             ))}
           </div>

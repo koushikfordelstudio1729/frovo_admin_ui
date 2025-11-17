@@ -18,6 +18,7 @@ export const apiConfig = {
       logout: '/auth/logout',
       refresh: '/auth/refresh-token',
       verify: '/auth/verify',
+      me: '/auth/me',
       forgotPassword: '/auth/forgot-password',
       resetPassword: '/auth/reset-password',
     },

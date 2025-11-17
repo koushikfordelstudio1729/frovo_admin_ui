@@ -8,6 +8,7 @@ export type {
   RegisterData,
   AuthResponse,
   RefreshTokenResponse,
+  CurrentUserResponse,
   AuthError,
 } from './auth.types';
 

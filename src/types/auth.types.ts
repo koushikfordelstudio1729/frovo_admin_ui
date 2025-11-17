@@ -91,6 +91,15 @@ export interface RefreshTokenResponse {
   };
 }
 
+export interface CurrentUserResponse {
+  success: boolean;
+  message: string;
+  data: {
+    user: User;
+    permissions: string[];
+  };
+}
+
 export interface AuthError {
   message: string;
   code?: string;
