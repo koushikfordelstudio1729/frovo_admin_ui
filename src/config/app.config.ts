@@ -7,6 +7,7 @@ export const appConfig = {
   storage: {
     keys: {
       token: 'frovo_auth_token',
+      refreshToken: 'frovo_refresh_token',
       user: 'frovo_user_data',
       theme: 'frovo_theme',
       preferences: 'frovo_user_preferences',

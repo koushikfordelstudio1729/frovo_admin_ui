@@ -6,6 +6,8 @@ import { Eye, EyeOff } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { Button, Checkbox, Input } from "@/components/common";
+import { authAPI } from "@/services/authAPI";
+import { storageUtils } from "@/utils";
 
 interface LoginFormProps {
   redirectPath: string;
@@ -53,18 +55,34 @@ const LoginForm: React.FC<LoginFormProps> = ({ redirectPath, signupLink }) => {
     setIsLoading(true);
 
     try {
-      // TODO: API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const response = await authAPI.login({ email, password });
 
-      if (rememberMe) {
-        localStorage.setItem("rememberMe", "true");
-        localStorage.setItem("email", email);
+      if (response.data.success) {
+        const { user, accessToken, refreshToken } = response.data.data;
+
+        // Store tokens and user data
+        storageUtils.setToken(accessToken);
+        storageUtils.setRefreshToken(refreshToken);
+        storageUtils.setUser(user);
+
+        if (rememberMe) {
+          localStorage.setItem("rememberMe", "true");
+          localStorage.setItem("email", email);
+        }
+
+        router.push(redirectPath);
+      } else {
+        setError(response.data.message || "Login failed. Please try again.");
       }
-
-      router.push(redirectPath);
-    } catch (err) {
+    } catch (err: unknown) {
       console.error("Login error:", err);
-      setError("Invalid credentials. Please try again.");
+
+      if (err && typeof err === 'object' && 'response' in err) {
+        const error = err as { response?: { data?: { message?: string } } };
+        setError(error.response?.data?.message || "Invalid credentials. Please try again.");
+      } else {
+        setError("An error occurred. Please try again.");
+      }
     } finally {
       setIsLoading(false);
     }

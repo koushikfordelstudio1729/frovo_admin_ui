@@ -59,6 +59,18 @@ class StorageUtils {
     this.removeItem(appConfig.storage.keys.token);
   }
 
+  setRefreshToken(refreshToken: string): void {
+    this.setItem(appConfig.storage.keys.refreshToken, refreshToken);
+  }
+
+  getRefreshToken(): string | null {
+    return this.getItem<string>(appConfig.storage.keys.refreshToken);
+  }
+
+  removeRefreshToken(): void {
+    this.removeItem(appConfig.storage.keys.refreshToken);
+  }
+
   setUser(user: unknown): void {
     this.setItem(appConfig.storage.keys.user, user);
   }
@@ -73,6 +85,7 @@ class StorageUtils {
 
   clearAuthData(): void {
     this.removeToken();
+    this.removeRefreshToken();
     this.removeUser();
   }
 }
