@@ -9,7 +9,6 @@ export const usersAPI = {
     if (params?.limit) queryParams.append('limit', params.limit.toString());
     if (params?.sortBy) queryParams.append('sortBy', params.sortBy);
     if (params?.sortOrder) queryParams.append('sortOrder', params.sortOrder);
-    if (params?.search) queryParams.append('search', params.search);
     if (params?.status) queryParams.append('status', params.status);
     if (params?.role) queryParams.append('role', params.role);
 
@@ -17,5 +16,20 @@ export const usersAPI = {
     const endpoint = queryString ? `/users?${queryString}` : '/users';
 
     return api.get<UsersResponse>(endpoint);
+  },
+
+  searchUsers: (query: string, params?: Omit<UserQueryParams, 'search'>) => {
+    const queryParams = new URLSearchParams();
+
+    queryParams.append('q', query);
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    if (params?.sortBy) queryParams.append('sortBy', params.sortBy);
+    if (params?.sortOrder) queryParams.append('sortOrder', params.sortOrder);
+    if (params?.status) queryParams.append('status', params.status);
+    if (params?.role) queryParams.append('role', params.role);
+
+    const queryString = queryParams.toString();
+    return api.get<UsersResponse>(`/users/search?${queryString}`);
   },
 };

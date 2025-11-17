@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components";
 import EditableInput from "@/components/common/EditableInput";
 
-export default function ExpenseEditPage() {
+function ExpenseEditContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -119,5 +119,13 @@ export default function ExpenseEditPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ExpenseEditPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center">Loading...</div>}>
+      <ExpenseEditContent />
+    </Suspense>
   );
 }

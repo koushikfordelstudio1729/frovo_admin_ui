@@ -15,10 +15,10 @@ export const loginUser = createAsyncThunk(
   async (credentials: LoginCredentials, { rejectWithValue }) => {
     try {
       const response = await authAPI.login(credentials);
-      localStorage.setItem('token', response.data.token);
+      // Response structure: { success, message, data: { user, accessToken, refreshToken } }
       return response.data;
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error && 'response' in error 
+      const errorMessage = error instanceof Error && 'response' in error
         ? (error as { response?: { data?: { message?: string } } }).response?.data?.message || 'Login failed'
         : 'Login failed';
       return rejectWithValue(errorMessage);
@@ -31,10 +31,10 @@ export const registerUser = createAsyncThunk(
   async (userData: RegisterData, { rejectWithValue }) => {
     try {
       const response = await authAPI.register(userData);
-      localStorage.setItem('token', response.data.token);
+      // Response structure: { success, message, data: { user, accessToken, refreshToken } }
       return response.data;
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error && 'response' in error 
+      const errorMessage = error instanceof Error && 'response' in error
         ? (error as { response?: { data?: { message?: string } } }).response?.data?.message || 'Registration failed'
         : 'Registration failed';
       return rejectWithValue(errorMessage);
@@ -57,9 +57,13 @@ const authSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
-    setCredentials: (state, action: PayloadAction<{ user: User; token: string }>) => {
-      state.user = action.payload.user;
-      state.token = action.payload.token;
+    setCredentials: (state, action: PayloadAction<{ user?: User; accessToken?: string; refreshToken?: string }>) => {
+      if (action.payload.user) {
+        state.user = action.payload.user;
+      }
+      if (action.payload.accessToken) {
+        state.token = action.payload.accessToken;
+      }
       state.isAuthenticated = true;
     },
     clearCredentials: (state) => {
@@ -77,8 +81,8 @@ const authSlice = createSlice({
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.user = action.payload.user;
-        state.token = action.payload.token;
+        state.user = action.payload.data.user;
+        state.token = action.payload.data.accessToken;
         state.isAuthenticated = true;
         state.error = null;
       })
@@ -94,8 +98,8 @@ const authSlice = createSlice({
       })
       .addCase(registerUser.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.user = action.payload.user;
-        state.token = action.payload.token;
+        state.user = action.payload.data.user;
+        state.token = action.payload.data.accessToken;
         state.isAuthenticated = true;
         state.error = null;
       })

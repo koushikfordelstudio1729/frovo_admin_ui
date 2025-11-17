@@ -41,10 +41,16 @@ export const RoleTableHeader: React.FC<RoleTableHeadProps> = ({
         update.scope = value as "Global" | "Partner" | "Machine";
       }
       if (filterType === "roleType") {
-        update.roleType = value as "System" | "Custom";
+        // Filter by specific role name
+        update.role = value;
       }
       if (filterType === "status") {
         update.status = value as "Active" | "Inactive";
+      }
+    } else {
+      // Clear the filter when "All" is selected
+      if (filterType === "roleType") {
+        update.role = undefined;
       }
     }
 
@@ -77,7 +83,7 @@ export const RoleTableHeader: React.FC<RoleTableHeadProps> = ({
   ];
 
   return (
-    <div className="mb-6">ß
+    <div className="mb-6">
       {/* Title */}
       <h2 className="text-2xl font-bold text-gray-900 mb-4">Role&apos;s List</h2>
 

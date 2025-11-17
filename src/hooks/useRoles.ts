@@ -48,25 +48,56 @@ export const useRoles = () => {
     const fetchUsers = async () => {
       try {
         setIsLoading(true);
-        const response = await usersAPI.getUsers({
-          page: currentPage,
-          limit: ROLES_PAGINATION.ITEMS_PER_PAGE,
-          sortBy: 'createdAt',
-          sortOrder: 'desc',
-          search: filters.search || undefined,
-          status: filters.status || undefined,
-        });
+
+        let response;
+
+        // Use search endpoint if search query exists
+        if (filters.search && filters.search.trim() !== '') {
+          response = await usersAPI.searchUsers(filters.search, {
+            page: currentPage,
+            limit: ROLES_PAGINATION.ITEMS_PER_PAGE,
+            sortBy: 'createdAt',
+            sortOrder: 'desc',
+            // All filters except search are applied client-side
+          });
+        } else {
+          // Use regular getUsers endpoint
+          response = await usersAPI.getUsers({
+            page: currentPage,
+            limit: ROLES_PAGINATION.ITEMS_PER_PAGE,
+            sortBy: 'createdAt',
+            sortOrder: 'desc',
+            // All filters are applied client-side
+          });
+        }
 
         if (response.data.success) {
-          setUsers(response.data.data);
-          setTotalPages(response.data.pagination.pages);
-          setTotalUsers(response.data.pagination.total);
+          setUsers(response.data.data || []);
+
+          // Handle pagination - check if pagination exists in response
+          if (response.data.pagination) {
+            setTotalPages(response.data.pagination.pages || 1);
+            setTotalUsers(response.data.pagination.total || 0);
+          } else {
+            // If no pagination, set defaults
+            setTotalPages(1);
+            setTotalUsers(response.data.data?.length || 0);
+          }
         } else {
           setError("Failed to fetch users");
         }
       } catch (err) {
         console.error("Error fetching users:", err);
+
+        // Log the full error for debugging
+        if (err instanceof Error) {
+          console.error("Error details:", err.message);
+        }
+
         setError("Failed to load users");
+        setUsers([]);
+        setTotalPages(1);
+        setTotalUsers(0);
       } finally {
         setIsLoading(false);
       }
@@ -75,15 +106,36 @@ export const useRoles = () => {
     fetchUsers();
   }, [currentPage, filters]);
 
-  // Transform users to match the role table format
-  const transformedRoles = users.map((user) => ({
-    role: user.roles[0]?.name || "No Role",
-    description: user.email,
-    scope: user.roles[0]?.systemRole || "N/A",
-    user: user.name,
-    lastModified: new Date(user.updatedAt).toLocaleDateString(),
-    id: user.id,
-  }));
+  // Transform users to match the role table format and apply client-side filters
+  const transformedRoles = users
+    .map((user) => ({
+      role: user.roles?.[0]?.name || "No Role",
+      description: user.email,
+      scope: user.roles?.[0]?.systemRole || "N/A",
+      user: user.name,
+      lastModified: new Date(user.updatedAt).toLocaleDateString(),
+      id: user.id,
+      status: user.status, // Keep original status for filtering
+    }))
+    // Apply all client-side filters
+    .filter((item) => {
+      // Filter by role
+      if (filters.role && item.role !== filters.role) {
+        return false;
+      }
+
+      // Filter by status
+      if (filters.status && item.status !== filters.status) {
+        return false;
+      }
+
+      // Filter by scope
+      if (filters.scope && item.scope !== filters.scope) {
+        return false;
+      }
+
+      return true;
+    });
 
   // Calculate dynamic stats from ALL users data (not just current page)
   const calculateStats = () => {
@@ -91,7 +143,7 @@ export const useRoles = () => {
 
     // Count users by role from all users
     allUsers.forEach((user) => {
-      const roleName = user.roles[0]?.name || "No Role";
+      const roleName = user.roles?.[0]?.name || "No Role";
       roleCounts[roleName] = (roleCounts[roleName] || 0) + 1;
     });
 

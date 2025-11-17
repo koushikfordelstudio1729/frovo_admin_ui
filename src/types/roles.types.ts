@@ -5,6 +5,7 @@ export interface RoleList {
   scope: string;
   user: string;
   lastModified: string;
+  status?: string; // Optional: used for client-side filtering
 }
 
 // Stats card
@@ -31,5 +32,6 @@ export interface RoleFilters {
   search: string;
   scope?: "Global" | "Partner" | "Machine";
   roleType?: "System" | "Custom";
+  role?: string;
   status?: "Active" | "Inactive";
 }

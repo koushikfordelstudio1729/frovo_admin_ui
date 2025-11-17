@@ -3,7 +3,7 @@ import { RoleStats, RoleType, RoleList } from "@/types/roles.types";
 // Mock roles data
 export const MOCK_ROLES: RoleList[] = [
   {
-    id: 1,
+    id: "1",
     role: "Super Admin",
     description: "Full system access and control",
     scope: "Global",
@@ -11,7 +11,7 @@ export const MOCK_ROLES: RoleList[] = [
     lastModified: "22-10-2025",
   },
   {
-    id: 2,
+    id: "2",
     role: "Ops Manager",
     description: "Manages operations and refills",
     scope: "Global",
@@ -19,7 +19,7 @@ export const MOCK_ROLES: RoleList[] = [
     lastModified: "21-10-2025",
   },
   {
-    id: 3,
+    id: "3",
     role: "Field Agent",
     description: "Executes refills and submits proof",
     scope: "Machine",
@@ -27,7 +27,7 @@ export const MOCK_ROLES: RoleList[] = [
     lastModified: "20-10-2025",
   },
   {
-    id: 4,
+    id: "4",
     role: "Technician",
     description: "Handles breakdowns and alerts",
     scope: "Machine",
@@ -35,7 +35,7 @@ export const MOCK_ROLES: RoleList[] = [
     lastModified: "19-10-2025",
   },
   {
-    id: 5,
+    id: "5",
     role: "Finance Manager",
     description: "Manages reconciliation and payouts",
     scope: "Global",
@@ -43,7 +43,7 @@ export const MOCK_ROLES: RoleList[] = [
     lastModified: "18-10-2025",
   },
   {
-    id: 6,
+    id: "6",
     role: "Support Agent",
     description: "Handles refunds and escalations",
     scope: "Global",
@@ -51,7 +51,7 @@ export const MOCK_ROLES: RoleList[] = [
     lastModified: "17-10-2025",
   },
   {
-    id: 7,
+    id: "7",
     role: "Warehouse Manager",
     description: "Manages stock and logistics",
     scope: "Partner",
@@ -59,7 +59,7 @@ export const MOCK_ROLES: RoleList[] = [
     lastModified: "16-10-2025",
   },
   {
-    id: 8,
+    id: "8",
     role: "Auditor",
     description: "Read-only reporting access",
     scope: "Global",
@@ -67,7 +67,7 @@ export const MOCK_ROLES: RoleList[] = [
     lastModified: "15-10-2025",
   },
   {
-    id: 9,
+    id: "9",
     role: "Ops Manager",
     description: "Manages operations and refills",
     scope: "Partner",
@@ -75,7 +75,7 @@ export const MOCK_ROLES: RoleList[] = [
     lastModified: "14-10-2025",
   },
   {
-    id: 10,
+    id: "10",
     role: "Field Agent",
     description: "Executes refills and submits proof",
     scope: "Global",
@@ -83,7 +83,7 @@ export const MOCK_ROLES: RoleList[] = [
     lastModified: "13-10-2025",
   },
   {
-    id: 11,
+    id: "11",
     role: "Technician",
     description: "Handles breakdowns and alerts",
     scope: "Partner",
