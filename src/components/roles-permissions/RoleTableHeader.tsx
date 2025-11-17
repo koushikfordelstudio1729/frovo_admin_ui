@@ -77,9 +77,9 @@ export const RoleTableHeader: React.FC<RoleTableHeadProps> = ({
   ];
 
   return (
-    <div className="mb-6">
+    <div className="mb-6">ß
       {/* Title */}
-      <h2 className="text-2xl font-bold text-gray-900 mb-4">Role's List</h2>
+      <h2 className="text-2xl font-bold text-gray-900 mb-4">Role&apos;s List</h2>
 
       {/* Search and Filters */}
       <div className="flex items-center gap-4">

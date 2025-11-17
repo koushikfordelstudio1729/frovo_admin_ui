@@ -35,3 +35,15 @@ export type {
   RouteGuardProps,
   AsyncThunkStatus,
 } from './common.types';
+
+// User types
+export type {
+  UserRole,
+  UserDepartment,
+  RefreshToken,
+  CreatedBy,
+  UserListItem,
+  PaginationMeta,
+  UsersResponse,
+  UserQueryParams,
+} from './user.types';

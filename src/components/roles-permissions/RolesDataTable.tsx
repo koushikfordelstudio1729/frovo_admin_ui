@@ -1,7 +1,7 @@
 "use client";
 
 import { RoleList } from "@/types/roles.types";
-import React from "react";
+import React, { ReactNode } from "react";
 import { Badge, Button, Pagination } from "@/components/common";
 import { Eye, Trash2 } from "lucide-react";
 import { Column } from "@/components/name&table/Table";
@@ -30,9 +30,13 @@ export const RolesDataTable: React.FC<RoleDataTableProps> = ({
     { key: "actions", label: "Action" },
   ];
 
-  const renderCell = (key: string, value: any, row?: Record<string, any>) => {
+  const renderCell = (
+    key: string,
+    value: unknown,
+    _row?: Record<string, unknown>
+  ): ReactNode => {
     if (key === "scope") {
-      return <Badge label={value} size="md" />;
+      return <Badge label={value as string} size="md" />;
     }
 
     if (key === "actions") {
@@ -56,7 +60,7 @@ export const RolesDataTable: React.FC<RoleDataTableProps> = ({
       );
     }
 
-    return value;
+    return value as ReactNode;
   };
 
   return (

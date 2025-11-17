@@ -1,8 +1,8 @@
 export interface RoleList {
-  id: number;
+  id: string;
   role: string;
   description: string;
-  scope: "Global" | "Partner" | "Machine";
+  scope: string;
   user: string;
   lastModified: string;
 }
