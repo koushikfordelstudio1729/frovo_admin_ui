@@ -1,12 +1,15 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { ArrowLeft, Eye, EyeOff } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, LogOut } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { Button, Input } from "@/components";
 import { authAPI } from "@/services/authAPI";
+import { storageUtils } from "@/utils";
 import type { User } from "@/types";
 
 export default function UserProfilePage() {
+  const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [permissions, setPermissions] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -28,6 +31,9 @@ export default function UserProfilePage() {
   const [passwordSuccess, setPasswordSuccess] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [isChangingPassword, setIsChangingPassword] = useState(false);
+
+  // Logout state
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -123,6 +129,28 @@ export default function UserProfilePage() {
     }
   };
 
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+
+    try {
+      await authAPI.logout();
+
+      // Clear all auth data from storage
+      storageUtils.clearAuthData();
+
+      // Redirect to login page
+      router.push("/admin/login");
+    } catch (err) {
+      console.error("Logout error:", err);
+
+      // Even if API call fails, clear local data and redirect
+      storageUtils.clearAuthData();
+      router.push("/admin/login");
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-full bg-gray-50 p-8 flex items-center justify-center">
@@ -142,11 +170,26 @@ export default function UserProfilePage() {
   return (
     <div className="min-h-full bg-gray-50 p-8">
       {/* Title */}
-      <div className="mb-8 flex items-center gap-3">
-        <button className="text-gray-700 hover:text-gray-900 p-1">
-          <ArrowLeft size={24} />
-        </button>
-        <h1 className="text-2xl font-bold text-gray-900">{user.name}</h1>
+      <div className="mb-8 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <button className="text-gray-700 hover:text-gray-900 p-1">
+            <ArrowLeft size={24} />
+          </button>
+          <h1 className="text-2xl font-bold text-gray-900">{user.name}</h1>
+        </div>
+
+        {/* Logout Button */}
+        <Button
+          variant="secondary"
+          size="md"
+          onClick={handleLogout}
+          isLoading={isLoggingOut}
+          disabled={isLoggingOut}
+          className="rounded-lg flex items-center gap-2"
+        >
+          <LogOut size={20} />
+          {isLoggingOut ? "Logging out..." : "Logout"}
+        </Button>
       </div>
 
       {/* Main Container */}

@@ -7,7 +7,8 @@ import type {
   RefreshTokenResponse,
   CurrentUserResponse,
   ChangePasswordRequest,
-  ChangePasswordResponse
+  ChangePasswordResponse,
+  LogoutResponse
 } from '../types';
 
 export const authAPI = {
@@ -20,7 +21,7 @@ export const authAPI = {
   },
 
   logout: () => {
-    return api.post(apiConfig.endpoints.auth.logout);
+    return api.post<LogoutResponse>(apiConfig.endpoints.auth.logout);
   },
 
   verifyToken: () => {

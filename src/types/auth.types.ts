@@ -112,6 +112,12 @@ export interface ChangePasswordResponse {
   data: null;
 }
 
+export interface LogoutResponse {
+  success: boolean;
+  message: string;
+  data: null;
+}
+
 export interface AuthError {
   message: string;
   code?: string;

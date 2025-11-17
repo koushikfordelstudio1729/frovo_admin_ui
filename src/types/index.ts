@@ -11,6 +11,7 @@ export type {
   CurrentUserResponse,
   ChangePasswordRequest,
   ChangePasswordResponse,
+  LogoutResponse,
   AuthError,
 } from './auth.types';
 
