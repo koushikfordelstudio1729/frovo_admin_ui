@@ -100,6 +100,18 @@ export interface CurrentUserResponse {
   };
 }
 
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
+export interface ChangePasswordResponse {
+  success: boolean;
+  message: string;
+  data: null;
+}
+
 export interface AuthError {
   message: string;
   code?: string;

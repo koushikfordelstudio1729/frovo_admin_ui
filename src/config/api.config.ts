@@ -19,13 +19,13 @@ export const apiConfig = {
       refresh: '/auth/refresh-token',
       verify: '/auth/verify',
       me: '/auth/me',
+      changePassword: '/auth/change-password',
       forgotPassword: '/auth/forgot-password',
       resetPassword: '/auth/reset-password',
     },
     user: {
       profile: '/user/profile',
       updateProfile: '/user/profile',
-      changePassword: '/user/change-password',
     },
   },
 

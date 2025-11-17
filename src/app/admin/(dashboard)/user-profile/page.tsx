@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { ArrowLeft } from "lucide-react";
-import { Button } from "@/components";
+import { ArrowLeft, Eye, EyeOff } from "lucide-react";
+import { Button, Input } from "@/components";
 import { authAPI } from "@/services/authAPI";
 import type { User } from "@/types";
 
@@ -11,6 +11,23 @@ export default function UserProfilePage() {
   const [permissions, setPermissions] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Password change state
+  const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passwordErrors, setPasswordErrors] = useState<{
+    currentPassword?: string;
+    newPassword?: string;
+    confirmPassword?: string;
+  }>({});
+  const [passwordSuccess, setPasswordSuccess] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -34,6 +51,77 @@ export default function UserProfilePage() {
 
     fetchUserProfile();
   }, []);
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordErrors({});
+    setPasswordError("");
+    setPasswordSuccess("");
+
+    // Validation
+    const errors: {
+      currentPassword?: string;
+      newPassword?: string;
+      confirmPassword?: string;
+    } = {};
+
+    if (!currentPassword) {
+      errors.currentPassword = "Current password is required";
+    }
+
+    if (!newPassword) {
+      errors.newPassword = "New password is required";
+    } else if (newPassword.length < 8) {
+      errors.newPassword = "Password must be at least 8 characters";
+    }
+
+    if (!confirmPassword) {
+      errors.confirmPassword = "Please confirm your password";
+    } else if (newPassword !== confirmPassword) {
+      errors.confirmPassword = "Passwords do not match";
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setPasswordErrors(errors);
+      return;
+    }
+
+    setIsChangingPassword(true);
+
+    try {
+      const response = await authAPI.changePassword({
+        currentPassword,
+        newPassword,
+        confirmPassword,
+      });
+
+      if (response.data.success) {
+        setPasswordSuccess(response.data.message);
+        // Reset form
+        setCurrentPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+        setTimeout(() => {
+          setShowPasswordForm(false);
+          setPasswordSuccess("");
+        }, 2000);
+      } else {
+        setPasswordError("Failed to change password");
+      }
+    } catch (err: unknown) {
+      console.error("Password change error:", err);
+      if (err && typeof err === "object" && "response" in err) {
+        const error = err as { response?: { data?: { message?: string } } };
+        setPasswordError(
+          error.response?.data?.message || "Failed to change password"
+        );
+      } else {
+        setPasswordError("An error occurred while changing password");
+      }
+    } finally {
+      setIsChangingPassword(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -131,6 +219,148 @@ export default function UserProfilePage() {
                 {perm}
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* Change Password Section */}
+        <div className="mb-8 flex flex-col items-center">
+          <div className="w-full max-w-2xl">
+            <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-2xl font-medium text-gray-900">
+                  Change Password
+                </h3>
+                {!showPasswordForm && (
+                  <Button
+                    variant="secondary"
+                    size="md"
+                    onClick={() => setShowPasswordForm(true)}
+                    className="rounded-lg"
+                  >
+                    Change Password
+                  </Button>
+                )}
+              </div>
+
+              {showPasswordForm && (
+                <form onSubmit={handleChangePassword} className="space-y-4">
+                  {/* Success Message */}
+                  {passwordSuccess && (
+                    <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-green-700">
+                      {passwordSuccess}
+                    </div>
+                  )}
+
+                  {/* Error Message */}
+                  {passwordError && (
+                    <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700">
+                      {passwordError}
+                    </div>
+                  )}
+
+                  {/* Current Password */}
+                  <Input
+                    variant="orange"
+                    type={showCurrentPassword ? "text" : "password"}
+                    label="Current Password"
+                    placeholder="Enter current password"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    error={passwordErrors.currentPassword}
+                    disabled={isChangingPassword}
+                    fullWidth
+                    required
+                    rightIcon={
+                      <button
+                        type="button"
+                        onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                        className="text-gray-400 hover:text-gray-600 transition-colors focus:outline-none"
+                      >
+                        {showCurrentPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                      </button>
+                    }
+                  />
+
+                  {/* New Password */}
+                  <Input
+                    variant="orange"
+                    type={showNewPassword ? "text" : "password"}
+                    label="New Password"
+                    placeholder="Enter new password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    error={passwordErrors.newPassword}
+                    disabled={isChangingPassword}
+                    fullWidth
+                    required
+                    rightIcon={
+                      <button
+                        type="button"
+                        onClick={() => setShowNewPassword(!showNewPassword)}
+                        className="text-gray-400 hover:text-gray-600 transition-colors focus:outline-none"
+                      >
+                        {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                      </button>
+                    }
+                  />
+
+                  {/* Confirm Password */}
+                  <Input
+                    variant="orange"
+                    type={showConfirmPassword ? "text" : "password"}
+                    label="Confirm New Password"
+                    placeholder="Re-enter new password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    error={passwordErrors.confirmPassword}
+                    disabled={isChangingPassword}
+                    fullWidth
+                    required
+                    rightIcon={
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="text-gray-400 hover:text-gray-600 transition-colors focus:outline-none"
+                      >
+                        {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                      </button>
+                    }
+                  />
+
+                  {/* Buttons */}
+                  <div className="flex gap-4 justify-end pt-4">
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="md"
+                      onClick={() => {
+                        setShowPasswordForm(false);
+                        setCurrentPassword("");
+                        setNewPassword("");
+                        setConfirmPassword("");
+                        setPasswordErrors({});
+                        setPasswordError("");
+                        setPasswordSuccess("");
+                      }}
+                      disabled={isChangingPassword}
+                      className="rounded-lg"
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      type="submit"
+                      variant="primary"
+                      size="md"
+                      isLoading={isChangingPassword}
+                      disabled={isChangingPassword}
+                      className="rounded-lg"
+                    >
+                      Update Password
+                    </Button>
+                  </div>
+                </form>
+              )}
+            </div>
           </div>
         </div>
 

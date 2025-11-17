@@ -9,6 +9,8 @@ export type {
   AuthResponse,
   RefreshTokenResponse,
   CurrentUserResponse,
+  ChangePasswordRequest,
+  ChangePasswordResponse,
   AuthError,
 } from './auth.types';
 

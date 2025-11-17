@@ -1,6 +1,14 @@
 import { api } from './api';
 import { apiConfig } from '../config';
-import type { LoginCredentials, RegisterData, AuthResponse, RefreshTokenResponse, CurrentUserResponse } from '../types';
+import type {
+  LoginCredentials,
+  RegisterData,
+  AuthResponse,
+  RefreshTokenResponse,
+  CurrentUserResponse,
+  ChangePasswordRequest,
+  ChangePasswordResponse
+} from '../types';
 
 export const authAPI = {
   login: (credentials: LoginCredentials) => {
@@ -27,5 +35,9 @@ export const authAPI = {
 
   getCurrentUser: () => {
     return api.get<CurrentUserResponse>(apiConfig.endpoints.auth.me);
+  },
+
+  changePassword: (data: ChangePasswordRequest) => {
+    return api.post<ChangePasswordResponse>(apiConfig.endpoints.auth.changePassword, data);
   },
 };
