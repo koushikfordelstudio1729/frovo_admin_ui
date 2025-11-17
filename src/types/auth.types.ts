@@ -82,6 +82,15 @@ export interface AuthResponse {
   };
 }
 
+export interface RefreshTokenResponse {
+  success: boolean;
+  message: string;
+  data: {
+    accessToken: string;
+    refreshToken: string;
+  };
+}
+
 export interface AuthError {
   message: string;
   code?: string;

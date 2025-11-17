@@ -1,10 +1,13 @@
 // Auth types
 export type {
   User,
+  Department,
+  Role,
   AuthState,
   LoginCredentials,
   RegisterData,
   AuthResponse,
+  RefreshTokenResponse,
   AuthError,
 } from './auth.types';
 
