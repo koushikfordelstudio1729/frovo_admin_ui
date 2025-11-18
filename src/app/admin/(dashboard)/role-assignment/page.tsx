@@ -20,7 +20,7 @@ export default function ScopedRoleAssignmentPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
+    <div className="min-h-full bg-gray-50 p-8">
       {/* Title */}
       <h1 className="text-3xl font-bold text-gray-900 mb-8 mt-4">
         Select scope level

@@ -41,7 +41,7 @@ export default function UserManagementPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 pt-8">
+    <div className="min-h-full bg-gray-50 p-4 pt-8">
       <TableName
         title="User Management"
         searchPlaceholder="Search user"

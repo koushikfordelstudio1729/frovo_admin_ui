@@ -35,7 +35,7 @@ const iconMap: Record<string, React.ComponentType<{ size?: number }>> = {
 export const AdminSidebar: React.FC = () => {
   const pathname = usePathname();
   return (
-    <aside className="w-64 bg-white text-white min-h-screen fixed left-0 top-0 overflow-auto p-6">
+    <aside className="w-64 bg-white text-white min-h-full fixed left-0 top-0 overflow-auto p-6">
       {/* Logo Section */}
       <div className="mb-6 flex justify-center">
         <Image

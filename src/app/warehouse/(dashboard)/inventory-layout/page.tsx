@@ -78,7 +78,7 @@ export default function InventoryLayoutPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-full bg-gray-50 p-6">
       <div className="flex items-center justify-between flex-wrap gap-2">
         <Label className="text-xl font-semibold">Stock Ageing</Label>
         <div className="flex gap-4 items-center mt-2">

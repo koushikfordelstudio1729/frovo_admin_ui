@@ -13,7 +13,8 @@ export default function Home() {
   }, [router]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center text-black bg-gray-50">
+    <div className="min-h-full
+     flex items-center justify-center text-black bg-gray-50">
       <div className="text-lg">Redirecting...</div>
     </div>
   );

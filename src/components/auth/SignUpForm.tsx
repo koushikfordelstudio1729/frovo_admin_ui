@@ -84,7 +84,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ redirectPath, loginLink }) => {
   };
 
   return (
-    <div className="min-h-screen bg-white flex">
+    <div className="min-h-full bg-white flex">
       {/* Logo */}
       <div className="absolute top-0 left-34 p-6 mt-4">
         <Image
