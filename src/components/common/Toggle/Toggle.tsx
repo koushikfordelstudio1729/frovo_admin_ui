@@ -3,7 +3,7 @@ import React from "react";
 interface ToggleProps {
   enabled: boolean;
   onChange: (enabled: boolean) => void;
-  label: string;
+  label?: string;
   disabled?: boolean;
 }
 

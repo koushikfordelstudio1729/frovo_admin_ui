@@ -15,13 +15,28 @@ export const vendorNavigation: VendorMenuItem[] = [
     label: "Vendor Registration",
     icon: "userPlus",
     children: [
-      { label: "Vendor Details", href: "/vendor/registration/details" },
-      { label: "Financials", href: "/vendor/registration/financials" },
-      { label: "Compliance", href: "/vendor/registration/compliance" },
-      { label: "Status", href: "/vendor/registration/status" },
-      { label: "Document Uploads", href: "/vendor/registration/documents" },
-      { label: "Contract Details", href: "/vendor/registration/contract" },
-      { label: "System Access", href: "/vendor/registration/system-access" },
+      {
+        label: "Vendor Details",
+        href: "/vendor/vendor-registration/vendor-details",
+      },
+      { label: "Financials", href: "/vendor/vendor-registration/financials" },
+      { label: "Compliance", href: "/vendor/vendor-registration/compliance" },
+      {
+        label: "Status",
+        href: "/vendor/vendor-registration/status",
+      },
+      {
+        label: "Document Uploads",
+        href: "/vendor/vendor-registration/upload-documents",
+      },
+      {
+        label: "Contract Details",
+        href: "/vendor/vendor-registration/contract-details",
+      },
+      {
+        label: "System Access",
+        href: "/vendor/vendor-registration/system-access",
+      },
     ],
   },
   {

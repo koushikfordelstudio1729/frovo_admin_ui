@@ -48,9 +48,9 @@ export const VendorSidebar: React.FC = () => {
   const handleToggle = (label: string) =>
     setOpen((prev) => ({ ...prev, [label]: !prev[label] }));
 
-  const group1 = vendorNavigation.slice(0, 2); 
-  const group2 = vendorNavigation.slice(2, 4); 
-  const group3 = vendorNavigation.slice(4); 
+  const group1 = vendorNavigation.slice(0, 2);
+  const group2 = vendorNavigation.slice(2, 4);
+  const group3 = vendorNavigation.slice(4);
 
   function TopLevelSidebar(item: VendorMenuItem) {
     const Icon = iconMap[item.icon as keyof typeof iconMap] || LayoutDashboard;
@@ -133,13 +133,13 @@ export const VendorSidebar: React.FC = () => {
         />
       </div>
       <nav className="space-y-5">
-        <div className="bg-[#FFF5F0] rounded-2xl py-3 space-y-1">
+        <div className="bg-[#FFEAE4] rounded-2xl py-3 space-y-1">
           {group1.map(TopLevelSidebar)}
         </div>
-        <div className="bg-[#FFF5F0] rounded-2xl py-3 space-y-1">
+        <div className="bg-[#FFEAE4] rounded-2xl py-3 space-y-1">
           {group2.map(TopLevelSidebar)}
         </div>
-        <div className="bg-[#FFF5F0] rounded-2xl py-3 space-y-1">
+        <div className="bg-[#FFEAE4] rounded-2xl py-3 space-y-1">
           {group3.map(TopLevelSidebar)}
         </div>
       </nav>

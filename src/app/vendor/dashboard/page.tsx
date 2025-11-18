@@ -147,7 +147,9 @@ const Dashboard = () => {
           <Button
             className="rounded-lg"
             variant="primary"
-            onClick={() => router.push("/vendor/dashboard/add-vendor")}
+            onClick={() =>
+              router.push("/vendor/vendor-registration/vendor-details")
+            }
           >
             <Plus size={18} className="mr-2" /> Add new vendor
           </Button>

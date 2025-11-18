@@ -11,7 +11,7 @@ interface FileUploadProps {
 }
 
 export default function FileUpload({
-  label = "Upload Bill",
+  label = "",
   file,
   onChange,
   accept = ".jpg,.jpeg,.png,.pdf",
@@ -74,7 +74,6 @@ export default function FileUpload({
             </button>
           </div>
         )}
-        
       </div>
     </div>
   );
