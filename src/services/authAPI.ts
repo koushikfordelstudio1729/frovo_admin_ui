@@ -1,6 +1,6 @@
-import { api } from './api';
-import { apiConfig } from '../config';
-import type { LoginCredentials, RegisterData, AuthResponse } from '../types';
+import { api } from "./api";
+import { apiConfig } from "../config/admin";
+import type { LoginCredentials, RegisterData, AuthResponse } from "../types";
 
 export const authAPI = {
   login: (credentials: LoginCredentials) => {

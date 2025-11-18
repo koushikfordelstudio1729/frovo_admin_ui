@@ -4,7 +4,7 @@ import { Table, TableName } from "@/components";
 import { Pagination, Badge } from "@/components/common";
 import AddUserModal from "@/components/modals/AddUser/AddUserModal";
 import { Column } from "@/components/name&table/Table";
-import { useUsers } from "@/hooks/useUsers";
+import { useUsers } from "@/hooks/admin/useUsers";
 import { useState } from "react";
 
 export default function UserManagementPage() {

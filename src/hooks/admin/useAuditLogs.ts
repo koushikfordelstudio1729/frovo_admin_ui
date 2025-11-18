@@ -5,7 +5,7 @@ import { AuditLogFilters } from "@/types/audit-logs.types";
 import {
   MOCK_AUDIT_LOGS,
   AUDIT_LOGS_PAGINATION,
-} from "@/config/audit-logs.config";
+} from "@/config/admin/audit-logs.config";
 
 export const useAuditLogs = () => {
   const [currentPage, setCurrentPage] = useState(1);

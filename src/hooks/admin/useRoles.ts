@@ -6,7 +6,7 @@ import {
   MOCK_ROLES,
   ROLE_STATS,
   ROLES_PAGINATION,
-} from "@/config/roles.config";
+} from "@/config/admin/roles.config";
 
 export const useRoles = () => {
   const [currentPage, setCurrentPage] = useState(1);

@@ -1,7 +1,7 @@
 "use client";
 
 import { Pagination, Badge, Button } from "@/components/common";
-import { useAccessRequests } from "@/hooks/useAccessRequests";
+import { useAccessRequests } from "@/hooks/admin/useAccessRequests";
 import { Column } from "@/components/name&table/Table";
 import { TableName, Table } from "@/components";
 

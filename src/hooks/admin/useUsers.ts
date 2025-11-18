@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { UserFilters } from "@/types/users.types";
-import { MOCK_USERS, USERS_PAGINATION } from "@/config/users.config";
+import { MOCK_USERS, USERS_PAGINATION } from "@/config/admin/users.config";
 
 export const useUsers = () => {
   const [currentPage, setCurrentPage] = useState(1);

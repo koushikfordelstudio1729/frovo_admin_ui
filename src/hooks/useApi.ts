@@ -1,7 +1,7 @@
 "use client";
 import { useState, useCallback } from "react";
-import { api } from "../services/api";
-import type { RequestConfig } from "../types";
+import { api } from "@/services/api";
+import type { RequestConfig } from "@/types";
 
 interface UseApiState<T> {
   data: T | null;

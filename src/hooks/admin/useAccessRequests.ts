@@ -5,7 +5,7 @@ import { AccessRequestFilters } from "@/types/access-requests.types";
 import {
   MOCK_ACCESS_REQUESTS,
   ACCESS_REQUESTS_PAGINATION,
-} from "@/config/access-requests.config";
+} from "@/config/admin/access-requests.config";
 
 export const useAccessRequests = () => {
   const [currentPage, setCurrentPage] = useState(1);

@@ -15,7 +15,7 @@ import {
   Settings,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { adminNavigation } from "@/config/admin.config";
+import { adminNavigation } from "@/config/admin/admin.config";
 import SidebarItem from "../../../common/SidebarItem/SidebarItem";
 import Image from "next/image";
 

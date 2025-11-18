@@ -2,7 +2,7 @@
 
 import { Column } from "@/components/name&table/Table";
 import { TableName, Table, Pagination, Badge, Button } from "@/components";
-import { useAuditLogs } from "@/hooks/useAuditLogs";
+import { useAuditLogs } from "@/hooks/admin/useAuditLogs";
 
 export default function AuditLogsPage() {
   const { logs, currentPage, totalPages, handleSearch, handlePageChange } =

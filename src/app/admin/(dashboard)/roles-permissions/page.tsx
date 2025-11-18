@@ -4,8 +4,8 @@ import React from "react";
 import RoleStatsGrid from "@/components/roles-permissions/RoleStatsGrid";
 import RoleTableHeader from "@/components/roles-permissions/RoleTableHeader";
 import RolesDataTable from "@/components/roles-permissions/RolesDataTable";
-import { useRoles } from "@/hooks/useRoles";
-import { ROLE_STATS } from "@/config/roles.config";
+import { useRoles } from "@/hooks/admin/useRoles";
+import { ROLE_STATS } from "@/config/admin/roles.config";
 
 export default function RolesPermissionsPage() {
   const {

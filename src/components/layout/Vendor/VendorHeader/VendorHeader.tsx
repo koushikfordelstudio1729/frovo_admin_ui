@@ -1,16 +1,31 @@
 "use client";
 
-import { adminNavigation } from "@/config/admin/admin.config";
+import {
+  VendorMenuItem,
+  vendorNavigation,
+} from "@/config/vendor/vendor.config";
 import { Bell, User } from "lucide-react";
 import { usePathname } from "next/navigation";
 import React from "react";
 
-export const AdminHeader: React.FC = () => {
+export const VendorHeader: React.FC = () => {
   const pathname = usePathname();
 
-  // Find the current page title from adminNavigation
-  const currentPage = adminNavigation.find((item) => item.href === pathname);
-  const title = currentPage?.label || "Admin Dashboard";
+  function getCurrentPageLabel(items: VendorMenuItem[]) {
+    for (const item of items) {
+      if (item.href === pathname) {
+        return item.label;
+      }
+      if (item.children) {
+        const found = item.children.find((child) => child.href === pathname);
+        if (found) {
+          return found.label;
+        }
+      }
+    }
+    return null;
+  }
+  const title = getCurrentPageLabel(vendorNavigation) || "Vendor Dashboard";
 
   return (
     <header className="fixed top-0 right-0 left-64 bg-white h-16 flex items-center justify-between px-8 z-40">
@@ -37,4 +52,4 @@ export const AdminHeader: React.FC = () => {
   );
 };
 
-export default AdminHeader;
+export default VendorHeader;

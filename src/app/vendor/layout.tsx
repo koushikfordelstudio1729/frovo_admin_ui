@@ -1,7 +1,8 @@
 "use client";
 
-import { WarehouseHeader } from "@/components/layout/Warehouse/WarehouseHeader/WarehouseHeader";
-import { WarehouseSidebar } from "@/components/layout/Warehouse/WarehouseSidebar/WarehouseSidebar";
+import { VendorSidebar } from "@/components";
+import { VendorHeader } from "@/components/layout/Vendor";
+
 import React from "react";
 
 export default function DashboardLayout({
@@ -11,9 +12,9 @@ export default function DashboardLayout({
 }) {
   return (
     <div className="flex">
-      <WarehouseSidebar />
+      <VendorSidebar />
       <main className="ml-64 flex-1 bg-gray-50 min-h-full">
-        <WarehouseHeader />
+        <VendorHeader />
         <div className="pt-10 p-8">{children}</div>
       </main>
     </div>

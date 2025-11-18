@@ -1,4 +1,4 @@
-import { appConfig } from '../config';
+import { appConfig } from "../config/admin";
 
 export class ValidationUtils {
   static isValidEmail(email: string): boolean {
@@ -13,7 +13,8 @@ export class ValidationUtils {
     if (rules.requireUppercase && !/[A-Z]/.test(password)) return false;
     if (rules.requireLowercase && !/[a-z]/.test(password)) return false;
     if (rules.requireNumbers && !/\d/.test(password)) return false;
-    if (rules.requireSpecialChars && !/[!@#$%^&*(),.?":{}|<>]/.test(password)) return false;
+    if (rules.requireSpecialChars && !/[!@#$%^&*(),.?":{}|<>]/.test(password))
+      return false;
 
     return true;
   }
@@ -26,19 +27,19 @@ export class ValidationUtils {
     let score = 0;
 
     if (password.length >= 8) score += 1;
-    else feedback.push('At least 8 characters');
+    else feedback.push("At least 8 characters");
 
     if (/[A-Z]/.test(password)) score += 1;
-    else feedback.push('Include uppercase letters');
+    else feedback.push("Include uppercase letters");
 
     if (/[a-z]/.test(password)) score += 1;
-    else feedback.push('Include lowercase letters');
+    else feedback.push("Include lowercase letters");
 
     if (/\d/.test(password)) score += 1;
-    else feedback.push('Include numbers');
+    else feedback.push("Include numbers");
 
     if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) score += 1;
-    else feedback.push('Include special characters');
+    else feedback.push("Include special characters");
 
     return { score, feedback };
   }
@@ -48,17 +49,21 @@ export class ValidationUtils {
   }
 
   static sanitizeInput(input: string): string {
-    return input.trim().replace(/[<>]/g, '');
+    return input.trim().replace(/[<>]/g, "");
   }
 
   static formatError(error: unknown): string {
-    if (typeof error === 'string') return error;
+    if (typeof error === "string") return error;
     if (error instanceof Error) return error.message;
-    if (error && typeof error === 'object' && 'response' in error) {
-      const axiosError = error as { response?: { data?: { message?: string } } };
-      return axiosError.response?.data?.message || 'An unexpected error occurred';
+    if (error && typeof error === "object" && "response" in error) {
+      const axiosError = error as {
+        response?: { data?: { message?: string } };
+      };
+      return (
+        axiosError.response?.data?.message || "An unexpected error occurred"
+      );
     }
-    return 'An unexpected error occurred';
+    return "An unexpected error occurred";
   }
 }
 

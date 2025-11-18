@@ -1,6 +1,6 @@
-import axios from 'axios';
-import { apiConfig } from '../config';
-import { storageUtils } from '../utils';
+import axios from "axios";
+import { apiConfig } from "../config/admin";
+import { storageUtils } from "../utils";
 
 export const api = axios.create({
   baseURL: apiConfig.baseURL,
@@ -26,8 +26,8 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       storageUtils.removeToken();
-      if (typeof window !== 'undefined') {
-        window.location.href = '/login';
+      if (typeof window !== "undefined") {
+        window.location.href = "/login";
       }
     }
     return Promise.reject(error);

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { SCOPE_OPTIONS } from "@/config/scoped-roles.config";
+import { SCOPE_OPTIONS } from "@/config/admin/scoped-roles.config";
 import { ScopeType } from "@/types/scoped-roles.types";
 import { Button, Select } from "@/components/common";
 

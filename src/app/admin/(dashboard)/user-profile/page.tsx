@@ -2,7 +2,7 @@
 
 import React from "react";
 import { ArrowLeft } from "lucide-react";
-import { MOCK_USER_PROFILE } from "@/config/user-profile.config";
+import { MOCK_USER_PROFILE } from "@/config/admin/user-profile.config";
 import { Button } from "@/components";
 
 export default function UserProfilePage() {

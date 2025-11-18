@@ -67,7 +67,7 @@ const lowStockColumns = [
 ];
 
 export default function Dashboard() {
-  const [date, setDate] = useState("2025-01-18");
+  const [date, setDate] = useState("");
   const [category, setCategory] = useState("");
   const [partner, setPartner] = useState("");
   const [warehouse, setWarehouse] = useState("");
