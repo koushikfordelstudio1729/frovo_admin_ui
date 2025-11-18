@@ -165,19 +165,19 @@ export default function InventorySummaryPage() {
         <StatCard
           className="rounded-b-none"
           title="Total SKUs"
-          count={112}
+          count={"112"}
           icon={Archive}
         />
         <StatCard
           className="rounded-b-none"
           title="Total PO's"
-          count={45}
+          count={"45"}
           icon={ShoppingCart}
         />
         <StatCard
           className="rounded-b-none"
           title="Pending"
-          count={32}
+          count={"32"}
           icon={Timer}
         />
       </div>
@@ -185,27 +185,27 @@ export default function InventorySummaryPage() {
         <StatCard
           className="rounded-t-none"
           title="Stock-Out SKUs"
-          count={68}
+          count={"68"}
           icon={Truck}
         />
         <StatCard
           className="rounded-t-none"
           title="Pending POs"
-          count={12}
+          count={"12"}
           icon={Timer}
         />
         <StatCard
           className="rounded-t-none"
           title="Completed Refills"
-          count={77}
+          count={"77"}
           icon={ThumbsUp}
         />
       </div>
       <div className="grid grid-cols-4 gap-4">
-        <StatCard title="Total Stock Value" count={142} icon={Tags} />
-        <StatCard title="Low Stock Items" count={30} icon={Box} />
-        <StatCard title="Near-Expiry SKUs" count={12} icon={Calendar} />
-        <StatCard title="Stock Accuracy" count={89} icon={BarChart} />
+        <StatCard title="Total Stock Value" count={"142"} icon={Tags} />
+        <StatCard title="Low Stock Items" count={"30"} icon={Box} />
+        <StatCard title="Near-Expiry SKUs" count={"12"} icon={Calendar} />
+        <StatCard title="Stock Accuracy" count={"89"} icon={BarChart} />
       </div>
       {/* Conditional rendor tables */}
       <div className="mt-8">

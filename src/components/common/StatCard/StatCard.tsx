@@ -4,7 +4,7 @@ import React from "react";
 
 interface StatsCardProps {
   title: string;
-  count: number;
+  count: string | number;
   icon: React.ComponentType<{ size?: number }>;
   className?: string;
 }

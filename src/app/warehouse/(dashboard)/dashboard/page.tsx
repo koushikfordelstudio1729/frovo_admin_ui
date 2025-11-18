@@ -175,19 +175,19 @@ export default function Dashboard() {
       <div className=" flex flex-row gap-6 mt-6">
         <StatCard
           title="Inbound"
-          count={120}
+          count={"120"}
           icon={ClipboardCheck}
           className="p-8 w-sm"
         />
         <StatCard
           title="Outbound"
-          count={120}
+          count={"120"}
           icon={ClipboardCheck}
           className="p-8 w-sm"
         />
         <StatCard
           title="Pendin QC"
-          count={120}
+          count={"120"}
           icon={ClipboardCheck}
           className="p-8 w-sm"
         />

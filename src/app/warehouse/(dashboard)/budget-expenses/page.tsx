@@ -69,7 +69,7 @@ export default function ExpenseTable() {
         <Badge
           variant={value === "Approve" ? "active" : "warning"}
           label={value}
-          className="px-3 py-3 text-xs font-semibold rounded-full"
+          className="px-3 py-3 text-sm font-semibold rounded-full"
           size="md"
         />
       );
@@ -143,14 +143,19 @@ export default function ExpenseTable() {
         </div>
       </div>
       <div className=" flex flex-row gap-6 mt-6">
-        <StatCard title="Total" count={120} icon={Cog} className="p-8 w-sm" />
+        <StatCard title="Total" count={"120"} icon={Cog} className="p-8 w-sm" />
         <StatCard
           title="Approved"
-          count={120}
+          count={"120"}
           icon={Cog}
           className="p-8 w-sm"
         />
-        <StatCard title="Pending" count={120} icon={Cog} className="p-8 w-sm" />
+        <StatCard
+          title="Pending"
+          count={"120"}
+          icon={Cog}
+          className="p-8 w-sm"
+        />
       </div>
       {/* Stacked Bar Chart */}
       <div className="mt-6">
