@@ -66,7 +66,7 @@ export const CreateDepartmentForm = () => {
       const response = await api.get<{
         success: boolean;
         data: User[];
-      }>(apiConfig.endpoints.users);
+      }>(apiConfig.endpoints.users.list);
 
       if (response.data.success) {
         setUsers(response.data.data || []);

@@ -44,6 +44,7 @@ export const apiConfig = {
       removeRole: (id: string, roleId: string) => `/users/${id}/roles/${roleId}`,
     },
     accessRequests: '/access-requests',
+    auditLogs: '/audit-logs',
   },
 
   statusCodes: {
