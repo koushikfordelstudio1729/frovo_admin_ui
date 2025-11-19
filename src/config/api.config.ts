@@ -30,6 +30,7 @@ export const apiConfig = {
     permissions: '/permissions',
     roles: '/roles',
     departments: '/departments',
+    users: '/users',
   },
 
   statusCodes: {
