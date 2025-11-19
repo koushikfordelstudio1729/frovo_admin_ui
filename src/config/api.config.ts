@@ -27,6 +27,9 @@ export const apiConfig = {
       profile: '/user/profile',
       updateProfile: '/user/profile',
     },
+    permissions: '/permissions',
+    roles: '/roles',
+    departments: '/departments',
   },
 
   statusCodes: {
