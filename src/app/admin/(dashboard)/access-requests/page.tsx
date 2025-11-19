@@ -1,81 +1,734 @@
 "use client";
 
-import { Pagination, Badge, Button } from "@/components/common";
-import { useAccessRequests } from "@/hooks/useAccessRequests";
-import { Column } from "@/components/name&table/Table";
-import { TableName, Table } from "@/components";
+import { useState, useEffect, useCallback } from "react";
+import { Search, Eye, CheckCircle, XCircle, Clock, Plus, X, User, Calendar } from "lucide-react";
+import { Button, Badge, Pagination, Input, Textarea } from "@/components/common";
+import { api } from "@/services/api";
+import { apiConfig } from "@/config";
+import { AxiosError } from "axios";
 
-export default function AccessRequestsApprovalsPage() {
-  const { requests, currentPage, totalPages, handleSearch, handlePageChange } =
-    useAccessRequests();
+interface Requester {
+  name: string;
+  email: string;
+  id: string;
+}
 
-  const handleApprove = (requestId: string) => {
-    console.log("Approve request:", requestId);
-    // TODO: Add API call to approve request
+interface RequestedRole {
+  name: string;
+  key: string;
+  id: string;
+}
+
+interface AccessRequest {
+  id: string;
+  requester: Requester;
+  requestedRole?: RequestedRole;
+  requestedPermissions: string[];
+  reason: string;
+  status: "pending" | "approved" | "rejected";
+  createdAt: string;
+  updatedAt: string;
+  approvedAt?: string;
+  rejectedAt?: string;
+  approver?: Requester;
+  isExpired: boolean;
+}
+
+interface AccessRequestsResponse {
+  success: boolean;
+  message: string;
+  data: AccessRequest[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    pages: number;
   };
+}
 
-  const handleReject = (requestId: string) => {
-    console.log("Reject request:", requestId);
-    // TODO: Add API call to reject request
-  };
+export default function AccessRequestsPage() {
+  const [requests, setRequests] = useState<AccessRequest[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedRequest, setSelectedRequest] = useState<AccessRequest | null>(null);
 
-  const columns: Column[] = [
-    { key: "requester", label: "Requester" },
-    { key: "permission", label: "Permission" },
-    { key: "duration", label: "Duration" },
-    { key: "status", label: "Status" },
-    { key: "actions", label: "Actions" },
-  ];
+  // Modals
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showApproveModal, setShowApproveModal] = useState(false);
+  const [showRejectModal, setShowRejectModal] = useState(false);
 
-  const renderCell = (key: string, value: any, row?: any) => {
-    if (key === "status") {
-      return <Badge size="md" label={value} />;
+  // Form states
+  const [createForm, setCreateForm] = useState({
+    requestedPermissions: [] as string[],
+    reason: "",
+    urgency: "medium",
+  });
+
+  const [approveForm, setApproveForm] = useState({
+    comment: "",
+    duration: 7,
+  });
+
+  const [rejectForm, setRejectForm] = useState({
+    comment: "",
+  });
+
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
+  const [availablePermissions] = useState([
+    "users:view", "users:create", "users:edit", "users:delete",
+    "roles:view", "roles:create", "roles:edit", "roles:delete",
+    "departments:view", "departments:create", "departments:edit", "departments:delete",
+  ]);
+
+  const getErrorMessage = (error: unknown): string => {
+    if (error instanceof AxiosError) {
+      return error.response?.data?.message || error.message;
     }
+    return "An unexpected error occurred";
+  };
 
-    if (key === "actions") {
-      return (
-        <div className="flex gap-2">
-          <Button
-            variant="approve"
-            size="sm"
-            onClick={() => handleApprove(row.id)}
-            className="rounded-sm"
-          >
-            Approve
-          </Button>
-          <Button
-            variant="reject"
-            size="sm"
-            onClick={() => handleReject(row.id)}
-            className="rounded-sm"
-          >
-            Reject
-          </Button>
-        </div>
+  const fetchRequests = useCallback(async (page = 1) => {
+    try {
+      setLoading(true);
+      const response = await api.get<AccessRequestsResponse>(
+        `${apiConfig.endpoints.accessRequests}?page=${page}&limit=10`
       );
+
+      if (response.data.success) {
+        setRequests(response.data.data);
+        setCurrentPage(response.data.pagination.page);
+        setTotalPages(response.data.pagination.pages);
+      }
+    } catch (err) {
+      console.error("Error fetching access requests:", getErrorMessage(err));
+      setError("Failed to fetch access requests");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const fetchRequestById = async (id: string) => {
+    try {
+      const response = await api.get<{
+        success: boolean;
+        data: AccessRequest;
+      }>(`${apiConfig.endpoints.accessRequests}/${id}`);
+
+      if (response.data.success) {
+        setSelectedRequest(response.data.data);
+        setShowViewModal(true);
+      }
+    } catch (err) {
+      setError(getErrorMessage(err));
+    }
+  };
+
+  const handleCreateRequest = async () => {
+    if (createForm.requestedPermissions.length === 0) {
+      setError("Please select at least one permission");
+      return;
     }
 
-    return value;
+    if (!createForm.reason.trim()) {
+      setError("Please provide a reason for the request");
+      return;
+    }
+
+    try {
+      const response = await api.post(apiConfig.endpoints.accessRequests, createForm);
+
+      if (response.data.success) {
+        setSuccess("Access request created successfully");
+        setShowCreateModal(false);
+        setCreateForm({
+          requestedPermissions: [],
+          reason: "",
+          urgency: "medium",
+        });
+        fetchRequests(currentPage);
+      }
+    } catch (err) {
+      setError(getErrorMessage(err));
+    }
   };
+
+  const handleApprove = async () => {
+    if (!selectedRequest) return;
+
+    try {
+      const response = await api.put(
+        `${apiConfig.endpoints.accessRequests}/${selectedRequest.id}/approve`,
+        {
+          status: "approved",
+          comment: approveForm.comment,
+          duration: approveForm.duration,
+        }
+      );
+
+      if (response.data.success) {
+        setSuccess("Access request approved successfully");
+        setShowApproveModal(false);
+        setApproveForm({ comment: "", duration: 7 });
+        fetchRequests(currentPage);
+      }
+    } catch (err) {
+      setError(getErrorMessage(err));
+    }
+  };
+
+  const handleReject = async () => {
+    if (!selectedRequest) return;
+
+    try {
+      const response = await api.put(
+        `${apiConfig.endpoints.accessRequests}/${selectedRequest.id}/reject`,
+        {
+          status: "rejected",
+          comment: rejectForm.comment,
+        }
+      );
+
+      if (response.data.success) {
+        setSuccess("Access request rejected");
+        setShowRejectModal(false);
+        setRejectForm({ comment: "" });
+        fetchRequests(currentPage);
+      }
+    } catch (err) {
+      setError(getErrorMessage(err));
+    }
+  };
+
+  useEffect(() => {
+    fetchRequests(1);
+  }, [fetchRequests]);
+
+  const getStatusBadge = (status: string) => {
+    const variants: { [key: string]: "active" | "inactive" | "pending" } = {
+      approved: "active",
+      rejected: "inactive",
+      pending: "pending",
+    };
+    return <Badge label={status} size="md" variant={variants[status] || "pending"} showDot />;
+  };
+
+  const filteredRequests = requests.filter(req =>
+    req.requester.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    req.requester.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    req.status.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <TableName
-        title="Access Requests & Approvals"
-        showSearch={false}
-        buttonText="Request Access"
-        buttonLink="/admin/request-access"
-      />
+    <div className="min-h-screen bg-gray-50 p-4 pt-8">
+      {/* Success/Error Messages */}
+      {success && (
+        <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg text-green-700 flex justify-between items-center">
+          {success}
+          <button onClick={() => setSuccess(null)}>
+            <X size={18} />
+          </button>
+        </div>
+      )}
 
-      <Table columns={columns} data={requests} renderCell={renderCell} />
+      {error && (
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 flex justify-between items-center">
+          {error}
+          <button onClick={() => setError(null)}>
+            <X size={18} />
+          </button>
+        </div>
+      )}
 
-      <div className="flex items-center justify-end px-6 pt-2 bg-gray-50">
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={handlePageChange}
-        />
+      {/* Header */}
+      <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+        <div className="flex justify-between items-center mb-4">
+          <h1 className="text-3xl font-bold text-gray-900">Access Requests & Approvals</h1>
+          <Button
+            variant="primary"
+            size="md"
+            onClick={() => setShowCreateModal(true)}
+            className="flex items-center gap-2"
+          >
+            <Plus size={20} />
+            Request Access
+          </Button>
+        </div>
+
+        {/* Search Bar */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+          <input
+            type="text"
+            placeholder="Search by requester name, email, or status..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+          />
+        </div>
       </div>
+
+      {/* Requests Table */}
+      <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+        {loading ? (
+          <div className="text-center py-12 text-gray-500">Loading requests...</div>
+        ) : filteredRequests.length === 0 ? (
+          <div className="text-center py-12 text-gray-500">No access requests found</div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Requester
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Requested Access
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Reason
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Created
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {filteredRequests.map((request) => (
+                  <tr key={request.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div>
+                        <div className="font-medium text-gray-900">{request.requester.name}</div>
+                        <div className="text-sm text-gray-500">{request.requester.email}</div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex flex-wrap gap-1">
+                        {request.requestedRole ? (
+                          <Badge
+                            label={`Role: ${request.requestedRole.name}`}
+                            size="sm"
+                            variant="active"
+                          />
+                        ) : (
+                          request.requestedPermissions.slice(0, 2).map((perm, idx) => (
+                            <Badge
+                              key={idx}
+                              label={perm}
+                              size="sm"
+                              variant="pending"
+                            />
+                          ))
+                        )}
+                        {request.requestedPermissions.length > 2 && (
+                          <Badge
+                            label={`+${request.requestedPermissions.length - 2} more`}
+                            size="sm"
+                            variant="inactive"
+                          />
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="text-sm text-gray-600 max-w-xs truncate">
+                        {request.reason}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {getStatusBadge(request.status)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {new Date(request.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => fetchRequestById(request.id)}
+                          className="text-indigo-600 hover:text-indigo-800"
+                          title="View details"
+                        >
+                          <Eye size={18} />
+                        </button>
+                        {request.status === "pending" && (
+                          <>
+                            <Button
+                              variant="primary"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedRequest(request);
+                                setShowApproveModal(true);
+                              }}
+                              className="bg-green-600 hover:bg-green-700"
+                            >
+                              Approve
+                            </Button>
+                            <Button
+                              variant="primary"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedRequest(request);
+                                setShowRejectModal(true);
+                              }}
+                              className="bg-red-600 hover:bg-red-700"
+                            >
+                              Reject
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* Pagination */}
+        {!loading && filteredRequests.length > 0 && (
+          <div className="flex items-center justify-end px-6 py-4 bg-gray-50 border-t">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={(page) => fetchRequests(page)}
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Create Request Modal */}
+      {showCreateModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-5 p-4">
+          <div className="bg-white rounded-xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-2xl font-bold text-gray-900">Request Access</h3>
+              <button onClick={() => setShowCreateModal(false)} className="text-gray-400 hover:text-gray-600">
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {/* Permissions Selection */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Requested Permissions *
+                </label>
+                <div className="border border-gray-300 rounded-lg p-4 max-h-60 overflow-y-auto">
+                  {availablePermissions.map((perm) => (
+                    <div key={perm} className="flex items-center gap-2 mb-2">
+                      <input
+                        type="checkbox"
+                        id={`perm-${perm}`}
+                        checked={createForm.requestedPermissions.includes(perm)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setCreateForm({
+                              ...createForm,
+                              requestedPermissions: [...createForm.requestedPermissions, perm],
+                            });
+                          } else {
+                            setCreateForm({
+                              ...createForm,
+                              requestedPermissions: createForm.requestedPermissions.filter((p) => p !== perm),
+                            });
+                          }
+                        }}
+                        className="accent-blue-600 w-4 h-4 rounded"
+                      />
+                      <label htmlFor={`perm-${perm}`} className="text-sm text-gray-700 font-mono">
+                        {perm}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Reason */}
+              <Textarea
+                label="Reason *"
+                variant="orange"
+                value={createForm.reason}
+                onChange={(e) => setCreateForm({ ...createForm, reason: e.target.value })}
+                rows={4}
+                placeholder="Explain why you need this access..."
+              />
+
+              {/* Urgency */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Urgency</label>
+                <select
+                  value={createForm.urgency}
+                  onChange={(e) => setCreateForm({ ...createForm, urgency: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                >
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="flex gap-3 justify-end mt-6">
+              <Button variant="secondary" size="md" onClick={() => setShowCreateModal(false)}>
+                Cancel
+              </Button>
+              <Button variant="primary" size="md" onClick={handleCreateRequest}>
+                Submit Request
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* View Details Modal */}
+      {showViewModal && selectedRequest && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+          <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-6">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h3 className="text-2xl font-bold text-white mb-1">Access Request Details</h3>
+                  <p className="text-blue-100 text-sm">Request ID: {selectedRequest.id}</p>
+                </div>
+                <button
+                  onClick={() => setShowViewModal(false)}
+                  className="text-white hover:bg-white hover:bg-opacity-20 rounded-lg p-2 transition-colors"
+                >
+                  <X size={24} />
+                </button>
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="px-8 py-6 overflow-y-auto max-h-[calc(90vh-180px)]">
+              <div className="space-y-6">
+                {/* Status Banner */}
+                <div className={`p-5 rounded-xl border-2 ${
+                  selectedRequest.status === 'approved' ? 'bg-green-50 border-green-300' :
+                  selectedRequest.status === 'rejected' ? 'bg-red-50 border-red-300' :
+                  'bg-yellow-50 border-yellow-300'
+                }`}>
+                  <div className="flex items-center gap-3">
+                    {selectedRequest.status === 'approved' && <CheckCircle className="text-green-600" size={28} />}
+                    {selectedRequest.status === 'rejected' && <XCircle className="text-red-600" size={28} />}
+                    {selectedRequest.status === 'pending' && <Clock className="text-yellow-600" size={28} />}
+                    <div>
+                      <p className="text-sm font-medium text-gray-600 uppercase tracking-wide">Status</p>
+                      <p className={`text-xl font-bold capitalize ${
+                        selectedRequest.status === 'approved' ? 'text-green-700' :
+                        selectedRequest.status === 'rejected' ? 'text-red-700' :
+                        'text-yellow-700'
+                      }`}>
+                        {selectedRequest.status}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Requester Info */}
+                  <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 border border-gray-200">
+                    <h4 className="font-bold text-gray-900 mb-4 flex items-center gap-2 text-lg">
+                      <User size={20} className="text-blue-600" />
+                      Requester Information
+                    </h4>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Name</label>
+                        <p className="font-semibold text-gray-900 text-lg mt-1">{selectedRequest.requester.name}</p>
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Email</label>
+                        <p className="text-gray-700 mt-1">{selectedRequest.requester.email}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Timeline */}
+                  <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-200">
+                    <h4 className="font-bold text-gray-900 mb-4 flex items-center gap-2 text-lg">
+                      <Calendar size={20} className="text-blue-600" />
+                      Timeline
+                    </h4>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Created</label>
+                        <p className="text-gray-900 mt-1 font-medium">{new Date(selectedRequest.createdAt).toLocaleString()}</p>
+                      </div>
+                      {selectedRequest.approvedAt && (
+                        <div>
+                          <label className="text-xs font-semibold text-green-600 uppercase tracking-wide">Approved</label>
+                          <p className="text-gray-900 mt-1 font-medium">{new Date(selectedRequest.approvedAt).toLocaleString()}</p>
+                        </div>
+                      )}
+                      {selectedRequest.rejectedAt && (
+                        <div>
+                          <label className="text-xs font-semibold text-red-600 uppercase tracking-wide">Rejected</label>
+                          <p className="text-gray-900 mt-1 font-medium">{new Date(selectedRequest.rejectedAt).toLocaleString()}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Requested Access */}
+                <div className="bg-white rounded-xl p-6 border-2 border-blue-200">
+                  <h4 className="font-bold text-gray-900 mb-4 text-lg">Requested Access</h4>
+                  {selectedRequest.requestedRole ? (
+                    <div className="bg-gradient-to-r from-blue-100 to-blue-50 border-l-4 border-blue-600 rounded-lg p-4">
+                      <p className="font-bold text-blue-900 text-lg mb-1">Role: {selectedRequest.requestedRole.name}</p>
+                      <p className="text-sm text-blue-700 font-mono bg-blue-50 inline-block px-3 py-1 rounded">
+                        {selectedRequest.requestedRole.key}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="flex flex-wrap gap-2">
+                      {selectedRequest.requestedPermissions.map((perm, idx) => (
+                        <span key={idx} className="px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg text-sm font-semibold shadow-sm">
+                          {perm}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Reason */}
+                <div className="bg-white rounded-xl p-6 border-2 border-gray-200">
+                  <h4 className="font-bold text-gray-900 mb-3 text-lg">Reason for Request</h4>
+                  <p className="text-gray-700 leading-relaxed bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    {selectedRequest.reason}
+                  </p>
+                </div>
+
+                {/* Approver Info */}
+                {selectedRequest.approver && (
+                  <div className={`rounded-xl p-6 border-2 ${
+                    selectedRequest.status === 'approved'
+                      ? 'bg-gradient-to-br from-green-50 to-green-100 border-green-200'
+                      : 'bg-gradient-to-br from-red-50 to-red-100 border-red-200'
+                  }`}>
+                    <h4 className="font-bold text-gray-900 mb-4 text-lg">
+                      {selectedRequest.status === 'approved' ? 'Approved By' : 'Rejected By'}
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Name</label>
+                        <p className="font-semibold text-gray-900 text-lg mt-1">{selectedRequest.approver.name}</p>
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Email</label>
+                        <p className="text-gray-700 mt-1">{selectedRequest.approver.email}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="px-8 py-5 bg-gray-50 border-t border-gray-200 flex justify-end gap-3">
+              <Button variant="secondary" size="md" onClick={() => setShowViewModal(false)}>
+                Close
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Approve Modal */}
+      {showApproveModal && selectedRequest && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-5 p-4">
+          <div className="bg-white rounded-xl p-8 max-w-md w-full shadow-2xl">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-2xl font-bold text-gray-900">Approve Request</h3>
+              <button onClick={() => setShowApproveModal(false)} className="text-gray-400 hover:text-gray-600">
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <p className="text-gray-700">
+                Approve access request from <strong>{selectedRequest.requester.name}</strong>?
+              </p>
+
+              <Textarea
+                label="Comment (Optional)"
+                variant="orange"
+                value={approveForm.comment}
+                onChange={(e) => setApproveForm({ ...approveForm, comment: e.target.value })}
+                rows={3}
+                placeholder="Add any comments..."
+              />
+
+              <Input
+                label="Duration (days)"
+                variant="orange"
+                type="number"
+                value={approveForm.duration.toString()}
+                onChange={(e) => setApproveForm({ ...approveForm, duration: parseInt(e.target.value) || 7 })}
+              />
+            </div>
+
+            <div className="flex gap-3 justify-end mt-6">
+              <Button variant="secondary" size="md" onClick={() => setShowApproveModal(false)}>
+                Cancel
+              </Button>
+              <Button variant="primary" size="md" onClick={handleApprove} className="bg-green-600 hover:bg-green-700">
+                Approve
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reject Modal */}
+      {showRejectModal && selectedRequest && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-5 p-4">
+          <div className="bg-white rounded-xl p-8 max-w-md w-full shadow-2xl">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-2xl font-bold text-gray-900">Reject Request</h3>
+              <button onClick={() => setShowRejectModal(false)} className="text-gray-400 hover:text-gray-600">
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <p className="text-gray-700">
+                Reject access request from <strong>{selectedRequest.requester.name}</strong>?
+              </p>
+
+              <Textarea
+                label="Comment (Optional)"
+                variant="orange"
+                value={rejectForm.comment}
+                onChange={(e) => setRejectForm({ ...rejectForm, comment: e.target.value })}
+                rows={3}
+                placeholder="Explain reason for rejection..."
+              />
+            </div>
+
+            <div className="flex gap-3 justify-end mt-6">
+              <Button variant="secondary" size="md" onClick={() => setShowRejectModal(false)}>
+                Cancel
+              </Button>
+              <Button variant="primary" size="md" onClick={handleReject} className="bg-red-600 hover:bg-red-700">
+                Reject
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

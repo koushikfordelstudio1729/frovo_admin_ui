@@ -43,6 +43,7 @@ export const apiConfig = {
       assignRoles: (id: string) => `/users/${id}/roles`,
       removeRole: (id: string, roleId: string) => `/users/${id}/roles/${roleId}`,
     },
+    accessRequests: '/access-requests',
   },
 
   statusCodes: {
