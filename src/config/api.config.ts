@@ -30,7 +30,19 @@ export const apiConfig = {
     permissions: '/permissions',
     roles: '/roles',
     departments: '/departments',
-    users: '/users',
+    users: {
+      list: '/users',
+      search: '/users/search',
+      create: '/users',
+      getById: (id: string) => `/users/${id}`,
+      update: (id: string) => `/users/${id}`,
+      delete: (id: string) => `/users/${id}`,
+      updateStatus: (id: string) => `/users/${id}/status`,
+      updatePassword: (id: string) => `/users/${id}/password`,
+      getPermissions: (id: string) => `/users/${id}/permissions`,
+      assignRoles: (id: string) => `/users/${id}/roles`,
+      removeRole: (id: string, roleId: string) => `/users/${id}/roles/${roleId}`,
+    },
   },
 
   statusCodes: {
