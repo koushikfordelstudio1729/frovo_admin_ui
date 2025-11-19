@@ -146,7 +146,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ redirectPath, signupLink }) => {
               />
 
               <Link
-                href="/forgot-password"
+                href="/admin/forgot-password"
                 className="text-sm text-orange-500 hover:text-orange-600 transition-colors"
               >
                 Forgot password?
