@@ -2,7 +2,7 @@
 import { Button, Label, Table, Badge, Pagination } from "@/components";
 import { FileArchiveIcon, ArrowDownToLine } from "lucide-react";
 import { useInventoryLayout } from "@/hooks/warehouse/useInventoryLayout";
-import AgeRangeSelect from "@/components/age-range-select/AgeRangeSelect";
+import AgeRangeSelect from "@/components/common/age-range-select/AgeRangeSelect";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 

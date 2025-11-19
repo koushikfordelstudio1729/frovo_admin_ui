@@ -87,6 +87,7 @@ const VendorStatus = () => {
             value={riskNotes}
             onChange={(e) => setRiskNotes(e.target.value)}
             className="h-[120px]"
+            textareaClassName="h-44"
           />
         </div>
 

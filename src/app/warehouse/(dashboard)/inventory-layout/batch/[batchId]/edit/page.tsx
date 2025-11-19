@@ -5,7 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { Button, Label } from "@/components";
 import EditableInput from "@/components/common/EditableInput";
-import AgeRangeSelect from "@/components/age-range-select/AgeRangeSelect";
+import AgeRangeSelect from "@/components/common/age-range-select/AgeRangeSelect";
 import { batchData } from "@/config/warehouse/inventory-layout.config";
 
 export default function BatchEditPage() {

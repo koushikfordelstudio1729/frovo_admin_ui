@@ -1,8 +1,16 @@
 "use client";
 
-import { Badge, Button, Label, Select, StatCard, Table } from "@/components";
+import {
+  Badge,
+  Button,
+  Label,
+  Select,
+  StatCard,
+  Table,
+  Pagination,
+} from "@/components";
 import { ClipboardCheck, Eye, Pencil, Plus, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { vendorData } from "@/config/vendor";
 
@@ -40,12 +48,29 @@ const vendorColumns = [
   { key: "action", label: "Action" },
 ];
 
+const ITEMS_PER_PAGE = 10;
+
 const Dashboard = () => {
   const router = useRouter();
   const [name, setName] = useState("");
   const [status, setStatus] = useState("");
   const [risk, setRisk] = useState("");
   const [contract, setContract] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Calculate pagination
+  const totalPages = Math.ceil(vendorData.length / ITEMS_PER_PAGE);
+
+  // Get current page data
+  const paginatedData = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    return vendorData.slice(startIndex, endIndex);
+  }, [currentPage]);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
 
   const renderCell = (key: string, value: any, row?: Record<string, any>) => {
     // Status Badge
@@ -158,8 +183,16 @@ const Dashboard = () => {
       <div className="mt-4">
         <Table
           columns={vendorColumns}
-          data={vendorData}
+          data={paginatedData}
           renderCell={renderCell}
+        />
+      </div>
+      {/* Pagination */}
+      <div className="flex justify-end mt-4">
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
         />
       </div>
     </div>

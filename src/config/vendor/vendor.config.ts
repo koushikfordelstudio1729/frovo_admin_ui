@@ -45,9 +45,9 @@ export const vendorNavigation: VendorMenuItem[] = [
     href: "/vendor/audit-trails",
   },
   {
-    label: "Dashboard 2",
+    label: "History",
     icon: "barChart2",
-    href: "/vendor/dashboard-2",
+    href: "/vendor/history",
   },
   {
     label: "User Profile",
