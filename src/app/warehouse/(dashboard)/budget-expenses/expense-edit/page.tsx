@@ -51,7 +51,7 @@ export default function ExpenseEditPage() {
   };
 
   return (
-    <div className="min-h-full bg-gray-50 p-4">
+    <div className="min-h-screen bg-gray-50 p-4">
       {/* Header with Back Button */}
       <div className="flex items-center gap-3 my-4">
         <button

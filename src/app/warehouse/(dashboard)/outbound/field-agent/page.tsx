@@ -17,7 +17,7 @@ export default function AssignFieldAgentPage() {
   });
 
   return (
-    <div className="min-h-full bg-gray-50 p-4">
+    <div className="min-h-screen bg-gray-50 p-4">
       <div className="flex items-center gap-3 my-4">
         <button
           onClick={() => router.back()}

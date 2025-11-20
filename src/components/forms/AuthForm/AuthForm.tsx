@@ -49,7 +49,7 @@ const AuthForm: React.FC<AuthFormProps> = ({
   illustrationAlt = "Illustration",
 }) => {
   return (
-    <div className="min-h-full bg-gray-100 flex">
+    <div className="min-h-screen bg-gray-100 flex">
       {/* Logo  */}
       <div className="absolute top-0 left-35 p-6 mt-4">
         {logoPath && (

@@ -57,7 +57,7 @@ export default function QCChecklistTemplatesPage() {
   };
 
   return (
-    <div className="min-h-full bg-gray-50 p-4">
+    <div className="min-h-screen bg-gray-50 p-4">
       {/* Header */}
       <div className="flex items-center gap-3 my-4">
         <button
