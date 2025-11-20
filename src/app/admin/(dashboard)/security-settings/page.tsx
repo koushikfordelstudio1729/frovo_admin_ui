@@ -65,7 +65,7 @@ const SecuritySettingsPage = () => {
   };
 
   return (
-    <div className="min-h-full bg-gray-50">
+    <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl bg-white p-8 mt-12 mx-auto">
         {/* Header */}
         <div className="mb-6">

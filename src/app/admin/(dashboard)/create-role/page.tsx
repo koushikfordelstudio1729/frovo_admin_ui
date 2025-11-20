@@ -28,7 +28,7 @@ const CreateRoleForm: React.FC = () => {
   };
 
   return (
-    <div className="min-h-full">
+    <div className="min-h-screen">
       {/* Header */}
       <div className="flex items-center gap-3 mb-8 mt-4">
         <button

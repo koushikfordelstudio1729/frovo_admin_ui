@@ -32,7 +32,7 @@ export default function ExpenseEntryForm() {
   });
 
   return (
-    <div className="min-h-full bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 p-6">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <button onClick={() => router.back()} aria-label="Go back">

@@ -122,7 +122,7 @@ export const VendorSidebar: React.FC = () => {
   }
 
   return (
-    <aside className="w-64 bg-white min-h-full fixed left-0 top-0 overflow-y-auto p-6">
+    <aside className="w-64 bg-white min-h-screen fixed left-0 top-0 overflow-y-auto p-6">
       <div className="mb-6 flex justify-center">
         <Image
           src="/images/logo.svg"

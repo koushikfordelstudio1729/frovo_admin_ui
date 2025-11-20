@@ -13,7 +13,7 @@ export default function DashboardLayout({
   return (
     <div className="flex">
       <VendorSidebar />
-      <main className="ml-64 flex-1 bg-gray-50 min-h-full">
+      <main className="ml-64 flex-1 bg-gray-50 min-h-screen">
         <VendorHeader />
         <div className="pt-10 p-8">{children}</div>
       </main>

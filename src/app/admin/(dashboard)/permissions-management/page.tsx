@@ -27,7 +27,7 @@ const PermissionsManagement = () => {
   };
 
   return (
-    <div className="min-h-full bg-gray-50 pt-12">
+    <div className="min-h-screen bg-gray-50 pt-12">
       <div className="grid grid-cols-2 gap-8 max-w-7xl mx-auto">
         {/* Permission Groups */}
         <div className="bg-white rounded-xl p-8 border border-gray-100">

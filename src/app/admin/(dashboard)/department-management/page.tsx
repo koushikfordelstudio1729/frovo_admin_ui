@@ -25,9 +25,9 @@ export const CreateDepartmentForm = () => {
   };
 
   return (
-    <>
+    <div className="min-h-screen">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-6 mt-4">
+      <div className=" flex items-center gap-3 mb-6 mt-4">
         <button
           type="button"
           onClick={() => router.back()}
@@ -109,7 +109,7 @@ export const CreateDepartmentForm = () => {
           </div>
         </form>
       </div>
-    </>
+    </div>
   );
 };
 

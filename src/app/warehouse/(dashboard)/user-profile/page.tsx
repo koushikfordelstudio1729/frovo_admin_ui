@@ -9,7 +9,7 @@ export default function UserProfilePage() {
   const user = MOCK_USER_PROFILE;
 
   return (
-    <div className="min-h-full bg-gray-50 p-8">
+    <div className="min-h-screen bg-gray-50 p-8">
       {/* Title */}
       <div className="mb-8 flex items-center gap-3">
         <button className="text-gray-700 hover:text-gray-900 p-1">

@@ -117,7 +117,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-full pt-12">
+    <div className="min-h-screen pt-12">
       <div className="flex items-end w-full gap-6">
         {/* Select Date */}
         <div>

@@ -71,7 +71,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ redirectPath, signupLink }) => {
   };
 
   return (
-    <div className="min-h-full bg-gray-100 flex">
+    <div className="min-h-screen bg-gray-100 flex">
       {/* Logo */}
       <div className="absolute top-0 left-34 p-6 mt-4">
         <Image

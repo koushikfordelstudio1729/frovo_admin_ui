@@ -69,7 +69,7 @@ export default function InventorySummaryPage() {
   ];
 
   return (
-    <div className="min-h-full bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 p-6">
       <div className="flex items-start justify-between my-4">
         {/* Select data */}
         <div>
