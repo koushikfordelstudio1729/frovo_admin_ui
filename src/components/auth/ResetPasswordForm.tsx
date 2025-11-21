@@ -5,15 +5,20 @@ import Image from "next/image";
 import { Input, Button } from "@/components/common";
 import { useRouter } from "next/navigation";
 
-interface ResetPasswordFormProps {
-  redirectPath?: string;
+export interface ResetPasswordFormProps {
+  logoUrl?: string;
+  appName?: string;
+  successPath?: string;
+  onPasswordReset?: (newPassword: string) => Promise<void>;
 }
 
-export default function ResetPasswordForm({
-  redirectPath = "/admin/success",
-}: ResetPasswordFormProps) {
+export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
+  logoUrl = "/images/logo.svg",
+  appName = "Frovo",
+  successPath = "/success",
+  onPasswordReset,
+}) => {
   const router = useRouter();
-
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState("");
@@ -25,7 +30,6 @@ export default function ResetPasswordForm({
   const hasNumberOrSpecial = /[0-9!@#$%^&*()_\-+={}[\]|;:"'<>,.?/~`]/.test(
     password
   );
-
   const allValid = hasMinLength && hasUpper && hasNumberOrSpecial;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -45,13 +49,15 @@ export default function ResetPasswordForm({
 
     setIsLoading(true);
     try {
-      await new Promise((res) => setTimeout(res, 300));
+      if (onPasswordReset) {
+        await onPasswordReset(password);
+      } else {
+        await new Promise((res) => setTimeout(res, 300));
+      }
 
       setSuccess("Password changed successfully.");
-
-      //  Correct redirect (dynamic)
       setTimeout(() => {
-        router.push(redirectPath);
+        router.push(successPath);
       }, 350);
     } catch {
       setError("Something went wrong. Please try again.");
@@ -62,11 +68,10 @@ export default function ResetPasswordForm({
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center relative">
-      {/* Logo */}
       <div className="absolute top-6 left-6">
         <Image
-          src="/images/logo.svg"
-          alt="Frovo Logo"
+          src={logoUrl}
+          alt={`${appName} Logo`}
           width={150}
           height={50}
           priority
@@ -119,10 +124,8 @@ export default function ResetPasswordForm({
             required
           />
 
-          {/* Help Text */}
           <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
             <span className="text-orange-500 text-sm">Help</span>
-
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -139,7 +142,6 @@ export default function ResetPasswordForm({
             </svg>
           </div>
 
-          {/* Password Requirements */}
           <div className="space-y-2 text-sm mt-4">
             <div className="text-orange-500">
               {hasMinLength ? (
@@ -184,4 +186,6 @@ export default function ResetPasswordForm({
       </div>
     </div>
   );
-}
+};
+
+export default ResetPasswordForm;

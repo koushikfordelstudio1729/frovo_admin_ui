@@ -1,7 +1,5 @@
-"use client";
-
 import ResetPasswordSuccess from "@/components/auth/ResetPasswordSuccess";
 
-export default function ResetPasswordSuccessPage() {
+export default function AdminSuccess() {
   return <ResetPasswordSuccess />;
 }

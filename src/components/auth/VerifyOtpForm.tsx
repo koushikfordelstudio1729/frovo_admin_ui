@@ -6,7 +6,19 @@ import Link from "next/link";
 import { Button } from "@/components/common";
 import { useRouter } from "next/navigation";
 
-export default function VerifyOtpForm() {
+export interface VerifyOtpFormProps {
+  logoUrl?: string;
+  appName?: string;
+  resetPasswordPath?: string;
+  onResendOtp?: () => Promise<void>;
+}
+
+export const VerifyOtpForm: React.FC<VerifyOtpFormProps> = ({
+  logoUrl = "/images/logo.svg",
+  appName = "Frovo",
+  resetPasswordPath = "/reset-password",
+  onResendOtp,
+}) => {
   const router = useRouter();
   const [otp, setOtp] = useState<string[]>(["", "", "", "", "", ""]);
   const [isLoading, setIsLoading] = useState(false);
@@ -50,11 +62,10 @@ export default function VerifyOtpForm() {
 
     try {
       await new Promise((res) => setTimeout(res, 250));
-
       setSuccess("OTP Verified Successfully.");
 
       setTimeout(() => {
-        router.push("/admin/reset-password");
+        router.push(resetPasswordPath);
       }, 200);
     } catch {
       setError("Invalid OTP. Please try again.");
@@ -63,33 +74,37 @@ export default function VerifyOtpForm() {
     }
   };
 
+  const handleResendOtp = async () => {
+    if (onResendOtp) {
+      await onResendOtp();
+    }
+    setSuccess("OTP resent.");
+    setTimeout(() => setSuccess(""), 1500);
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center relative">
-      {/* Logo */}
       <div className="absolute top-6 left-6">
         <Image
-          src="/images/logo.svg"
-          alt="Frovo Logo"
+          src={logoUrl}
+          alt={`${appName} Logo`}
           width={150}
           height={50}
           priority
         />
       </div>
 
-      {/* Form container */}
       <div className="w-full max-w-md mx-auto px-6">
         <h2 className="text-3xl font-bold text-gray-900 mb-10 text-center">
           Forgot Password ?
         </h2>
 
-        {/* Success message */}
         {success && (
           <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm">
             {success}
           </div>
         )}
 
-        {/* Error message */}
         {error && (
           <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
             {error}
@@ -97,10 +112,8 @@ export default function VerifyOtpForm() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Subtext */}
           <p className="text-sm text-gray-600 text-left">Enter OTP</p>
 
-          {/* OTP inputs */}
           <div className="flex gap-3 justify-center mt-2 mb-4">
             {otp.map((digit, idx) => (
               <input
@@ -145,13 +158,10 @@ export default function VerifyOtpForm() {
           </Button>
 
           <p className="text-sm text-gray-600 mt-2 text-center">
-            Didn’t receive OTP?{" "}
+            Didn't receive OTP?{" "}
             <button
               type="button"
-              onClick={() => {
-                setSuccess("OTP resent.");
-                setTimeout(() => setSuccess(""), 1500);
-              }}
+              onClick={handleResendOtp}
               className="text-orange-500 hover:text-orange-600 font-medium"
             >
               Resend
@@ -161,4 +171,6 @@ export default function VerifyOtpForm() {
       </div>
     </div>
   );
-}
+};
+
+export default VerifyOtpForm;

@@ -6,7 +6,19 @@ import Link from "next/link";
 import { Input, Button } from "@/components/common";
 import { useRouter } from "next/navigation";
 
-export default function ForgotPasswordForm() {
+export interface ForgotPasswordFormProps {
+  logoUrl?: string;
+  appName?: string;
+  backToLoginPath?: string;
+  verifyOtpPath?: string;
+}
+
+export const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({
+  logoUrl = "/images/logo.svg",
+  appName = "Frovo",
+  backToLoginPath = "/login",
+  verifyOtpPath = "/verify-otp",
+}) => {
   const [emailOrPhone, setEmailOrPhone] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -33,11 +45,8 @@ export default function ForgotPasswordForm() {
     setIsLoading(true);
 
     try {
-      // Faster redirect (only 300ms)
       await new Promise((res) => setTimeout(res, 300));
-
-      // Redirect to OTP page
-      router.push("/admin/verify-otp");
+      router.push(verifyOtpPath);
     } catch {
       setError("Something went wrong. Please try again.");
     } finally {
@@ -49,8 +58,8 @@ export default function ForgotPasswordForm() {
     <div className="min-h-screen bg-gray-100 flex items-center justify-center relative">
       <div className="absolute top-6 left-6">
         <Image
-          src="/images/logo.svg"
-          alt="Frovo Logo"
+          src={logoUrl}
+          alt={`${appName} Logo`}
           width={150}
           height={50}
           priority
@@ -97,7 +106,7 @@ export default function ForgotPasswordForm() {
           <p className="text-sm text-gray-600 text-center">
             Remember your password?{" "}
             <Link
-              href="/admin/login"
+              href={backToLoginPath}
               className="text-orange-500 hover:text-orange-600 font-medium"
             >
               Back to Login
@@ -107,4 +116,6 @@ export default function ForgotPasswordForm() {
       </div>
     </div>
   );
-}
+};
+
+export default ForgotPasswordForm;
