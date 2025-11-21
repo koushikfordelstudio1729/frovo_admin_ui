@@ -3,7 +3,7 @@
 import UserProfile from "@/components/profile/UserProfile";
 import { MOCK_USER_PROFILE } from "@/config/admin/user-profile.config";
 
-export default function SuperAdminProfilePage() {
+export default function VendorProfilePage() {
   const user = MOCK_USER_PROFILE;
 
   return (

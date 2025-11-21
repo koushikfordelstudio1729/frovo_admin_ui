@@ -41,7 +41,7 @@ const VendorStatus = () => {
         <button onClick={() => router.back()} className="cursor-pointer">
           <ArrowLeft className="w-5 h-5 text-gray-800" />
         </button>
-        <Label className="text-2xl font-semibold">Vendor Registration</Label>
+        <Label className="text-2xl font-semibold">Status</Label>
       </div>
 
       <div className="mt-6 p-6 bg-white rounded-lg">
@@ -107,7 +107,7 @@ const VendorStatus = () => {
           <Button
             className="px-10 rounded-lg"
             onClick={() =>
-              router.push("/vendor/vendor-registration/upload-documents")
+              router.push("/vendor/vendor-registration/documents-contract")
             }
           >
             Next

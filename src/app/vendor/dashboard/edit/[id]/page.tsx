@@ -13,8 +13,8 @@ const categoryOptions = [
 ];
 
 const statusOptions = [
-  { label: "Active", value: "active" },
-  { label: "Inactive", value: "inactive" },
+  { label: "Verified", value: "verified" },
+  { label: "Verification", value: "verification" },
   { label: "Pending", value: "pending" },
 ];
 

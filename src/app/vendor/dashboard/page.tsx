@@ -21,8 +21,8 @@ const nameOptions = [
 ];
 
 const statusOptions = [
-  { label: "Active", value: "active" },
-  { label: "Inactive", value: "inactive" },
+  { label: "Verified", value: "verified" },
+  { label: "Verification", value: "verification" },
   { label: "Pending", value: "pending" },
 ];
 
@@ -75,7 +75,13 @@ const Dashboard = () => {
   const renderCell = (key: string, value: any, row?: Record<string, any>) => {
     // Status Badge
     if (key === "status") {
-      const variant = value.toLowerCase() as "active" | "inactive" | "pending";
+      const statusMap: Record<string, "approved" | "warning" | "rejected"> = {
+        Verified: "approved",
+        Verification: "warning",
+        Pending: "rejected",
+      };
+
+      const variant = statusMap[value] || "pending";
       return <Badge label={value} variant={variant} />;
     }
 

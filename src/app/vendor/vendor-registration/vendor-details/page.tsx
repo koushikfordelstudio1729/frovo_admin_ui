@@ -42,11 +42,11 @@ const VendorRegistration = () => {
         >
           <ArrowLeft className="w-5 h-5 text-gray-800" />
         </button>
-        <Label className="text-2xl font-semibold">Vendor Registration</Label>
+        <Label className="text-2xl font-semibold">Vendor Details</Label>
       </div>
       <div className="max-h-full mt-6 p-6 bg-white rounded-lg">
-        {/* Row 1 */}
         <div className="grid grid-cols-2 gap-12">
+          {/* Vendor Name */}
           <Input
             label="Vendor Name"
             variant="orange"
@@ -54,6 +54,7 @@ const VendorRegistration = () => {
             value={vendorName}
             onChange={(e) => setVendorName(e.target.value)}
           />
+          {/* Vendor Billing Name */}
           <Input
             label="Vendor Billing Name"
             variant="orange"
@@ -62,8 +63,8 @@ const VendorRegistration = () => {
             onChange={(e) => setVendorBillingName(e.target.value)}
           />
         </div>
-        {/* Row 2 */}
         <div className="mt-6 grid grid-cols-2 gap-12">
+          {/* Vendor ID */}
           <Input
             label="Vendor ID"
             variant="orange"
@@ -71,6 +72,7 @@ const VendorRegistration = () => {
             value={vendorId}
             onChange={(e) => setVendorId(e.target.value)}
           />
+          {/* Vendor Type */}
           <Select
             label="Vendor Type"
             variant="orange"
@@ -81,7 +83,7 @@ const VendorRegistration = () => {
             selectClassName="py-4 px-4"
           />
         </div>
-        {/* Row 3 */}
+        {/* Vendor Category */}
         <div className="mt-6 grid grid-cols-2 gap-12">
           <Select
             label="Vendor Category"
@@ -92,6 +94,7 @@ const VendorRegistration = () => {
             placeholder="Select vendor category"
             selectClassName="py-4 px-4"
           />
+          {/* Primary Contact Name */}
           <Input
             label="Primary Contact Name"
             variant="orange"
@@ -100,8 +103,8 @@ const VendorRegistration = () => {
             onChange={(e) => setPrimaryContact(e.target.value)}
           />
         </div>
-        {/* Row 4 */}
         <div className="mt-6 grid grid-cols-2 gap-12">
+          {/* Contact Phone */}
           <Input
             label="Contact Phone"
             variant="orange"
@@ -109,6 +112,7 @@ const VendorRegistration = () => {
             value={contactPhone}
             onChange={(e) => setContactPhone(e.target.value)}
           />
+          {/* Email ID of Vendor */}
           <Input
             label="Email ID of Vendor"
             variant="orange"
@@ -117,8 +121,8 @@ const VendorRegistration = () => {
             onChange={(e) => setVendorEmail(e.target.value)}
           />
         </div>
-        {/* Row 5: Address */}
         <div className="mt-6 grid grid-cols-2 gap-12">
+          {/* Address (Billing) */}
           <Textarea
             label="Address (Billing)"
             variant="orange"
@@ -132,7 +136,7 @@ const VendorRegistration = () => {
           <Button
             className="px-10 rounded-lg"
             onClick={() =>
-              router.push("/vendor/vendor-registration/financials")
+              router.push("/vendor/vendor-registration/financials-compliance")
             }
           >
             Next

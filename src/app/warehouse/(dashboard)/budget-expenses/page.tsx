@@ -69,7 +69,7 @@ export default function ExpenseTable() {
         <Badge
           variant={value === "Approve" ? "active" : "warning"}
           label={value}
-          className="px-3 py-3 text-sm font-semibold rounded-full"
+          className="px-3 py-3 text-sm rounded-full"
           size="md"
         />
       );
@@ -80,7 +80,8 @@ export default function ExpenseTable() {
           <Button
             title="Edit"
             size="sm"
-            className="bg-blue-500 text-white rounded-md px-4 py-1"
+            variant="edit"
+            className="text-white rounded-md px-4 py-1"
             onClick={() => handleEdit(row)}
           >
             Edit
@@ -88,6 +89,7 @@ export default function ExpenseTable() {
           <Button
             title="Delete"
             size="sm"
+            variant="reject"
             className="bg-gray-800 text-white rounded-md px-4 py-1"
             onClick={() => handleDelete(row)}
           >

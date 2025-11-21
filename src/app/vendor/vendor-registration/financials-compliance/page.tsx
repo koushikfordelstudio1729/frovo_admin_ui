@@ -5,14 +5,23 @@ import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+const paymentTermsOptions = [
+  { label: "Net 7", value: "net7" },
+  { label: "Net 15", value: "net15" },
+  { label: "Net 30", value: "net30" },
+];
+
 const billingCycleOptions = [
   { label: "Weekly", value: "weekly" },
   { label: "Monthly", value: "monthly" },
   { label: "Per PO", value: "per_po" },
 ];
 
-const VendorCompliance = () => {
+const VendorFinancialsAndCompliance = () => {
   const router = useRouter();
+  const [baVendor, setBaVendor] = useState("");
+  const [ifscCode, setifscCode] = useState("");
+  const [paymentTerms, setPaymentTerms] = useState("");
   const [gstDetails, setGstDetails] = useState("");
   const [panNumber, setPanNumber] = useState("");
   const [tdsRate, setTdsRate] = useState("");
@@ -29,10 +38,48 @@ const VendorCompliance = () => {
         >
           <ArrowLeft className="w-5 h-5 text-gray-800" />
         </button>
-        <Label className="text-2xl font-semibold">Vendor Registration</Label>
+        <Label className="text-2xl font-semibold">Finance & Compliance</Label>
       </div>
       <div className="max-h-full mt-6 p-6 bg-white rounded-lg">
-        <div className="grid grid-cols-2 gap-12">
+        {/* Finance Sections */}
+        <Label className="text-orange-500 text-2xl font-semibold">
+          Finance
+        </Label>
+        <div className="grid grid-cols-2 mt-6 gap-12">
+          {/* Bank Account of Vendor*/}
+          <Input
+            label="Bank Account of Vendor"
+            variant="orange"
+            placeholder="Enter Bank Account of Vendor"
+            value={baVendor}
+            onChange={(e) => setBaVendor(e.target.value)}
+          />
+          {/* Vendor Billing Name*/}
+          <Input
+            label="Vendor Billing Name"
+            variant="orange"
+            placeholder="Enter vendor billing name"
+            value={ifscCode}
+            onChange={(e) => setifscCode(e.target.value)}
+          />
+        </div>
+        <div className="mt-6 w-lg">
+          <Select
+            label="Payment Terms"
+            variant="orange"
+            options={paymentTermsOptions}
+            value={paymentTerms}
+            onChange={(value) => setPaymentTerms(value)}
+            selectClassName="py-4 px-4"
+          />
+        </div>
+        {/* Seperator Line */}
+        <div className="w-full border-2 my-12"></div>
+        {/* Contract Terms */}
+        <Label className="text-orange-500 text-2xl font-semibold">
+          Contract Terms
+        </Label>
+        <div className="grid grid-cols-2 mt-6 gap-12">
           {/* GST Details */}
           <Input
             label="GST Details"
@@ -83,4 +130,4 @@ const VendorCompliance = () => {
   );
 };
 
-export default VendorCompliance;
+export default VendorFinancialsAndCompliance;

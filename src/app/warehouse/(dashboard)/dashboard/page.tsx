@@ -10,11 +10,13 @@ import {
   lowStockData,
 } from "@/config/warehouse";
 import {
-  ClipboardCheck,
   TriangleAlert,
   Eye,
   Pencil,
   Trash2,
+  ArrowBigDown,
+  ArrowBigUp,
+  ClipboardClock,
 } from "lucide-react";
 
 const statCards = [
@@ -176,19 +178,19 @@ export default function Dashboard() {
         <StatCard
           title="Inbound"
           count={"120"}
-          icon={ClipboardCheck}
+          icon={ArrowBigDown}
           className="p-8 w-sm"
         />
         <StatCard
           title="Outbound"
-          count={"120"}
-          icon={ClipboardCheck}
+          count={"80"}
+          icon={ArrowBigUp}
           className="p-8 w-sm"
         />
         <StatCard
-          title="Pendin QC"
-          count={"120"}
-          icon={ClipboardCheck}
+          title="Pending QC"
+          count={"53"}
+          icon={ClipboardClock}
           className="p-8 w-sm"
         />
       </div>

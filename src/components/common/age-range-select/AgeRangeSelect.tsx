@@ -9,9 +9,9 @@ interface AgeRangeSelectProps {
 }
 
 const AGE_OPTIONS = [
-  { value: "> 60", label: ">60 Days", color: "bg-red-500 text-white" },
+  { value: "> 60", label: ">60 Days", color: "bg-green-500 text-white" },
   { value: "> 45", label: ">45 Days", color: "bg-orange-400 text-white" },
-  { value: "15", label: "15 Days", color: "bg-green-500 text-white" },
+  { value: "15", label: "15 Days", color: "bg-red-500 text-white" },
 ];
 
 export default function AgeRangeSelect({

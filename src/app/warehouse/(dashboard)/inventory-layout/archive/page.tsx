@@ -15,25 +15,11 @@ const batchColumns = [
   { key: "actions", label: "Actions" },
 ];
 
-const quarantineColumns = [
-  { key: "sku", label: "SKU" },
-  { key: "qty", label: "Qty" },
-  { key: "expiry", label: "Expiry" },
-];
-
 export default function ArchivePage() {
   const router = useRouter();
   const [ageRange, setAgeRange] = useState(">60");
-  const {
-    rows,
-    currentPage,
-    totalPages,
-    handlePageChange,
-    filters,
-    handleFilterChange,
-    expirySoon,
-    quarantineData,
-  } = useInventoryLayout();
+  const { rows, currentPage, totalPages, handlePageChange } =
+    useInventoryLayout();
 
   const handleArchive = (row: any) => {
     console.log("Archive:", row);
@@ -42,10 +28,10 @@ export default function ArchivePage() {
   const renderBatchCell = (key: string, value: any, row: any) => {
     if (key === "age") {
       if (value <= 15)
-        return <Badge label={`${value} Days`} variant="active" size="md" />;
+        return <Badge label={`${value} Days`} variant="rejected" size="md" />;
       if (value > 15 && value <= 45)
         return <Badge label={`${value} Days`} variant="warning" size="md" />;
-      return <Badge label={`${value} Days`} variant="rejected" size="md" />;
+      return <Badge label={`${value} Days`} variant="approved" size="md" />;
     }
 
     if (key === "actions") {

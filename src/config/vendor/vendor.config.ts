@@ -19,20 +19,19 @@ export const vendorNavigation: VendorMenuItem[] = [
         label: "Vendor Details",
         href: "/vendor/vendor-registration/vendor-details",
       },
-      { label: "Financials", href: "/vendor/vendor-registration/financials" },
-      { label: "Compliance", href: "/vendor/vendor-registration/compliance" },
+      {
+        label: "Financials & Compliance",
+        href: "/vendor/vendor-registration/financials-compliance",
+      },
       {
         label: "Status",
         href: "/vendor/vendor-registration/status",
       },
       {
-        label: "Document Uploads",
-        href: "/vendor/vendor-registration/upload-documents",
+        label: "Document Uploads & Contract Details",
+        href: "/vendor/vendor-registration/documents-contract",
       },
-      {
-        label: "Contract Details",
-        href: "/vendor/vendor-registration/contract-details",
-      },
+
       {
         label: "System Access",
         href: "/vendor/vendor-registration/system-access",
@@ -52,11 +51,11 @@ export const vendorNavigation: VendorMenuItem[] = [
   {
     label: "User Profile",
     icon: "user",
-    href: "/vendor/profile",
+    href: "/vendor/user-profile",
   },
   {
     label: "Security Settings",
     icon: "shield",
-    href: "/vendor/security",
+    href: "/vendor/security-security",
   },
 ];

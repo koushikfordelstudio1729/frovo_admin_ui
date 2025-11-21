@@ -42,10 +42,10 @@ export default function InventoryLayoutPage() {
   const renderBatchCell = (key: string, value: any, row: any) => {
     if (key === "age") {
       if (value <= 15)
-        return <Badge label={`${value} Days`} variant="active" size="md" />;
+        return <Badge label={`${value} Days`} variant="rejected" size="md" />;
       if (value > 15 && value <= 45)
         return <Badge label={`${value} Days`} variant="warning" size="md" />;
-      return <Badge label={`${value} Days`} variant="rejected" size="md" />;
+      return <Badge label={`${value} Days`} variant="approved" size="md" />;
     }
 
     if (key === "actions") {
