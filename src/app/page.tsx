@@ -9,7 +9,7 @@ export default function Home() {
   const { isAuthenticated } = useAppSelector((state) => state.auth);
 
   useEffect(() => {
-    router.push("/admin/login");
+    router.push("/login");
   }, [router]);
 
   return (
