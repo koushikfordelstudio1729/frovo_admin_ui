@@ -26,6 +26,8 @@ export const VerifyOtpForm: React.FC<VerifyOtpFormProps> = ({
   const [success, setSuccess] = useState("");
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
 
+  const isOtpValid = otp.join("").length === 6;
+
   const handleChange = (val: string, idx: number) => {
     if (!/^[0-9]?$/.test(val)) return;
 
@@ -112,9 +114,8 @@ export const VerifyOtpForm: React.FC<VerifyOtpFormProps> = ({
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <p className="text-sm text-gray-600 text-left">Enter OTP</p>
-
-          <div className="flex gap-3 justify-center mt-2 mb-4">
+          <p className="text-md mx-1 text-gray-600 text-left">Enter OTP</p>
+          <div className="flex gap-3 justify-center mb-4">
             {otp.map((digit, idx) => (
               <input
                 key={idx}
@@ -128,8 +129,8 @@ export const VerifyOtpForm: React.FC<VerifyOtpFormProps> = ({
                 onChange={(e) => handleChange(e.target.value, idx)}
                 onKeyDown={(e) => handleKeyDown(e, idx)}
                 className="
-                  w-12 h-12 
-                  border border-gray-300 
+                  w-14 h-14 
+                  border-2 border-gray-300 
                   rounded-lg 
                   text-center 
                   text-lg 
@@ -145,18 +146,19 @@ export const VerifyOtpForm: React.FC<VerifyOtpFormProps> = ({
             ))}
           </div>
 
-          <Button
-            type="submit"
-            variant="primary"
-            size="lg"
-            fullWidth
-            isLoading={isLoading}
-            disabled={isLoading}
-            className="rounded-lg"
-          >
-            Verify OTP
-          </Button>
-
+          <div className="mt-8">
+            <Button
+              type="submit"
+              variant="primary"
+              size="lg"
+              fullWidth
+              isLoading={isLoading}
+              disabled={!isOtpValid || isLoading}
+              className="rounded-lg transition-all duration-200"
+            >
+              Verify OTP
+            </Button>
+          </div>
           <p className="text-sm text-gray-600 mt-2 text-center">
             Didn't receive OTP?{" "}
             <button

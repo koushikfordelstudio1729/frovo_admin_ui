@@ -2,10 +2,14 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { Button, Checkbox, Input } from "@/components/common";
+import {
+  Button,
+  Checkbox,
+  Input,
+  PasswordToggleButton,
+} from "@/components/common";
 
 export interface User {
   email: string;
@@ -51,6 +55,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       setEmail(savedEmail);
     }
   }, []);
+
+  const isFormValid = email.trim() !== "" && password !== ""; 
 
   const validateForm = (): boolean => {
     const newErrors: { email?: string; password?: string } = {};
@@ -177,7 +183,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
               variant="orange"
               type="email"
               label="Email"
-              placeholder="name@frovo.in"
+              placeholder="Enter email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               error={errors.email}
@@ -191,7 +197,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
               variant="orange"
               type={showPassword ? "text" : "password"}
               label="Password"
-              placeholder="••••••••••••••••••"
+              placeholder="Enter password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               error={errors.password}
@@ -199,14 +205,10 @@ export const LoginForm: React.FC<LoginFormProps> = ({
               fullWidth
               required
               rightIcon={
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="text-gray-400 hover:text-gray-600 transition-colors focus:outline-none"
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                >
-                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                </button>
+                <PasswordToggleButton
+                  isVisible={showPassword}
+                  onToggle={() => setShowPassword(!showPassword)}
+                />
               }
             />
 
@@ -234,7 +236,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
               size="lg"
               fullWidth
               isLoading={isLoading}
-              disabled={isLoading}
+              disabled={!isFormValid || isLoading}
               className="rounded-lg"
             >
               Login

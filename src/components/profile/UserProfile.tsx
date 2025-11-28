@@ -36,16 +36,15 @@ const UserProfile: React.FC<UserProfileProps> = ({
 }) => {
   const router = useRouter();
 
-  // 🔐 Redirect function (works even without parent)
+  //  Redirect to change password
   const handleChangePassword = () => {
     router.push("/userprofile-password");
   };
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
-      {/* Top Section (Back + Title + Change Password Button) */}
       <div className="mb-8 flex items-center justify-between w-full">
-        {/* Left (Back + Name) */}
+        {/* Title and Back ) */}
         <div className="flex items-center gap-3">
           <button
             className="text-gray-700 hover:text-gray-900 p-1"
@@ -56,11 +55,11 @@ const UserProfile: React.FC<UserProfileProps> = ({
           <h1 className="text-2xl font-bold text-gray-900">{name}</h1>
         </div>
 
-        {/* Right — Change Password Button */}
+        {/* Change Password Button */}
         <Button
           variant="primary"
           className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg"
-          onClick={handleChangePassword} // ← FIXED HERE
+          onClick={handleChangePassword}
         >
           Change Password
         </Button>
@@ -85,8 +84,12 @@ const UserProfile: React.FC<UserProfileProps> = ({
           <h3 className="text-2xl font-medium text-gray-900 mb-4">Role List</h3>
           <div className="w-sm rounded-lg">
             <div className="grid grid-cols-2 bg-orange-600 text-white font-bold">
-              <div className="px-6 py-4 text-black font-medium text-xl">Role</div>
-              <div className="px-6 py-4 text-black font-medium text-xl">Scope</div>
+              <div className="px-6 py-4 text-black font-medium text-xl">
+                Role
+              </div>
+              <div className="px-6 py-4 text-black font-medium text-xl">
+                Scope
+              </div>
             </div>
             {roles.map((role, index) => (
               <div

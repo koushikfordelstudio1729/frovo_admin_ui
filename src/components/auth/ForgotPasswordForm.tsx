@@ -24,6 +24,8 @@ export const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({
   const [error, setError] = useState("");
   const router = useRouter();
 
+  const isFormValid = emailOrPhone.trim() !== "";
+
   const isValidEmail = (value: string) =>
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
   const isValidPhone = (value: string) => /^[0-9]{10}$/.test(value);
@@ -97,8 +99,8 @@ export const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({
             size="lg"
             fullWidth
             isLoading={isLoading}
-            disabled={isLoading}
-            className="rounded-lg"
+            disabled={!isFormValid || isLoading}
+            className="rounded-lg transition-all duration-200"
           >
             Send OTP
           </Button>

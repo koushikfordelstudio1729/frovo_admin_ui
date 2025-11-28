@@ -1,4 +1,3 @@
-// src/components/auth/ResetPasswordSuccess.tsx
 "use client";
 
 import React from "react";
