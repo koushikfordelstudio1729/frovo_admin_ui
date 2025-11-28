@@ -12,31 +12,9 @@ export const vendorNavigation: VendorMenuItem[] = [
     href: "/vendor/dashboard",
   },
   {
-    label: "Vendor Registration",
+    label: "Vendor Onboard",
     icon: "userPlus",
-    children: [
-      {
-        label: "Vendor Details",
-        href: "/vendor/vendor-registration/vendor-details",
-      },
-      {
-        label: "Financials & Compliance",
-        href: "/vendor/vendor-registration/financials-compliance",
-      },
-      {
-        label: "Status",
-        href: "/vendor/vendor-registration/status",
-      },
-      {
-        label: "Document Uploads & Contract Details",
-        href: "/vendor/vendor-registration/documents-contract",
-      },
-
-      {
-        label: "System Access",
-        href: "/vendor/vendor-registration/system-access",
-      },
-    ],
+    href: "/vendor/vendor-onboard",
   },
   {
     label: "Audit Trails",
