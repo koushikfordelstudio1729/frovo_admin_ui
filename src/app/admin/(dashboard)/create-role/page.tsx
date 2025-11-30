@@ -78,7 +78,7 @@ const CreateRoleForm: React.FC = () => {
           module: string;
           action: string;
         }> } };
-      }>(apiConfig.endpoints.permissions);
+      }>(apiConfig.endpoints.permissions.list);
 
       if (response.data.success) {
         // Handle both response formats

@@ -27,7 +27,11 @@ export const apiConfig = {
       profile: '/user/profile',
       updateProfile: '/user/profile',
     },
-    permissions: '/permissions',
+    permissions: {
+      list: '/permissions',
+      search: '/permissions/search',
+      byModule: (module: string) => `/permissions/module/${module}`,
+    },
     roles: '/roles',
     departments: '/departments',
     users: {

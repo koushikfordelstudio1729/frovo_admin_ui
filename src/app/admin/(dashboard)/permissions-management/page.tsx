@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Search, Shield, TrendingUp, Users, Key } from "lucide-react";
 import { api } from "@/services/api";
-import { apiConfig } from "@/config";
+import { apiConfig } from "@/config/admin";
 import { AxiosError } from "axios";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 
@@ -54,7 +54,7 @@ export default function PermissionsManagement() {
   const fetchPermissions = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await api.get<PermissionsResponse>(apiConfig.endpoints.permissions);
+      const response = await api.get<PermissionsResponse>(apiConfig.endpoints.permissions.list);
 
       if (response.data.success) {
         setPermissions(response.data.data.permissions);
@@ -93,7 +93,7 @@ export default function PermissionsManagement() {
       const response = await api.get<{
         success: boolean;
         data: Permission[];
-      }>(`${apiConfig.endpoints.permissions}/search?q=${encodeURIComponent(query)}`);
+      }>(`${apiConfig.endpoints.permissions.search}?q=${encodeURIComponent(query)}`);
 
       if (response.data.success) {
         // Group the search results
@@ -121,7 +121,7 @@ export default function PermissionsManagement() {
       const response = await api.get<{
         success: boolean;
         data: Permission[];
-      }>(`${apiConfig.endpoints.permissions}/module/${module}`);
+      }>(apiConfig.endpoints.permissions.byModule(module));
 
       if (response.data.success) {
         const grouped: { [group: string]: Permission[] } = {};
