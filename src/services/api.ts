@@ -1,5 +1,5 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
-import { apiConfig } from '../config';
+import { apiConfig } from '@/config/admin';
 import { storageUtils } from '../utils';
 
 export const api = axios.create({

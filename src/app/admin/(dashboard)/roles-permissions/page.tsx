@@ -3,7 +3,7 @@
 import RoleStatsGrid from "@/components/roles-permissions/RoleStatsGrid";
 import RoleTableHeader from "@/components/roles-permissions/RoleTableHeader";
 import RolesDataTable from "@/components/roles-permissions/RolesDataTable";
-import { useRoles } from "@/hooks/useRoles";
+import { useRoles } from "@/hooks/admin/useRoles";
 
 export default function RolesPermissionsPage() {
   const {

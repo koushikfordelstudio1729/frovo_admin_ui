@@ -11,7 +11,7 @@ interface FileUploadProps {
 }
 
 export default function FileUpload({
-  label = "Upload Bill",
+  label = "",
   file,
   onChange,
   accept = ".jpg,.jpeg,.png,.pdf",
@@ -19,7 +19,7 @@ export default function FileUpload({
   const inputRef = useRef<HTMLInputElement>(null);
 
   return (
-    <div className="w-full max-w-xs">
+    <div className="w-full max-w-md">
       <label className="text-base font-semibold text-gray-900 mb-3 block">
         {label}
       </label>
@@ -74,7 +74,6 @@ export default function FileUpload({
             </button>
           </div>
         )}
-        
       </div>
     </div>
   );

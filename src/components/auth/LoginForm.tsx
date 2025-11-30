@@ -2,22 +2,52 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { Button, Checkbox, Input } from "@/components/common";
+import PasswordToggleButton from "@/components/common/PasswordToggleButton";
 import { authAPI } from "@/services/authAPI";
 import { storageUtils } from "@/utils";
+import type { User as AuthUser } from "@/types/auth.types";
 
-interface LoginFormProps {
+export interface User {
+  email: string;
+  password: string;
+  role: string;
+  name: string;
   redirectPath: string;
-  signupLink: string;
 }
 
-const LoginForm: React.FC<LoginFormProps> = ({ redirectPath, signupLink }) => {
-  const router = useRouter();
+export interface LoginFormProps {
+  users: User[];
+  forgotPasswordPath?: string;
+  logoUrl?: string;
+  illustrationUrl?: string;
+  appName?: string;
+}
 
-  // Form State
+// Helper function to get redirect path based on user role
+const getRedirectPath = (role: string): string => {
+  const rolePathMap: Record<string, string> = {
+    super_admin: "/admin/roles-permissions",
+    admin: "/admin/dashboard",
+    warehouse_admin: "/warehouse/dashboard",
+    warehouse: "/warehouse/dashboard",
+    vendor_admin: "/vendor/dashboard",
+    vendor: "/vendor/dashboard",
+  };
+
+  return rolePathMap[role] || "/admin/dashboard";
+};
+
+export const LoginForm: React.FC<LoginFormProps> = ({
+  users,
+  forgotPasswordPath = "/forgot-password",
+  logoUrl = "/images/logo.svg",
+  illustrationUrl = "/images/login_page_vm.png",
+  appName = "Frovo",
+}) => {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -33,28 +63,38 @@ const LoginForm: React.FC<LoginFormProps> = ({ redirectPath, signupLink }) => {
   useEffect(() => {
     const checkAuth = () => {
       const token = storageUtils.getToken();
+      const user = storageUtils.getUser<AuthUser>();
 
-      if (token) {
+      if (token && user) {
         // User is already logged in, redirect to dashboard
-        router.push(redirectPath);
+        const userRole = user.roles && user.roles.length > 0 ? user.roles[0].systemRole : 'admin';
+        const path = getRedirectPath(userRole);
+        router.push(path);
       } else {
         setIsCheckingAuth(false);
       }
     };
 
     checkAuth();
-  }, [router, redirectPath]);
+  }, [router]);
 
-  // Handle form submission
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    setErrors({});
+  // Load remembered email on component mount
+  useEffect(() => {
+    const remembered = localStorage.getItem("rememberMe");
+    const savedEmail = localStorage.getItem("email");
 
-    // Validation
+    if (remembered === "true" && savedEmail) {
+      setRememberMe(true);
+      setEmail(savedEmail);
+    }
+  }, []);
+
+  const isFormValid = email.trim() !== "" && password !== ""; 
+
+  const validateForm = (): boolean => {
     const newErrors: { email?: string; password?: string } = {};
 
-    if (!email) {
+    if (!email.trim()) {
       newErrors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(email)) {
       newErrors.email = "Please enter a valid email address";
@@ -64,8 +104,15 @@ const LoginForm: React.FC<LoginFormProps> = ({ redirectPath, signupLink }) => {
       newErrors.password = "Password is required";
     }
 
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+
+    if (!validateForm()) {
       return;
     }
 
@@ -87,7 +134,10 @@ const LoginForm: React.FC<LoginFormProps> = ({ redirectPath, signupLink }) => {
           localStorage.setItem("email", email);
         }
 
-        router.push(redirectPath);
+        // Redirect based on user role
+        const userRole = user.roles && user.roles.length > 0 ? user.roles[0].systemRole : 'admin';
+        const path = getRedirectPath(userRole);
+        router.push(path);
       } else {
         setError(response.data.message || "Login failed. Please try again.");
       }
@@ -119,8 +169,8 @@ const LoginForm: React.FC<LoginFormProps> = ({ redirectPath, signupLink }) => {
       {/* Logo */}
       <div className="absolute top-0 left-34 p-6 mt-4">
         <Image
-          src="/images/logo.svg"
-          alt="Frovo Logo"
+          src={logoUrl}
+          alt={`${appName} Logo`}
           width={150}
           height={50}
           priority
@@ -130,24 +180,39 @@ const LoginForm: React.FC<LoginFormProps> = ({ redirectPath, signupLink }) => {
       {/* Form Section */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
         <div className="w-full max-w-md">
-          {/* Title */}
           <h2 className="text-3xl font-bold text-gray-900 mb-8">Login</h2>
 
-          {/* General Error Message */}
+          {/* Test Credentials Banner */}
+          {users.length > 0 && (
+            <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-sm font-semibold text-blue-900 mb-2">
+                Test Credentials:
+              </p>
+              <ul className="text-xs text-blue-800 space-y-1">
+                {users.map((user) => (
+                  <li key={user.role}>
+                    • {user.name}: {user.email} / {user.password}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Error Message */}
           {error && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
               {error}
             </div>
           )}
 
-          {/* Form */}
+          {/* Login Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Email Field */}
             <Input
               variant="orange"
               type="email"
-              label="Username"
-              placeholder="name@frovo.in"
+              label="Email"
+              placeholder="Enter email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               error={errors.email}
@@ -156,12 +221,12 @@ const LoginForm: React.FC<LoginFormProps> = ({ redirectPath, signupLink }) => {
               required
             />
 
-            {/* Password Field with Eye Icon */}
+            {/* Password Field */}
             <Input
               variant="orange"
               type={showPassword ? "text" : "password"}
               label="Password"
-              placeholder="••••••••••••••••••"
+              placeholder="Enter password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               error={errors.password}
@@ -169,14 +234,10 @@ const LoginForm: React.FC<LoginFormProps> = ({ redirectPath, signupLink }) => {
               fullWidth
               required
               rightIcon={
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="text-gray-400 hover:text-gray-600 transition-colors focus:outline-none"
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                >
-                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                </button>
+                <PasswordToggleButton
+                  isVisible={showPassword}
+                  onToggle={() => setShowPassword(!showPassword)}
+                />
               }
             />
 
@@ -190,7 +251,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ redirectPath, signupLink }) => {
               />
 
               <Link
-                href="/forgot-password"
+                href={forgotPasswordPath}
                 className="text-sm text-orange-500 hover:text-orange-600 transition-colors"
               >
                 Forgot password?
@@ -204,34 +265,21 @@ const LoginForm: React.FC<LoginFormProps> = ({ redirectPath, signupLink }) => {
               size="lg"
               fullWidth
               isLoading={isLoading}
-              disabled={isLoading}
+              disabled={!isFormValid || isLoading}
               className="rounded-lg"
             >
               Login
             </Button>
-
-            {/* Footer Content */}
-            <div className="mt-4 text-left">
-              <p className="text-sm text-gray-600">
-                Don&apos;t have an account?{" "}
-                <Link
-                  href={signupLink}
-                  className="text-orange-500 hover:text-orange-600 font-medium transition-colors"
-                >
-                  Sign up
-                </Link>
-              </p>
-            </div>
           </form>
         </div>
       </div>
 
-      {/* Vending Machine Illustration */}
+      {/* Illustration Section */}
       <div className="hidden lg:flex lg:w-1/2 items-center justify-center p-12">
         <div className="w-full h-full flex items-center justify-center">
           <Image
-            src="/images/login_page_vm.png"
-            alt="Frovo Vending Machine"
+            src={illustrationUrl}
+            alt={`${appName} Illustration`}
             width={500}
             height={700}
             priority

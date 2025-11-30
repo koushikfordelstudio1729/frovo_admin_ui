@@ -10,11 +10,13 @@ import {
   lowStockData,
 } from "@/config/warehouse";
 import {
-  ClipboardCheck,
   TriangleAlert,
   Eye,
   Pencil,
   Trash2,
+  ArrowBigDown,
+  ArrowBigUp,
+  ClipboardClock,
 } from "lucide-react";
 
 const statCards = [
@@ -67,7 +69,7 @@ const lowStockColumns = [
 ];
 
 export default function Dashboard() {
-  const [date, setDate] = useState("2025-01-18");
+  const [date, setDate] = useState("");
   const [category, setCategory] = useState("");
   const [partner, setPartner] = useState("");
   const [warehouse, setWarehouse] = useState("");
@@ -175,20 +177,20 @@ export default function Dashboard() {
       <div className=" flex flex-row gap-6 mt-6">
         <StatCard
           title="Inbound"
-          count={120}
-          icon={ClipboardCheck}
+          count={"120"}
+          icon={ArrowBigDown}
           className="p-8 w-sm"
         />
         <StatCard
           title="Outbound"
-          count={120}
-          icon={ClipboardCheck}
+          count={"80"}
+          icon={ArrowBigUp}
           className="p-8 w-sm"
         />
         <StatCard
-          title="Pendin QC"
-          count={120}
-          icon={ClipboardCheck}
+          title="Pending QC"
+          count={"53"}
+          icon={ClipboardClock}
           className="p-8 w-sm"
         />
       </div>

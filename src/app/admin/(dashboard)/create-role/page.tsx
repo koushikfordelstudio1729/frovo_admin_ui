@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect, useCallback } from "react";
 import { Button, Input, Textarea, Select } from "@/components/common";
 import { api } from "@/services/api";
-import { apiConfig } from "@/config";
+import { apiConfig } from "@/config/admin";
 
 interface Permission {
   _id: string;

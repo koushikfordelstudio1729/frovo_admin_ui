@@ -9,11 +9,14 @@ export default function Home() {
   const { isAuthenticated } = useAppSelector((state) => state.auth);
 
   useEffect(() => {
-    router.push("/admin/login");
+    router.push("/login");
   }, [router]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center text-black bg-gray-50">
+    <div
+      className="min-h-screen
+     flex items-center justify-center text-black bg-gray-50"
+    >
       <div className="text-lg">Redirecting...</div>
     </div>
   );

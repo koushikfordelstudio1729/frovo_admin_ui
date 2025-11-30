@@ -1,5 +1,5 @@
 import React from "react";
-import { useAuth } from "@/hooks";
+import { useAuth } from "@/hooks/admin";
 import Button from "@/components/common/Button";
 
 interface HeaderProps {

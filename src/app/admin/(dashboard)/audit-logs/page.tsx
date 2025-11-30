@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Search, Download, Activity, Users, FileText, TrendingUp, Eye, Calendar } from "lucide-react";
 import { Button, Badge, Pagination } from "@/components/common";
 import { api } from "@/services/api";
-import { apiConfig } from "@/config";
+import { apiConfig } from "@/config/admin";
 import { AxiosError } from "axios";
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 

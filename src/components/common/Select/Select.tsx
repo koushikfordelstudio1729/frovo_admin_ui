@@ -61,7 +61,7 @@ const Select: React.FC<SelectProps> = ({
   const currentVariant = variantStyles[variant];
 
   const baseSelectClasses =
-    "block border rounded-lg shadow-sm focus:outline-none transition-colors appearance-none pr-12 text-black";
+    "block border-2 rounded-lg shadow-sm focus:outline-none transition-colors appearance-none pr-12 text-black";
 
   const errorClasses = hasError
     ? "border-red-300 text-red-900 focus:ring-red-500 focus:border-red-500"

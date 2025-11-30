@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Search, Eye, CheckCircle, XCircle, Clock, Plus, X, User, Calendar } from "lucide-react";
 import { Button, Badge, Pagination, Input, Textarea } from "@/components/common";
 import { api } from "@/services/api";
-import { apiConfig } from "@/config";
+import { apiConfig } from "@/config/admin";
 import { AxiosError } from "axios";
 
 interface Requester {

@@ -1,48 +1,48 @@
-import { appConfig } from '../config';
+import { appConfig } from "../config/admin";
 
 class StorageUtils {
-  private isClient = typeof window !== 'undefined';
+  private isClient = typeof window !== "undefined";
 
   setItem(key: string, value: unknown): void {
     if (!this.isClient) return;
-    
+
     try {
       const serializedValue = JSON.stringify(value);
       localStorage.setItem(key, serializedValue);
     } catch (error) {
-      console.error('Error saving to localStorage:', error);
+      console.error("Error saving to localStorage:", error);
     }
   }
 
   getItem<T>(key: string, defaultValue?: T): T | null {
     if (!this.isClient) return defaultValue || null;
-    
+
     try {
       const item = localStorage.getItem(key);
       return item ? JSON.parse(item) : defaultValue || null;
     } catch (error) {
-      console.error('Error reading from localStorage:', error);
+      console.error("Error reading from localStorage:", error);
       return defaultValue || null;
     }
   }
 
   removeItem(key: string): void {
     if (!this.isClient) return;
-    
+
     try {
       localStorage.removeItem(key);
     } catch (error) {
-      console.error('Error removing from localStorage:', error);
+      console.error("Error removing from localStorage:", error);
     }
   }
 
   clear(): void {
     if (!this.isClient) return;
-    
+
     try {
       localStorage.clear();
     } catch (error) {
-      console.error('Error clearing localStorage:', error);
+      console.error("Error clearing localStorage:", error);
     }
   }
 

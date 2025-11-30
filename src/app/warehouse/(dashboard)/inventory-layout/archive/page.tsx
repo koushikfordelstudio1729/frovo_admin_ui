@@ -2,7 +2,7 @@
 import { Button, Label, Table, Badge, Pagination } from "@/components";
 import { FileArchiveIcon, ArrowDownToLine, ArrowLeft } from "lucide-react";
 import { useInventoryLayout } from "@/hooks/warehouse/useInventoryLayout";
-import AgeRangeSelect from "@/components/age-range-select/AgeRangeSelect";
+import AgeRangeSelect from "@/components/common/age-range-select/AgeRangeSelect";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -15,25 +15,11 @@ const batchColumns = [
   { key: "actions", label: "Actions" },
 ];
 
-const quarantineColumns = [
-  { key: "sku", label: "SKU" },
-  { key: "qty", label: "Qty" },
-  { key: "expiry", label: "Expiry" },
-];
-
 export default function ArchivePage() {
   const router = useRouter();
   const [ageRange, setAgeRange] = useState(">60");
-  const {
-    rows,
-    currentPage,
-    totalPages,
-    handlePageChange,
-    filters,
-    handleFilterChange,
-    expirySoon,
-    quarantineData,
-  } = useInventoryLayout();
+  const { rows, currentPage, totalPages, handlePageChange } =
+    useInventoryLayout();
 
   const handleArchive = (row: any) => {
     console.log("Archive:", row);
@@ -42,10 +28,10 @@ export default function ArchivePage() {
   const renderBatchCell = (key: string, value: any, row: any) => {
     if (key === "age") {
       if (value <= 15)
-        return <Badge label={`${value} Days`} variant="active" size="md" />;
+        return <Badge label={`${value} Days`} variant="rejected" size="md" />;
       if (value > 15 && value <= 45)
         return <Badge label={`${value} Days`} variant="warning" size="md" />;
-      return <Badge label={`${value} Days`} variant="rejected" size="md" />;
+      return <Badge label={`${value} Days`} variant="approved" size="md" />;
     }
 
     if (key === "actions") {
@@ -78,7 +64,7 @@ export default function ArchivePage() {
   };
 
   return (
-    <div className="min-h-full bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 p-6">
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-3 mt-2">
           <button onClick={() => router.back()} type="button">

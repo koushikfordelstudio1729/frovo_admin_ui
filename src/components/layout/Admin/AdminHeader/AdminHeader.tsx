@@ -1,6 +1,6 @@
 "use client";
 
-import { adminNavigation } from "@/config/admin.config";
+import { adminNavigation } from "@/config/admin/admin.config";
 import { Bell, User } from "lucide-react";
 import { usePathname } from "next/navigation";
 import React from "react";

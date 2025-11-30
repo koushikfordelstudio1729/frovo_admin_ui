@@ -69,7 +69,7 @@ export default function ExpenseTable() {
         <Badge
           variant={value === "Approve" ? "active" : "warning"}
           label={value}
-          className="px-3 py-3 text-xs font-semibold rounded-full"
+          className="px-3 py-3 text-sm rounded-full"
           size="md"
         />
       );
@@ -80,7 +80,8 @@ export default function ExpenseTable() {
           <Button
             title="Edit"
             size="sm"
-            className="bg-blue-500 text-white rounded-md px-4 py-1"
+            variant="edit"
+            className="text-white rounded-md px-4 py-1"
             onClick={() => handleEdit(row)}
           >
             Edit
@@ -88,6 +89,7 @@ export default function ExpenseTable() {
           <Button
             title="Delete"
             size="sm"
+            variant="reject"
             className="bg-gray-800 text-white rounded-md px-4 py-1"
             onClick={() => handleDelete(row)}
           >
@@ -143,14 +145,19 @@ export default function ExpenseTable() {
         </div>
       </div>
       <div className=" flex flex-row gap-6 mt-6">
-        <StatCard title="Total" count={120} icon={Cog} className="p-8 w-sm" />
+        <StatCard title="Total" count={"120"} icon={Cog} className="p-8 w-sm" />
         <StatCard
           title="Approved"
-          count={120}
+          count={"120"}
           icon={Cog}
           className="p-8 w-sm"
         />
-        <StatCard title="Pending" count={120} icon={Cog} className="p-8 w-sm" />
+        <StatCard
+          title="Pending"
+          count={"120"}
+          icon={Cog}
+          className="p-8 w-sm"
+        />
       </div>
       {/* Stacked Bar Chart */}
       <div className="mt-6">

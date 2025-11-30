@@ -2,7 +2,7 @@
 import { Button, Label, Table, Badge, Pagination } from "@/components";
 import { FileArchiveIcon, ArrowDownToLine } from "lucide-react";
 import { useInventoryLayout } from "@/hooks/warehouse/useInventoryLayout";
-import AgeRangeSelect from "@/components/age-range-select/AgeRangeSelect";
+import AgeRangeSelect from "@/components/common/age-range-select/AgeRangeSelect";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -42,10 +42,10 @@ export default function InventoryLayoutPage() {
   const renderBatchCell = (key: string, value: any, row: any) => {
     if (key === "age") {
       if (value <= 15)
-        return <Badge label={`${value} Days`} variant="active" size="md" />;
+        return <Badge label={`${value} Days`} variant="rejected" size="md" />;
       if (value > 15 && value <= 45)
         return <Badge label={`${value} Days`} variant="warning" size="md" />;
-      return <Badge label={`${value} Days`} variant="rejected" size="md" />;
+      return <Badge label={`${value} Days`} variant="approved" size="md" />;
     }
 
     if (key === "actions") {

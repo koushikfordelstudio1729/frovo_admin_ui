@@ -31,7 +31,7 @@ export default function InboundLogisticsPage() {
   };
 
   return (
-    <div className="min-h-full bg-gray-50 p-4">
+    <div className="min-h-screen bg-gray-50 p-4">
       {/* Header with Back Button */}
       <div className="flex items-center gap-3 my-4">
         <button
@@ -52,9 +52,9 @@ export default function InboundLogisticsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div>
             <Label className="text-lg font-semibold text-gray-700 mb-2 block">
-              PO Number
+              Batch
             </Label>
-            <Input id="poNumber" variant="orange" />
+            <Input id="batch" variant="orange" placeholder="Enter batch" />
           </div>
 
           <div>
@@ -75,14 +75,19 @@ export default function InboundLogisticsPage() {
             <Label className="text-lg font-semibold text-gray-700 mb-2 block">
               SKU
             </Label>
-            <Input id="sku" variant="orange" />
+            <Input id="sku" placeholder="Enter SKU" variant="orange" />
           </div>
 
           <div>
             <Label className="text-lg font-semibold text-gray-700 mb-2 block">
               Quantity
             </Label>
-            <Input id="quantity" type="number" variant="orange" />
+            <Input
+              id="quantity"
+              placeholder="Enter Quantity"
+              type="number"
+              variant="orange"
+            />
           </div>
         </div>
 

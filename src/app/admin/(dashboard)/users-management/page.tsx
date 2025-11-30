@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Search, Edit, Trash2, Shield, Key, UserPlus, X, Eye } from "lucide-react";
 import { Button, Badge, Pagination, Input } from "@/components/common";
 import { api } from "@/services/api";
-import { apiConfig } from "@/config";
+import { apiConfig } from "@/config/admin";
 import { AxiosError } from "axios";
 
 interface User {

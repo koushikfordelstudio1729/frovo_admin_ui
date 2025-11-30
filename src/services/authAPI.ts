@@ -1,5 +1,5 @@
 import { api } from './api';
-import { apiConfig } from '../config';
+import { apiConfig } from '@/config/admin';
 import type {
   LoginCredentials,
   RegisterData,

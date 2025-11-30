@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect, useCallback } from "react";
 import { Button, Input, Textarea } from "@/components/common";
 import { api } from "@/services/api";
-import { apiConfig } from "@/config";
+import { apiConfig } from "@/config/admin";
 
 interface Role {
   id: string;
@@ -217,7 +217,7 @@ export const CreateDepartmentForm = () => {
       )}
 
       {/* Header */}
-      <div className="flex items-center gap-3 mb-6 mt-4">
+      <div className=" flex items-center gap-3 mb-6 mt-4">
         <button
           type="button"
           onClick={() => router.back()}
