@@ -7,6 +7,21 @@ export interface WarehouseMenuItem {
 
 export const warehouseNavigation: WarehouseMenuItem[] = [
   { label: "Dashboard", href: "/warehouse/dashboard", icon: "layoutDashboard" },
+  {
+    label: "Raise PO",
+    href: "/warehouse/raise-po",
+    icon: "arrowUp",
+  },
+  {
+    label: "PO Summery",
+    href: "/warehouse/po-summery",
+    icon: "summery",
+  },
+  {
+    label: "Create GRN",
+    href: "/warehouse/create-grn",
+    icon: "refresh",
+  },
   { label: "Inbound", href: "/warehouse/inbound", icon: "arrowUpRight" },
   {
     label: "Outbound",

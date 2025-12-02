@@ -15,6 +15,7 @@ type BadgeVariant =
   | "error"
   | "warning"
   | "info"
+  | "orange"
   | "custom";
 
 type BadgeSize = "sm" | "md" | "lg";
@@ -29,7 +30,6 @@ interface BadgeProps {
 }
 
 const variantStyles: Record<BadgeVariant, string> = {
-
   global: "bg-green-400 text-green-900",
   machine: "bg-blue-300 text-blue-900",
   partner: "bg-purple-300 text-purple-900",
@@ -42,6 +42,7 @@ const variantStyles: Record<BadgeVariant, string> = {
   error: "bg-red-100 text-red-800",
   warning: "bg-yellow-400 text-yellow-800",
   info: "bg-blue-100 text-blue-800",
+  orange: "bg-orange-500 text-white",
   custom: "",
 };
 

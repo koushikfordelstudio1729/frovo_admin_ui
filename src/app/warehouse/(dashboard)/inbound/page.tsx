@@ -7,6 +7,7 @@ import {
   Label,
   Checkbox,
   FileUpload,
+  BackHeader,
 } from "@/components";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -33,36 +34,25 @@ export default function InboundLogisticsPage() {
   return (
     <div className="min-h-screen bg-gray-50 p-4">
       {/* Header with Back Button */}
-      <div className="flex items-center gap-3 my-4">
-        <button
-          onClick={() => router.back()}
-          className="p-2 hover:cursor-pointer"
-          aria-label="Go back"
-        >
-          <ArrowLeft className="w-6 h-6 text-gray-700" />
-        </button>
-        <h1 className="text-2xl font-semibold text-gray-900">
-          Goods Entry Form
-        </h1>
-      </div>
+      <BackHeader title="Goods Entry Form" />
 
       {/* Main Form Card */}
       <div className="max-w-full bg-white rounded-2xl p-8">
         {/* Input Fields Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div className="grid grid-cols-2 gap-6 mb-6">
           <div>
-            <Label className="text-lg font-semibold text-gray-700 mb-2 block">
-              Batch
-            </Label>
-            <Input id="batch" variant="orange" placeholder="Enter batch" />
+            <Input
+              id="batch"
+              label="Batch"
+              variant="orange"
+              placeholder="Enter batch"
+            />
           </div>
 
           <div>
-            <Label className="text-lg font-semibold text-gray-700 mb-2 block">
-              Vendor
-            </Label>
             <Select
               id="vendor"
+              label="Vendor"
               options={vendorOptions}
               value={formData.vendor}
               placeholder="Select vendor"
@@ -72,18 +62,18 @@ export default function InboundLogisticsPage() {
           </div>
 
           <div>
-            <Label className="text-lg font-semibold text-gray-700 mb-2 block">
-              SKU
-            </Label>
-            <Input id="sku" placeholder="Enter SKU" variant="orange" />
+            <Input
+              id="sku"
+              label="SKU"
+              placeholder="Enter SKU"
+              variant="orange"
+            />
           </div>
 
           <div>
-            <Label className="text-lg font-semibold text-gray-700 mb-2 block">
-              Quantity
-            </Label>
             <Input
               id="quantity"
+              label="Quantity"
               placeholder="Enter Quantity"
               type="number"
               variant="orange"
@@ -145,12 +135,10 @@ export default function InboundLogisticsPage() {
 
           {/* Storage Assignment */}
           <div className="bg-gray-50 rounded-xl p-6">
-            <Label className="text-xl font-semibold text-gray-900 mb-4 block">
-              Storage Assignment
-            </Label>
             <div>
               <Select
                 id="storage"
+                label="Storage Assignment"
                 options={storageOptions}
                 value={formData.storage ?? ""}
                 placeholder="Select storage location"

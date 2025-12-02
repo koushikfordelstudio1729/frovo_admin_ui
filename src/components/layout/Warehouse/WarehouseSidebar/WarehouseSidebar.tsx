@@ -11,6 +11,9 @@ import {
   User,
   Settings,
   ChevronDown,
+  ArrowBigUpDash,
+  RefreshCcw,
+  LucideListChevronsUpDown,
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -21,6 +24,9 @@ import Image from "next/image";
 
 const iconMap = {
   layoutDashboard: LayoutDashboard,
+  summery: LucideListChevronsUpDown,
+  arrowUp: ArrowBigUpDash,
+  refresh: RefreshCcw,
   boxes: Boxes,
   arrowDownLeft: ArrowDownLeft,
   arrowUpRight: ArrowUpRight,
@@ -52,9 +58,9 @@ export const WarehouseSidebar: React.FC = () => {
   const handleToggle = (label: string) =>
     setOpen((prev) => ({ ...prev, [label]: !prev[label] }));
 
-  const group1 = warehouseNavigation.slice(0, 3);
-  const group2 = warehouseNavigation.slice(3, 6);
-  const group3 = warehouseNavigation.slice(6);
+  const group1 = warehouseNavigation.slice(0, 6);
+  const group2 = warehouseNavigation.slice(6, 9);
+  const group3 = warehouseNavigation.slice(9);
 
   function TopLevelSidebar(item: WarehouseMenuItem) {
     const Icon = iconMap[item.icon as keyof typeof iconMap] || Boxes;

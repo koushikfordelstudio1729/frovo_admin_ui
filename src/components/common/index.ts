@@ -16,3 +16,4 @@ export { default as EditableInput } from "./EditableInput";
 export { default as FileUpload } from "./FileUpload";
 export { default as PasswordValidation } from "./PasswordValidation";
 export { default as PasswordToggleButton } from "./PasswordToggleButton";
+export { default as BackHeader } from "./BackHeader";

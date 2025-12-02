@@ -5,6 +5,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
     | "primary"
     | "secondary"
     | "danger"
+    | "red"
     | "outline"
     | "approve"
     | "reject"
@@ -33,6 +34,7 @@ const Button: React.FC<ButtonProps> = ({
     primary: "bg-[#FF5722] text-white hover:bg-[#F4511E]",
     secondary: "bg-gray-700 text-white hover:bg-gray-800",
     danger: "text-red-600 hover:text-red-700 hover:cursor-pointer",
+    red: "bg-red-600 text-white hover:bg-red-700 hover:cursor-pointer",
     outline: "border border-gray-300 bg-white text-gray-700 hover:bg-gray-50",
     approve: "bg-[#0B9F00] text-white hover:bg-green-800",
     reject: "bg-gray-700 text-white hover:bg-red-700",
