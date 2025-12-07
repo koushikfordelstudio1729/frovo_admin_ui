@@ -7,6 +7,7 @@ import {
   Input,
   Label,
   Select,
+  Table,
   Textarea,
 } from "@/components";
 import { useState } from "react";
@@ -15,6 +16,18 @@ import { useRouter } from "next/navigation";
 const qcStatusOptions = [
   { label: "Approve", value: "approve" },
   { label: "Pending", value: "pending" },
+];
+
+const qcVerificationColumns = [
+  { label: "Item Name / SKU", key: "item_sku" },
+  { label: "UOM", key: "uom" },
+  { label: "Ordered Qty", key: "ordered_qty" },
+  { label: "Challan Qty", key: "challan_qty" },
+  { label: "Received Qty", key: "receieved_qty" },
+  { label: "Accepted Qty", key: "accepted_qty" },
+  { label: "Rejected Qty", key: "rejected_qty" },
+  { label: "Expiry Date", key: "expiry_date" },
+  { label: "Remarks", key: "remarks" },
 ];
 
 const CreateGRN = () => {
@@ -47,6 +60,15 @@ const CreateGRN = () => {
             placeholder="Enter Vehicle Number"
           />
           <Input label="Received Date" variant="orange" type="date" />
+        </div>
+        <div className="border-2 my-18"></div>
+        <div className="relative">
+          <div className="overflow-x-auto">
+            <Table
+              columns={qcVerificationColumns}
+              data={qcVerificationColumns}
+            />
+          </div>
         </div>
         <div className="border-2 my-18"></div>
         <div className="flex justify-center">

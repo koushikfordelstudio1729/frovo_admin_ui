@@ -58,7 +58,6 @@ const RaisePO = () => {
               variant="orange"
               placeholder="Enter any additional notes..."
               rows={5}
-              textareaClassName="w-lg"
             />
           </div>
         </div>

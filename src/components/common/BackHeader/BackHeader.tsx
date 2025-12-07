@@ -32,7 +32,7 @@ export const BackHeader: React.FC<BackHeaderProps> = ({
   };
 
   return (
-    <div className={`flex items-center gap-3 my-4 ${className}`}>
+    <div className={`flex items-center gap-1 my-4 ${className}`}>
       {showBackButton && (
         <button
           onClick={handleBack}
