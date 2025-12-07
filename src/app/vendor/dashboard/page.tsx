@@ -175,15 +175,24 @@ const Dashboard = () => {
       <div className="mt-6">
         <div className="flex items-center justify-between">
           <Label className="text-xl font-semibold">Vendor&apos;s</Label>
-          <Button
-            className="rounded-lg"
-            variant="primary"
-            onClick={() =>
-              router.push("/vendor/vendor-registration/vendor-details")
-            }
-          >
-            <Plus size={18} className="mr-2" /> Add new vendor
-          </Button>
+          <div className="flex gap-4">
+            <Button
+              className="rounded-lg"
+              variant="primary"
+              onClick={() =>
+                router.push("/vendor/registered-company/add-company")
+              }
+            >
+              <Plus size={18} className="mr-2" /> Add new company
+            </Button>
+            <Button
+              className="rounded-lg"
+              variant="primary"
+              onClick={() => router.push("/vendor/vendor-onboard")}
+            >
+              <Plus size={18} className="mr-2" /> Add new vendor
+            </Button>
+          </div>
         </div>
       </div>
       <div className="mt-4">

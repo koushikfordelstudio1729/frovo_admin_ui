@@ -78,7 +78,7 @@ export const VendorSidebar: React.FC = () => {
               size={20}
               className={isActive ? "text-white" : "text-orange-400"}
             />
-            <span className="ml-1 text-sm">{item.label}</span>
+            <span className="ml-1 text-sm whitespace-nowrap">{item.label}</span>
           </span>
           <div className="w-5 flex justify-center">
             {item.children ? (

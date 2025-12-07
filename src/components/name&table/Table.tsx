@@ -34,7 +34,7 @@ export const Table: React.FC<TableProps> = ({
             {columns.map((col, index) => (
               <th
                 key={col.key}
-                className="px-8 py-3 text-left text-[16px] font-medium relative"
+                className="px-8 py-3 text-center text-md font-medium relative"
               >
                 {col.label}
                 {showSeparators && index < columns.length - 1 && (

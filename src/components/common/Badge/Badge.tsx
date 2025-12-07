@@ -65,7 +65,7 @@ export const Badge: React.FC<BadgeProps> = ({
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full font-medium ${variantStyles[detectedVariant]} ${sizeStyles[size]} ${className}`}
+      className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full font-medium ${variantStyles[detectedVariant]} ${sizeStyles[size]} ${className}`}
     >
       {showDot && <span className="w-2 h-2 rounded-full bg-current" />}
       {icon && <span className="shrink-0">{icon}</span>}

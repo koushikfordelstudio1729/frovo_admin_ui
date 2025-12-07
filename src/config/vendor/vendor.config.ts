@@ -17,14 +17,14 @@ export const vendorNavigation: VendorMenuItem[] = [
     href: "/vendor/vendor-onboard",
   },
   {
+    label: "Registered Company",
+    icon: "barChart2",
+    href: "/vendor/registered-company",
+  },
+  {
     label: "Audit Trails",
     icon: "fileText",
     href: "/vendor/audit-trails",
-  },
-  {
-    label: "History",
-    icon: "barChart2",
-    href: "/vendor/history",
   },
   {
     label: "User Profile",

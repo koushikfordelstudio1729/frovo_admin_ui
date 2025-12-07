@@ -119,9 +119,7 @@ const VendorRegistrationFull = () => {
 
   // System Access
   const [paymentMethod, setPaymentMethod] = useState("");
-  const [operationsManager, setOperationsManager] = useState(
-    "Ramesh ( Operations Manager )"
-  );
+  const [operationsManager, setOperationsManager] = useState("");
   const [internalNotes, setInternalNotes] = useState("");
 
   const today = new Date().toISOString().split("T")[0];
@@ -148,7 +146,6 @@ const VendorRegistrationFull = () => {
   };
 
   const handleSave = () => {
-    // TODO: call draft save API
     console.log("Save draft payload", {
       vendorName,
       vendorBillingName,
@@ -208,18 +205,35 @@ const VendorRegistrationFull = () => {
 
         <div className="mt-6 grid grid-cols-2 gap-12">
           <Input
-            label="Vendor Name"
+            label="CIN Number"
             variant="orange"
-            placeholder="Enter vendor name"
+            placeholder="Enter CIN number"
             value={vendorName}
             onChange={(e) => setVendorName(e.target.value)}
           />
           <Input
-            label="Vendor Billing Name"
+            label="Vendor Name"
             variant="orange"
-            placeholder="Enter vendor billing name"
+            placeholder="Enter vendor name"
             value={vendorBillingName}
             onChange={(e) => setVendorBillingName(e.target.value)}
+          />
+        </div>
+
+        <div className="mt-6 grid grid-cols-2 gap-12">
+          <Input
+            label="Vendor Billing Name"
+            variant="orange"
+            placeholder="Enter Billing Name"
+            value={vendorId}
+            onChange={(e) => setVendorId(e.target.value)}
+          />
+          <Input
+            label="Email ID of Vendor"
+            variant="orange"
+            placeholder="Enter vendor email ID"
+            value={vendorEmail}
+            onChange={(e) => setVendorEmail(e.target.value)}
           />
         </div>
 
@@ -228,8 +242,8 @@ const VendorRegistrationFull = () => {
             label="Vendor ID"
             variant="orange"
             placeholder="Enter vendor ID"
-            value={vendorId}
-            onChange={(e) => setVendorId(e.target.value)}
+            value={vendorEmail}
+            onChange={(e) => setVendorEmail(e.target.value)}
           />
           <Select
             label="Vendor Type"
@@ -256,8 +270,8 @@ const VendorRegistrationFull = () => {
             label="Primary Contact Name"
             variant="orange"
             placeholder="Enter primary contact name"
-            value={primaryContact}
-            onChange={(e) => setPrimaryContact(e.target.value)}
+            value={contactPhone}
+            onChange={(e) => setContactPhone(e.target.value)}
           />
         </div>
 
@@ -269,16 +283,6 @@ const VendorRegistrationFull = () => {
             value={contactPhone}
             onChange={(e) => setContactPhone(e.target.value)}
           />
-          <Input
-            label="Email ID of Vendor"
-            variant="orange"
-            placeholder="Enter vendor email ID"
-            value={vendorEmail}
-            onChange={(e) => setVendorEmail(e.target.value)}
-          />
-        </div>
-
-        <div className="mt-6 grid grid-cols-2 gap-12">
           <Textarea
             label="Address (Billing)"
             variant="orange"
@@ -542,7 +546,7 @@ const VendorRegistrationFull = () => {
             variant="orange"
             value={operationsManager}
             onChange={(e) => setOperationsManager(e.target.value)}
-            placeholder="Name (Role)"
+            placeholder="Enter Name"
           />
         </div>
 

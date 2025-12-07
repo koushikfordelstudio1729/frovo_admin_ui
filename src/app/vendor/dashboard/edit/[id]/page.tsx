@@ -24,6 +24,12 @@ const riskRatingOptions = [
   { label: "High", value: "high" },
 ];
 
+const vendorTypeOptions = [
+  { label: "Low", value: "low" },
+  { label: "Medium", value: "medium" },
+  { label: "High", value: "high" },
+];
+
 export default function VendorEditPage() {
   const router = useRouter();
   const params = useParams();
@@ -148,10 +154,20 @@ export default function VendorEditPage() {
                 placeholder=""
               />
             </div>
+            <div>
+              <Select
+                label="Vendor Type"
+                variant="orange"
+                onChange={(val) => handleInputChange("vendorType", val)}
+                options={vendorTypeOptions}
+                placeholder="Select vendor type"
+                selectClassName="py-4 p-4"
+              />
+            </div>
           </div>
 
           {/* Action Buttons */}
-          <div className="flex justify-center gap-6 mt-8">
+          <div className="flex justify-center gap-6 mt-12">
             <Button
               className="rounded-md px-8"
               variant="primary"
