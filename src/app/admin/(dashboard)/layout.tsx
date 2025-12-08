@@ -2,7 +2,7 @@
 
 import { AdminHeader } from "@/components";
 import { AdminSidebar } from "@/components";
-import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import { AdminProtectedRoute } from "@/components/auth/RoleBasedProtectedRoute";
 import React from "react";
 
 export default function DashboardLayout({
@@ -11,7 +11,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <ProtectedRoute>
+    <AdminProtectedRoute>
       <div className="flex">
         <AdminSidebar />
         <main className="ml-64 flex-1 bg-gray-50 min-h-screen">
@@ -19,6 +19,6 @@ export default function DashboardLayout({
           <div className="pt-10 p-8">{children}</div>
         </main>
       </div>
-    </ProtectedRoute>
+    </AdminProtectedRoute>
   );
 }

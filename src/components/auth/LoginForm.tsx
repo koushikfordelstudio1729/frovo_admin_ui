@@ -9,6 +9,7 @@ import PasswordToggleButton from "@/components/common/PasswordToggleButton";
 import { authAPI } from "@/services/authAPI";
 import { storageUtils } from "@/utils";
 import type { User as AuthUser } from "@/types/auth.types";
+import { getRedirectPathByUser } from "@/config/roleRouting.config";
 
 export interface User {
   email: string;
@@ -26,19 +27,8 @@ export interface LoginFormProps {
   appName?: string;
 }
 
-// Helper function to get redirect path based on user role
-const getRedirectPath = (role: string): string => {
-  const rolePathMap: Record<string, string> = {
-    super_admin: "/admin/roles-permissions",
-    admin: "/admin/dashboard",
-    warehouse_admin: "/warehouse/dashboard",
-    warehouse: "/warehouse/dashboard",
-    vendor_admin: "/vendor/dashboard",
-    vendor: "/vendor/dashboard",
-  };
-
-  return rolePathMap[role] || "/admin/dashboard";
-};
+// Note: Role routing logic has been moved to @/config/roleRouting.config.ts
+// This makes it easier to add new roles and maintain routing configuration
 
 export const LoginForm: React.FC<LoginFormProps> = ({
   users,
@@ -66,9 +56,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       const user = storageUtils.getUser<AuthUser>();
 
       if (token && user) {
-        // User is already logged in, redirect to dashboard
-        const userRole = user.roles && user.roles.length > 0 ? user.roles[0].systemRole : 'admin';
-        const path = getRedirectPath(userRole);
+        // User is already logged in, redirect to their role-specific dashboard
+        const path = getRedirectPathByUser(user);
         router.push(path);
       } else {
         setIsCheckingAuth(false);
@@ -134,9 +123,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           localStorage.setItem("email", email);
         }
 
-        // Redirect based on user role
-        const userRole = user.roles && user.roles.length > 0 ? user.roles[0].systemRole : 'admin';
-        const path = getRedirectPath(userRole);
+        // Redirect based on user's role using centralized routing config
+        const path = getRedirectPathByUser(user);
         router.push(path);
       } else {
         setError(response.data.message || "Login failed. Please try again.");
