@@ -1,18 +1,24 @@
 "use client";
 
 import { Input, Label, Select, Table, Pagination } from "@/components";
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
+import { getAuditTrails } from "@/services/vendor";
 
-const selectActorOptions = [
-  { label: "Yatish", value: "yatish" },
-  { label: "Nithin", value: "nithin" },
-  { label: "Koushik", value: "koushik" },
-  { label: "Jatin", value: "jatin" },
-];
+interface AuditLog {
+  timestamp: string;
+  actor: string;
+  action: string;
+  target: string;
+  before_after_diff: { before: string; after: string };
+}
+
+const ITEMS_PER_PAGE = 8;
 
 const selectActionOptions = [
-  { label: "Vendor Created", value: "vendor_created" },
-  { label: "Contract Updated", value: "contract_updated" },
+  { label: "Vendor Created", value: "create" },
+  { label: "Contract Updated", value: "update" },
+  { label: "Quick Status Change", value: "quick_status_change" },
+  { label: "Deleted Vendor", value: "delete" },
 ];
 
 const auditTrailsColumn = [
@@ -23,147 +29,113 @@ const auditTrailsColumn = [
   { key: "before_after_diff", label: "Before / After diff" },
 ];
 
-const activityLogData = [
-  {
-    timestamp: "Nov 18, 3:45 PM",
-    actor: "Ramesh Kumar",
-    action: "Vendor Created",
-    target: "ABC Suppliers Pvt Ltd",
-    before_after_diff: { before: "Verification", after: "Verified" },
-  },
-  {
-    timestamp: "Nov 18, 11:20 AM",
-    actor: "Priya Sharma",
-    action: "Vendor Updated",
-    target: "XYZ Logistics Inc",
-    before_after_diff: { before: "Verification", after: "Verified" },
-  },
-  {
-    timestamp: "Nov 17, 5:30 PM",
-    actor: "Anil Verma",
-    action: "Vendor Approved",
-    target: "Delhi Foods Corporation",
-    before_after_diff: { before: "Verification", after: "Verified" },
-  },
-  {
-    timestamp: "Nov 17, 2:15 PM",
-    actor: "Sneha Patel",
-    action: "Document Uploaded",
-    target: "Mumbai Packaging Co",
-    before_after_diff: { before: "Verification", after: "Verified" },
-  },
-  {
-    timestamp: "Nov 16, 9:00 AM",
-    actor: "Vikram Singh",
-    action: "Vendor Rejected",
-    target: "Chennai Services Ltd",
-    before_after_diff: { before: "Verification", after: "Verified" },
-  },
-  {
-    timestamp: "Nov 15, 4:50 PM",
-    actor: "Kavita Reddy",
-    action: "Contract Updated",
-    target: "Bangalore Beverages",
-    before_after_diff: { before: "Verification", after: "Verified" },
-  },
-  {
-    timestamp: "Nov 15, 1:30 PM",
-    actor: "Rohit Gupta",
-    action: "Vendor Created",
-    target: "Pune Snacks Distributors",
-    before_after_diff: { before: "Verification", after: "Verified" },
-  },
-  {
-    timestamp: "Nov 14, 10:45 AM",
-    actor: "Meera Joshi",
-    action: "Payment Method Changed",
-    target: "Hyderabad Maintenance",
-    before_after_diff: { before: "Verification", after: "Verified" },
-  },
-  {
-    timestamp: "Nov 13, 3:20 PM",
-    actor: "Suresh Yadav",
-    action: "Vendor Deleted",
-    target: "Kolkata Trading Co",
-    before_after_diff: { before: "Verification", after: "Verified" },
-  },
-  {
-    timestamp: "Nov 12, 11:00 AM",
-    actor: "Anjali Desai",
-    action: "Portal Access Enabled",
-    target: "Ahmedabad Consumables",
-    before_after_diff: { before: "Verification", after: "Verified" },
-  },
-];
-
-const ITEMS_PER_PAGE = 8;
-
 const AuditTrails = () => {
   const [date, setDate] = useState("");
-  const [actor, setActor] = useState("");
   const [action, setAction] = useState("");
+  const [logs, setLogs] = useState<AuditLog[]>([]);
+  const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Calculate pagination
-  const totalPages = Math.ceil(activityLogData.length / ITEMS_PER_PAGE);
+  const fetchAuditData = useCallback(async () => {
+    try {
+      const res: any = await getAuditTrails();
+      const audits = res?.data?.data?.audits || [];
 
-  // Get current page data
-  const paginatedData = useMemo(() => {
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    const endIndex = startIndex + ITEMS_PER_PAGE;
-    return activityLogData.slice(startIndex, endIndex);
-  }, [currentPage]);
+      const formatted: AuditLog[] = audits.map((item: any) => ({
+        timestamp: new Date(item.timestamp).toLocaleString(),
+        actor: item?.user?.name || item?.user_email || "—",
+        action: item.action || "—",
+        target: item.target_vendor_name || item.target_vendor_id || "—",
+        before_after_diff: {
+          before:
+            item.before_state?.verification_status ||
+            item.before_state?.vendor_status_cycle ||
+            "—",
+          after:
+            item.after_state?.verification_status ||
+            item.after_state?.vendor_status_cycle ||
+            "—",
+        },
+      }));
 
-  // Custom cell renderer for before/after diff
-  const renderCell = (key: string, value: any) => {
-    if (key === "before_after_diff" && value && typeof value === "object") {
-      return (
-        <span>
-          {value.before}
-          <span className="mx-2 text-gray-400">→</span>
-          {value.after}
-        </span>
-      );
+      setLogs(formatted);
+    } finally {
+      setLoading(false);
     }
-    return value;
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchAuditData();
+  }, [fetchAuditData]);
+
+  // Reset pagination when filters change
+  useEffect(() => setCurrentPage(1), [date, action]);
+
+  const filteredLogs = useMemo(() => {
+    return logs.filter((log) => {
+      if (action && log.action !== action) return false;
+      if (date) {
+        const logDate = new Date(log.timestamp).toLocaleDateString();
+        const selectedDate = new Date(date).toLocaleDateString();
+        if (logDate !== selectedDate) return false;
+      }
+      return true;
+    });
+  }, [logs, action, date]);
+
+  const totalPages = Math.ceil(filteredLogs.length / ITEMS_PER_PAGE);
+
+  const paginatedData = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredLogs.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredLogs, currentPage]);
+
+  const renderCell = (key: string, value: any) =>
+    key === "before_after_diff" ? (
+      <span>
+        {value.before}
+        <span className="mx-2 text-gray-400">→</span>
+        {value.after}
+      </span>
+    ) : (
+      value
+    );
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-lg font-semibold text-gray-600">
+          Loading audit logs...
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen pt-12">
-      {/* Filter Section */}
-      <div className="flex items-end w-xl gap-6">
+      {/* Filters */}
+      <div className="flex items-end w-sm gap-6">
         <Input
-          id="filter-date"
-          inputClassName="border-2"
           label="Date"
-          variant="date"
           type="date"
+          variant="date"
           value={date}
           onChange={(e) => setDate(e.target.value)}
         />
-        <Select
-          label="Actor"
-          placeholder="Select actor"
-          selectClassName="px-6 py-2 bg-white text-sm"
-          options={selectActorOptions}
-          value={actor}
-          onChange={setActor}
-        />
+
         <Select
           label="Actions"
-          placeholder="Select actions"
-          selectClassName="px-6 py-2 bg-white text-sm"
           options={selectActionOptions}
           value={action}
+          selectClassName="py-1.5 px-2"
           onChange={setAction}
         />
       </div>
 
-      {/* Table Section */}
+      {/* Table */}
       <div className="mt-8">
-        <Label className="text-lg font-bold text-black">
-          Audit Trails: XYZ Vendor
-        </Label>
+        <Label className="text-lg font-bold text-black">Audit Trails</Label>
+
         <div className="mt-4">
           <Table
             columns={auditTrailsColumn}
@@ -172,7 +144,6 @@ const AuditTrails = () => {
           />
         </div>
 
-        {/* Pagination */}
         <div className="flex justify-end mt-4">
           <Pagination
             currentPage={currentPage}

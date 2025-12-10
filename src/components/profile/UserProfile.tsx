@@ -1,9 +1,11 @@
 "use client";
 
-import React from "react";
-import { ArrowLeft } from "lucide-react";
+import React, { useState } from "react";
+import { ArrowLeft, LogOut } from "lucide-react";
 import { Button } from "@/components";
 import { useRouter } from "next/navigation";
+import { authAPI } from "@/services/authAPI";
+import { storageUtils } from "@/utils";
 
 interface Role {
   role: string;
@@ -35,16 +37,32 @@ const UserProfile: React.FC<UserProfileProps> = ({
   onRequestMoreAccess,
 }) => {
   const router = useRouter();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-  //  Redirect to change password
+  // Change Password redirect
   const handleChangePassword = () => {
     router.push("/userprofile-password");
+  };
+
+  // Logout Handler
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    try {
+      await authAPI.logout();
+    } catch (err) {
+      console.error("Logout API error:", err);
+      // even if API fails, logout locally
+    } finally {
+      storageUtils.clearAuthData(); // remove token / user from localstorage
+      router.push("/login");
+      setIsLoggingOut(false);
+    }
   };
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="mb-8 flex items-center justify-between w-full">
-        {/* Title and Back ) */}
+        {/* Header Left */}
         <div className="flex items-center gap-3">
           <button
             className="text-gray-700 hover:text-gray-900 p-1"
@@ -55,14 +73,27 @@ const UserProfile: React.FC<UserProfileProps> = ({
           <h1 className="text-2xl font-bold text-gray-900">{name}</h1>
         </div>
 
-        {/* Change Password Button */}
-        <Button
-          variant="primary"
-          className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg"
-          onClick={handleChangePassword}
-        >
-          Change Password
-        </Button>
+        {/* Buttons for change password and logout */}
+        <div className="flex items-center gap-4">
+          <Button
+            variant="primary"
+            className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg"
+            onClick={handleChangePassword}
+          >
+            Change Password
+          </Button>
+
+          <Button
+            variant="secondary"
+            className="rounded-lg flex items-center gap-2"
+            onClick={handleLogout}
+            disabled={isLoggingOut}
+            isLoading={isLoggingOut}
+          >
+            <LogOut size={20} />
+            {isLoggingOut ? "Logging out..." : "Logout"}
+          </Button>
+        </div>
       </div>
 
       <div className="mx-auto bg-white rounded-xl p-8">
@@ -126,7 +157,7 @@ const UserProfile: React.FC<UserProfileProps> = ({
           </div>
         </div>
 
-        {/* Request More Access Button */}
+        {/* Request More Access */}
         <div className="flex justify-center">
           <Button
             variant="primary"

@@ -2,9 +2,11 @@
 
 import { Button, Input, Label, Select, Textarea } from "@/components";
 import FileUpload from "@/components/common/FileUpload";
+import { createVendor } from "@/services/vendor";
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 // Dropdown options
 const vendorTypeOptions = [
@@ -12,6 +14,9 @@ const vendorTypeOptions = [
   { label: "Beverages", value: "beverages" },
   { label: "Packaging", value: "packaging" },
   { label: "Services", value: "services" },
+  { label: "Raw Materials", value: "raw_materials" },
+  { label: "Equipment", value: "equipment" },
+  { label: "Maintenance", value: "maintenance" },
 ];
 
 const vendorCategoryOptions = [
@@ -19,6 +24,8 @@ const vendorCategoryOptions = [
   { label: "Packaging", value: "packaging" },
   { label: "Logistics", value: "logistics" },
   { label: "Maintenance", value: "maintenance" },
+  { label: "Services", value: "services" },
+  { label: "Equipment", value: "equipment" },
 ];
 
 const paymentTermsOptions = [
@@ -178,9 +185,8 @@ const VendorRegistrationFull = () => {
     });
   };
 
-  const handleSubmit = () => {
-    // TODO: call final submit API
-    console.log("Submit for approval payload");
+  const handleSubmit = async () => {
+   
   };
 
   return (

@@ -59,7 +59,7 @@ export const Table: React.FC<TableProps> = ({
               {columns.map((col) => (
                 <td
                   key={col.key}
-                  className="px-6 py-4 text-[16px] text-gray-900"
+                  className="px-6 py-4 text-center text-[16px] text-gray-900"
                 >
                   {renderCell
                     ? renderCell(col.key, row[col.key], row)

@@ -2,20 +2,16 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
-import { Button, Label, Input, Select } from "@/components";
-import { vendorData } from "@/config/vendor/vendor-data.config";
+import { Button, Input, Select, BackHeader } from "@/components";
+import { updateVendor, getVendorById } from "@/services/vendor";
+import { toast } from "react-hot-toast";
 
 const categoryOptions = [
-  { label: "Snacks", value: "snacks" },
-  { label: "Beverages", value: "beverages" },
-  { label: "Food", value: "food" },
-];
-
-const statusOptions = [
-  { label: "Verified", value: "verified" },
-  { label: "Verification", value: "verification" },
-  { label: "Pending", value: "pending" },
+  { label: "Packaging", value: "packaging" },
+  { label: "Services", value: "services" },
+  { label: "Raw Materials", value: "raw_materials" },
+  { label: "Equipment", value: "equipment" },
+  { label: "Maintenance", value: "maintenance" },
 ];
 
 const riskRatingOptions = [
@@ -25,9 +21,12 @@ const riskRatingOptions = [
 ];
 
 const vendorTypeOptions = [
-  { label: "Low", value: "low" },
-  { label: "Medium", value: "medium" },
-  { label: "High", value: "high" },
+  { label: "Consumables", value: "consumables" },
+  { label: "Packaging", value: "packaging" },
+  { label: "Logistics", value: "logistics" },
+  { label: "Maintenance", value: "maintenance" },
+  { label: "Services", value: "services" },
+  { label: "Equipment", value: "equipment" },
 ];
 
 export default function VendorEditPage() {
@@ -35,156 +34,148 @@ export default function VendorEditPage() {
   const params = useParams();
   const vendorId = params.id as string;
 
+  const [loading, setLoading] = useState(true);
+
   const [formData, setFormData] = useState({
     vendorName: "",
     category: "",
-    status: "",
     riskRating: "",
-    onTimePercentage: "",
+    vendorType: "",
     contractExpiry: "",
   });
 
-  // Preload vendor data when page loads
   useEffect(() => {
-    const found = vendorData.find((vendor) => vendor.id === vendorId);
-    if (found) {
-      setFormData({
-        vendorName: found.vendorName,
-        category: found.category,
-        status: found.status,
-        riskRating: found.riskRating,
-        onTimePercentage: found.onTimePercentage,
-        contractExpiry: found.contractExpiry,
-      });
-    }
+    const fetchVendor = async () => {
+      try {
+        const res = await getVendorById(vendorId);
+        const data = res.data.data;
+
+        setFormData({
+          vendorName: data.vendor_name,
+          category: data.vendor_category,
+          riskRating: data.risk_rating,
+          vendorType: Array.isArray(data.vendor_type)
+            ? data.vendor_type[0]
+            : data.vendor_type,
+          contractExpiry: data.contract_expiry_date.split("T")[0],
+        });
+      } catch (err) {
+        toast.error("Failed to fetch vendor details");
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchVendor();
   }, [vendorId]);
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = (field: string, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = () => {
-    console.log("Updated vendor data:", formData);
-    // TODO: API call to update vendor
-    router.push("/vendor/dashboard");
+  const handleSubmit = async () => {
+    try {
+      const payload = {
+        vendor_name: formData.vendorName,
+        vendor_category: formData.category,
+        vendor_type: formData.vendorType,
+        risk_rating: formData.riskRating,
+        contract_expiry_date: `${formData.contractExpiry}T00:00:00.000Z`,
+      };
+
+      await updateVendor(vendorId, payload);
+      toast.success("Vendor updated successfully");
+
+      router.push("/vendor/dashboard");
+      router.refresh();
+    } catch (error) {
+      toast.error("Vendor update failed");
+      console.error(error);
+    }
   };
 
-  const handleCancel = () => {
-    router.back();
-  };
+  const handleCancel = () => router.back();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-lg font-semibold text-gray-600">
+          Loading Vendor Data...
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
-      <div className="flex items-center justify-between flex-wrap gap-2 mb-6">
-        <div className="flex items-center gap-3 mt-2">
-          <button onClick={handleCancel} type="button">
-            <ArrowLeft className="w-5 h-5 text-gray-800" />
-          </button>
-          <Label className="text-xl font-semibold">
-            {formData.vendorName || "Vendor"} Edit
-          </Label>
+      <BackHeader title={`Edit ${formData.vendorName}`} />
+
+      <div className="bg-white p-6 rounded-lg">
+        <div className="grid grid-cols-2 gap-8">
+          <Input
+            label="Vendor Name"
+            variant="orange"
+            value={formData.vendorName}
+            onChange={(e) => handleInputChange("vendorName", e.target.value)}
+          />
+
+          <Select
+            label="Category"
+            variant="orange"
+            value={formData.category}
+            selectClassName="py-4 px-4"
+            options={categoryOptions}
+            onChange={(val) => handleInputChange("category", val)}
+          />
+
+          <Select
+            label="Risk Rating"
+            variant="orange"
+            value={formData.riskRating}
+            selectClassName="py-4 px-4"
+            options={riskRatingOptions}
+            onChange={(val) => handleInputChange("riskRating", val)}
+          />
+
+          <Input
+            label="Contract Expiry"
+            type="date"
+            variant="orange"
+            value={formData.contractExpiry}
+            onChange={(e) =>
+              handleInputChange("contractExpiry", e.target.value)
+            }
+          />
+
+          <Select
+            label="Vendor Type"
+            variant="orange"
+            value={formData.vendorType}
+            selectClassName="py-4 px-4"
+            options={vendorTypeOptions}
+            onChange={(val) => handleInputChange("vendorType", val)}
+          />
         </div>
-      </div>
 
-      <div className="mx-auto">
-        <div className="bg-white p-6 rounded-lg">
-          <div className="grid grid-cols-2 gap-8">
-            {/* Vendor Name */}
-            <div>
-              <Input
-                label="Vendor Name"
-                value={formData.vendorName}
-                variant="orange"
-                onChange={(e) =>
-                  handleInputChange("vendorName", e.target.value)
-                }
-                placeholder="Enter vendor name"
-              />
-            </div>
+        <div className="flex justify-center gap-6 mt-12">
+          <Button
+            variant="primary"
+            size="md"
+            className="rounded-lg"
+            onClick={handleSubmit}
+          >
+            Save Changes
+          </Button>
 
-            {/* Category */}
-            <div>
-              <Select
-                label="Category"
-                variant="orange"
-                value={formData.category}
-                onChange={(val) => handleInputChange("category", val)}
-                options={categoryOptions}
-                placeholder="Select category"
-                selectClassName="py-4 p-4"
-              />
-            </div>
-
-            {/* Status */}
-            <div>
-              <Select
-                label="Status"
-                variant="orange"
-                value={formData.status}
-                onChange={(val) => handleInputChange("status", val)}
-                options={statusOptions}
-                placeholder="Select status"
-                selectClassName="py-4 p-4"
-              />
-            </div>
-
-            {/* Risk Rating */}
-            <div>
-              <Select
-                label="Risk Rating"
-                variant="orange"
-                value={formData.riskRating}
-                onChange={(val) => handleInputChange("riskRating", val)}
-                options={riskRatingOptions}
-                placeholder="Select risk rating"
-                selectClassName="py-4 p-4"
-              />
-            </div>
-
-            {/* Contract Expiry */}
-            <div>
-              <Input
-                label="Contract Expiry"
-                variant="orange"
-                type="date"
-                value={formData.contractExpiry}
-                onChange={(e) =>
-                  handleInputChange("contractExpiry", e.target.value)
-                }
-                placeholder=""
-              />
-            </div>
-            <div>
-              <Select
-                label="Vendor Type"
-                variant="orange"
-                onChange={(val) => handleInputChange("vendorType", val)}
-                options={vendorTypeOptions}
-                placeholder="Select vendor type"
-                selectClassName="py-4 p-4"
-              />
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex justify-center gap-6 mt-12">
-            <Button
-              className="rounded-md px-8"
-              variant="primary"
-              size="md"
-              onClick={handleSubmit}
-            >
-              Save Changes
-            </Button>
-            <Button
-              className="rounded-md px-8"
-              variant="secondary"
-              size="md"
-              onClick={handleCancel}
-            >
-              Cancel
-            </Button>
-          </div>
+          <Button
+            variant="secondary"
+            size="md"
+            className="rounded-lg"
+            onClick={handleCancel}
+          >
+            Cancel
+          </Button>
         </div>
       </div>
     </div>

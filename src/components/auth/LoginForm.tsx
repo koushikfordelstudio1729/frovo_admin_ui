@@ -78,7 +78,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     }
   }, []);
 
-  const isFormValid = email.trim() !== "" && password !== ""; 
+  const isFormValid = email.trim() !== "" && password !== "";
 
   const validateForm = (): boolean => {
     const newErrors: { email?: string; password?: string } = {};
@@ -132,9 +132,12 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     } catch (err: unknown) {
       console.error("Login error:", err);
 
-      if (err && typeof err === 'object' && 'response' in err) {
+      if (err && typeof err === "object" && "response" in err) {
         const error = err as { response?: { data?: { message?: string } } };
-        setError(error.response?.data?.message || "Invalid credentials. Please try again.");
+        setError(
+          error.response?.data?.message ||
+            "Invalid credentials. Please try again."
+        );
       } else {
         setError("An error occurred. Please try again.");
       }
@@ -176,7 +179,10 @@ export const LoginForm: React.FC<LoginFormProps> = ({
               <p className="text-sm font-semibold text-blue-900 mb-2">
                 Test Credentials:
               </p>
-              <ul className="text-xs text-blue-800 space-y-1">
+              <ul className="text-[10px] text-blue-800 space-y-1">
+                <li>
+                  • Backend: https://frovo-backend-rback-7l6r.onrender.com/
+                </li>
                 {users.map((user) => (
                   <li key={user.role}>
                     • {user.name}: {user.email} / {user.password}

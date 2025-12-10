@@ -3,27 +3,22 @@
 import {
   Badge,
   Button,
-  Label,
   Select,
   StatCard,
   Table,
   Pagination,
+  Input,
 } from "@/components";
-import { ClipboardCheck, Eye, Pencil, Plus, Trash2 } from "lucide-react";
-import { useState, useMemo } from "react";
+import { ClipboardCheck, Eye, Pencil, Trash2 } from "lucide-react";
+import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { vendorData } from "@/config/vendor";
-
-const nameOptions = [
-  { label: "Vendor A", value: "vendor-a" },
-  { label: "Vendor B", value: "vendor-b" },
-  { label: "Vendor C", value: "vendor-c" },
-];
+import { getVendorDashboard } from "@/services/vendor";
+import { toast } from "react-hot-toast";
 
 const statusOptions = [
   { label: "Verified", value: "verified" },
-  { label: "Verification", value: "verification" },
   { label: "Pending", value: "pending" },
+  { label: "Rejected", value: "rejected" },
 ];
 
 const riskRatingOptions = [
@@ -32,18 +27,11 @@ const riskRatingOptions = [
   { label: "High", value: "high" },
 ];
 
-const contractTypeOptions = [
-  { label: "Fixed Price", value: "fixed" },
-  { label: "Time & Material", value: "time-material" },
-  { label: "Retainer", value: "retainer" },
-];
-
 const vendorColumns = [
   { key: "vendorName", label: "Vendor Name" },
   { key: "category", label: "Category" },
   { key: "status", label: "Status" },
   { key: "riskRating", label: "Risk Rating" },
-  { key: "onTimePercentage", label: "On-Time%" },
   { key: "contractExpiry", label: "Contract Expiry" },
   { key: "action", label: "Action" },
 ];
@@ -52,66 +40,125 @@ const ITEMS_PER_PAGE = 10;
 
 const Dashboard = () => {
   const router = useRouter();
-  const [name, setName] = useState("");
+
   const [status, setStatus] = useState("");
   const [risk, setRisk] = useState("");
-  const [contract, setContract] = useState("");
+  const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(true);
 
-  // Calculate pagination
-  const totalPages = Math.ceil(vendorData.length / ITEMS_PER_PAGE);
+  const [stats, setStats] = useState({
+    total: 0,
+    pending: 0,
+    active: 0,
+    rejected: 0,
+  });
 
-  // Get current page data
+  const [vendors, setVendors] = useState<any[]>([]);
+
+  // Fetch dashboard data
+  useEffect(() => {
+    const fetchDashboard = async () => {
+      try {
+        const res = await getVendorDashboard();
+        const data = res?.data?.data;
+
+        setStats({
+          total: data.total_vendors,
+          pending: data.pending_approvals,
+          active: data.active_vendors,
+          rejected: data.rejected_vendors,
+        });
+
+        setVendors(
+          (data.vendors || []).map((v: any) => ({
+            id: v._id,
+            vendorName: v.vendor_name,
+            category: v.vendor_category,
+            status: v.verification_status,
+            riskRating: v.risk_rating,
+            contractExpiry: new Date(
+              v.contract_expiry_date
+            ).toLocaleDateString(),
+          }))
+        );
+      } catch (err) {
+        toast.error("Unable to fetch dashboard details");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboard();
+  }, []);
+
+  // Reset pagination when filters or search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [status, risk, search]);
+
+  // Filter + Search vendors
+  const filteredVendors = useMemo(() => {
+    return vendors.filter((v) => {
+      const statusMatch = status ? v.status === status : true;
+      const riskMatch = risk ? v.riskRating === risk : true;
+      const searchMatch = search
+        ? v.vendorName.toLowerCase().includes(search.toLowerCase())
+        : true;
+
+      return statusMatch && riskMatch && searchMatch;
+    });
+  }, [vendors, status, risk, search]);
+
+  // Pagination
+  const totalPages = Math.ceil(filteredVendors.length / ITEMS_PER_PAGE);
+
   const paginatedData = useMemo(() => {
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    const endIndex = startIndex + ITEMS_PER_PAGE;
-    return vendorData.slice(startIndex, endIndex);
-  }, [currentPage]);
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredVendors.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredVendors, currentPage]);
 
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
-
+  // Cell rendering
   const renderCell = (key: string, value: any, row?: Record<string, any>) => {
-    // Status Badge
     if (key === "status") {
-      const statusMap: Record<string, "approved" | "warning" | "rejected"> = {
-        Verified: "approved",
-        Verification: "warning",
-        Pending: "rejected",
+      const map: Record<string, "approved" | "warning" | "rejected"> = {
+        verified: "approved",
+        pending: "warning",
+        rejected: "rejected",
       };
-
-      const variant = statusMap[value] || "pending";
-      return <Badge label={value} variant={variant} />;
+      return (
+        <Badge
+          label={value.charAt(0).toUpperCase() + value.slice(1)}
+          variant={map[value] || "warning"}
+        />
+      );
     }
 
-    // Action Buttons
     if (key === "action") {
       if (!row) return null;
 
       return (
         <div className="flex items-center gap-2">
           <Button
-            title="View"
             size="sm"
             className="bg-transparent shadow-none hover:bg-gray-100"
-            onClick={() => console.log("View:", row)}
+            onClick={() => router.push(`/vendor/details/${row.id}`)}
           >
             <Eye className="text-green-500 w-5 h-5" />
           </Button>
+
           <Button
-            title="Edit"
             size="sm"
             className="bg-transparent shadow-none hover:bg-gray-100"
             onClick={() => router.push(`/vendor/dashboard/edit/${row.id}`)}
           >
             <Pencil className="text-blue-500 w-5 h-5" />
           </Button>
+
           <Button
-            title="Delete"
             size="sm"
             className="bg-transparent shadow-none hover:bg-gray-100"
-            onClick={() => console.log("Delete:", row)}
+            onClick={() => console.log("Delete:", row.id)}
           >
             <Trash2 className="text-red-500 w-5 h-5" />
           </Button>
@@ -122,92 +169,82 @@ const Dashboard = () => {
     return value;
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-lg font-semibold text-gray-600">
+          Loading Dashboard...
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen pt-12">
+      {/* Stat Cards */}
       <div className="grid grid-cols-4 gap-4">
-        <StatCard title="Total Vendor" count="20" icon={ClipboardCheck} />
-        <StatCard title="Pending Approval" count="12" icon={ClipboardCheck} />
         <StatCard
-          title="Avg. On-Time Delivery"
-          count="98%"
+          title="Total Vendor"
+          count={stats.total}
           icon={ClipboardCheck}
         />
         <StatCard
-          title="Avg. Rejection Rate"
-          count="2%"
+          title="Pending Approval"
+          count={stats.pending}
+          icon={ClipboardCheck}
+        />
+        <StatCard
+          title="Active Vendors"
+          count={stats.active}
+          icon={ClipboardCheck}
+        />
+        <StatCard
+          title="Rejected Vendors"
+          count={stats.rejected}
           icon={ClipboardCheck}
         />
       </div>
+
+      {/* Filters */}
       <div className="flex items-end w-4xl mt-6 gap-6">
-        <Select
-          label="Name"
-          placeholder="Select Name"
-          selectClassName="py-2 px-4"
-          value={name}
-          onChange={setName}
-          options={nameOptions}
+        <Input
+          label="Search"
+          placeholder="Search Company"
+          inputClassName="py-2"
+          variant="search"
+          onChange={(e) => setSearch(e.target.value)}
         />
         <Select
           label="Status"
-          placeholder="Select Status"
-          selectClassName="py-2 px-4"
           value={status}
           onChange={setStatus}
           options={statusOptions}
+          selectClassName="py-2 px-4"
         />
         <Select
           label="Risk Rating"
-          placeholder="Select Risk"
-          selectClassName="py-2 px-4"
           value={risk}
           onChange={setRisk}
           options={riskRatingOptions}
-        />
-        <Select
-          label="Contract Type"
-          placeholder="Select Contract"
           selectClassName="py-2 px-4"
-          value={contract}
-          onChange={setContract}
-          options={contractTypeOptions}
         />
       </div>
+
+      {/* Table */}
       <div className="mt-6">
-        <div className="flex items-center justify-between">
-          <Label className="text-xl font-semibold">Vendor&apos;s</Label>
-          <div className="flex gap-4">
-            <Button
-              className="rounded-lg"
-              variant="primary"
-              onClick={() =>
-                router.push("/vendor/registered-company/add-company")
-              }
-            >
-              <Plus size={18} className="mr-2" /> Add new company
-            </Button>
-            <Button
-              className="rounded-lg"
-              variant="primary"
-              onClick={() => router.push("/vendor/vendor-onboard")}
-            >
-              <Plus size={18} className="mr-2" /> Add new vendor
-            </Button>
-          </div>
-        </div>
-      </div>
-      <div className="mt-4">
         <Table
           columns={vendorColumns}
           data={paginatedData}
           renderCell={renderCell}
         />
       </div>
+
       {/* Pagination */}
       <div className="flex justify-end mt-4">
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
-          onPageChange={handlePageChange}
+          onPageChange={setCurrentPage}
         />
       </div>
     </div>
