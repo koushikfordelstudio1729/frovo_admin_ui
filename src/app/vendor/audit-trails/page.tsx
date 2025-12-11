@@ -114,22 +114,26 @@ const AuditTrails = () => {
   return (
     <div className="min-h-screen pt-12">
       {/* Filters */}
-      <div className="flex items-end w-sm gap-6">
-        <Input
-          label="Date"
-          type="date"
-          variant="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-        />
+      <div className="grid grid-cols-6 gap-6">
+        <div className="w-42">
+          <Input
+            label="Date"
+            type="date"
+            variant="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+          />
+        </div>
 
-        <Select
-          label="Actions"
-          options={selectActionOptions}
-          value={action}
-          selectClassName="py-1.5 px-2"
-          onChange={setAction}
-        />
+        <div>
+          <Select
+            label="Actions"
+            options={selectActionOptions}
+            value={action}
+            selectClassName="py-1.5 px-2"
+            onChange={setAction}
+          />
+        </div>
       </div>
 
       {/* Table */}

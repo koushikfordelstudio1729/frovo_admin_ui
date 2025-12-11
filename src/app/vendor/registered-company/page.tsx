@@ -109,7 +109,7 @@ export default function CompanyList() {
           <span
             className="text-orange-500 font-medium cursor-pointer hover:underline"
             onClick={() =>
-              router.push(`/vendor/registered-company/company/${company.cin}`)
+              router.push(`/vendor/registered-company/company/${company.id}`)
             }
           >
             {value}

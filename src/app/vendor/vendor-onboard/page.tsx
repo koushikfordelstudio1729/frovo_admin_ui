@@ -8,7 +8,6 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
-// Dropdown options
 const vendorTypeOptions = [
   { label: "Snacks", value: "snacks" },
   { label: "Beverages", value: "beverages" },
@@ -29,9 +28,9 @@ const vendorCategoryOptions = [
 ];
 
 const paymentTermsOptions = [
-  { label: "Net 7", value: "net7" },
-  { label: "Net 15", value: "net15" },
-  { label: "Net 30", value: "net30" },
+  { label: "Net 7", value: "net_7" },
+  { label: "Net 15", value: "net_15" },
+  { label: "Net 30", value: "net_30" },
 ];
 
 const billingCycleOptions = [
@@ -48,7 +47,7 @@ const statusCycleOptions = [
 ];
 
 const verificationStatusOptions = [
-  { label: "Pending Verification", value: "pending_verification" },
+  { label: "Pending Verification", value: "pending" },
   { label: "Verified", value: "verified" },
   { label: "Failed", value: "failed" },
   { label: "Rejected", value: "rejected" },
@@ -90,6 +89,7 @@ const VendorRegistrationFull = () => {
   const router = useRouter();
 
   // Vendor Details
+  const [cinNumber, setCinNumber] = useState("");
   const [vendorName, setVendorName] = useState("");
   const [vendorBillingName, setVendorBillingName] = useState("");
   const [vendorId, setVendorId] = useState("");
@@ -186,7 +186,42 @@ const VendorRegistrationFull = () => {
   };
 
   const handleSubmit = async () => {
-   
+    const payload = {
+      vendor_name: vendorName,
+      vendor_billing_name: vendorBillingName,
+      vendor_type: vendorType ? [vendorType] : [],
+      vendor_category: vendorCategory,
+      primary_contact_name: primaryContact,
+      contact_phone: contactPhone,
+      vendor_email: vendorEmail,
+      vendor_address: billingAddress,
+      vendor_id: vendorId,
+      company_registration_number: cinNumber,
+      bank_account_number: baVendor,
+      ifsc_code: ifscCode,
+      payment_terms: paymentTerms,
+      payment_methods: paymentMethod,
+      gst_number: gstDetails,
+      pan_number: panNumber,
+      tds_rate: Number(tdsRate),
+      billing_cycle: billingCycle,
+      vendor_status_cycle: statusCycle,
+      verification_status: verificationStatus,
+      risk_rating: riskRating,
+      risk_notes: riskNotes,
+      contract_terms: contractTerms,
+      contract_expiry_date: contractExpiryDate,
+      contract_renewal_date: contractRenewalDate,
+      internal_notes: internalNotes,
+    };
+
+    try {
+      await createVendor(payload);
+      toast.success("Vendor Created Successfully!");
+      router.push("/vendor/dashboard");
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "Failed to create vendor");
+    }
   };
 
   return (
@@ -214,70 +249,70 @@ const VendorRegistrationFull = () => {
             label="CIN Number"
             variant="orange"
             placeholder="Enter CIN number"
+            value={cinNumber}
+            onChange={(e) => setCinNumber(e.target.value)}
+          />
+          <Input
+            label="Brand Name"
+            variant="orange"
+            placeholder="Enter brand name"
             value={vendorName}
             onChange={(e) => setVendorName(e.target.value)}
           />
+        </div>
+
+        <div className="mt-6 grid grid-cols-2 gap-12">
           <Input
-            label="Vendor Name"
+            label="Brand Billing Name"
             variant="orange"
-            placeholder="Enter vendor name"
+            placeholder="Enter Billing Name"
             value={vendorBillingName}
             onChange={(e) => setVendorBillingName(e.target.value)}
           />
+          <Input
+            label="Email ID of Brand"
+            variant="orange"
+            placeholder="Enter brand email ID"
+            value={vendorEmail}
+            onChange={(e) => setVendorEmail(e.target.value)}
+          />
         </div>
 
         <div className="mt-6 grid grid-cols-2 gap-12">
           <Input
-            label="Vendor Billing Name"
+            label="Brand ID"
             variant="orange"
-            placeholder="Enter Billing Name"
+            placeholder="Enter brand ID"
             value={vendorId}
             onChange={(e) => setVendorId(e.target.value)}
           />
-          <Input
-            label="Email ID of Vendor"
-            variant="orange"
-            placeholder="Enter vendor email ID"
-            value={vendorEmail}
-            onChange={(e) => setVendorEmail(e.target.value)}
-          />
-        </div>
-
-        <div className="mt-6 grid grid-cols-2 gap-12">
-          <Input
-            label="Vendor ID"
-            variant="orange"
-            placeholder="Enter vendor ID"
-            value={vendorEmail}
-            onChange={(e) => setVendorEmail(e.target.value)}
-          />
           <Select
-            label="Vendor Type"
+            label="Brand Type"
             variant="orange"
             options={vendorTypeOptions}
             value={vendorType}
             onChange={setVendorType}
-            placeholder="Select vendor type"
+            placeholder="Select brand type"
             selectClassName="py-4 px-4"
           />
         </div>
 
         <div className="mt-6 grid grid-cols-2 gap-12">
           <Select
-            label="Vendor Category"
+            label="Brand Category"
             variant="orange"
             options={vendorCategoryOptions}
             value={vendorCategory}
             onChange={setVendorCategory}
-            placeholder="Select vendor category"
+            placeholder="Select brand category"
             selectClassName="py-4 px-4"
           />
           <Input
             label="Primary Contact Name"
             variant="orange"
             placeholder="Enter primary contact name"
-            value={contactPhone}
-            onChange={(e) => setContactPhone(e.target.value)}
+            value={primaryContact}
+            onChange={(e) => setPrimaryContact(e.target.value)}
           />
         </div>
 
@@ -313,9 +348,9 @@ const VendorRegistrationFull = () => {
             onChange={(e) => setBaVendor(e.target.value)}
           />
           <Input
-            label="Vendor Billing Name"
+            label="IFSC Code"
             variant="orange"
-            placeholder="Enter vendor billing name"
+            placeholder="Enter IFSC code"
             value={ifscCode}
             onChange={(e) => setIfscCode(e.target.value)}
           />
@@ -332,7 +367,7 @@ const VendorRegistrationFull = () => {
           />
         </div>
 
-        <div className="w-full border-2 my-12" />
+        <div className="w-full my-12" />
         <Label className="text-orange-500 text-2xl font-semibold">
           Compliance
         </Label>
@@ -379,12 +414,12 @@ const VendorRegistrationFull = () => {
 
         <div className="mt-6 grid grid-cols-2 gap-12">
           <Select
-            label="Vendor Status Cycle"
+            label="Brand Status Cycle"
             variant="orange"
             options={statusCycleOptions}
             value={statusCycle}
             onChange={setStatusCycle}
-            placeholder="Select vendor status cycle"
+            placeholder="Select brand status cycle"
             selectClassName="py-4 px-4"
           />
           <Select
@@ -497,7 +532,7 @@ const VendorRegistrationFull = () => {
         </Button>
 
         {/* Contract Details */}
-        <div className="w-full border-2 my-12" />
+        <div className="w-full  my-12" />
         <Label className="text-orange-500 text-2xl font-semibold">
           Contract Detail
         </Label>

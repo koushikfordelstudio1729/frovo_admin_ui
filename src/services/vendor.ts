@@ -10,9 +10,7 @@ export const getVendorById = (id: string) =>
   api.get(`${BASE_VENDOR_ADMIN}/vendors/${id}/edit`);
 
 export const createVendor = (payload: any) =>
-  api.post(`${BASE_VENDOR}/create`, payload, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
+  api.post(`${BASE_VENDOR}/create`, payload);
 
 export const updateVendor = (id: string, payload: any) =>
   api.put(`${BASE_VENDOR_ADMIN}/vendors/${id}`, payload, {
@@ -32,3 +30,8 @@ export const createCompany = (payload: any) =>
       "Content-Type": "application/json",
     },
   });
+
+  export const getCompanyDetails = (companyRegistrationNumber: string) =>
+    api.post(`${BASE_VENDOR}/companies`, {
+      company_registration_number: companyRegistrationNumber,
+    });

@@ -7,20 +7,21 @@ export interface VendorMenuItem {
 
 export const vendorNavigation: VendorMenuItem[] = [
   {
-    label: "Dashboard",
-    icon: "layoutDashboard",
-    href: "/vendor/dashboard",
+    label: "Registered Company",
+    icon: "barChart2",
+    href: "/vendor/registered-company",
   },
+  // {
+  //   label: "Dashboard",
+  //   icon: "layoutDashboard",
+  //   href: "/vendor/dashboard",
+  // },
   {
     label: "Vendor Onboard",
     icon: "userPlus",
     href: "/vendor/vendor-onboard",
   },
-  {
-    label: "Registered Company",
-    icon: "barChart2",
-    href: "/vendor/registered-company",
-  },
+
   {
     label: "Audit Trails",
     icon: "fileText",

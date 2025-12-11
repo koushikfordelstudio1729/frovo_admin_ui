@@ -211,6 +211,7 @@ const Dashboard = () => {
           label="Search"
           placeholder="Search Company"
           inputClassName="py-2"
+          labelClassName="text-xl"
           variant="search"
           onChange={(e) => setSearch(e.target.value)}
         />

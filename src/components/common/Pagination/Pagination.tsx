@@ -43,7 +43,7 @@ export const Pagination: React.FC<PaginationProps> = ({
           className={`px-3 py-2 text-sm rounded border-2 ${
             currentPage === 1
               ? "text-gray-400  border-gray-300 cursor-not-allowed opacity-60"
-              : "text-gray-700 border-gray-400 hover:bg-gray-100"
+              : "text-gray-700 border-gray-400 hover:bg-gray-100 cursor-pointer"
           }`}
         >
           {"<< First"}
@@ -56,7 +56,7 @@ export const Pagination: React.FC<PaginationProps> = ({
           className={`px-3 py-2 text-sm rounded border-2 ${
             currentPage === 1
               ? "text-gray-400 border-gray-300 cursor-not-allowed opacity-60"
-              : "text-gray-700 border-gray-400 hover:bg-gray-100"
+              : "text-gray-700 border-gray-400 hover:bg-gray-100 cursor-pointer"
           }`}
         >
           {"< Back"}
@@ -74,8 +74,8 @@ export const Pagination: React.FC<PaginationProps> = ({
               onClick={() => onPageChange(Number(page))}
               className={`px-3 py-2 text-sm rounded font-medium transition ${
                 currentPage === page
-                  ? "bg-gray-900 text-white border-2 border-gray-900" // ACTIVE PAGE
-                  : "border-2 border-gray-400 text-gray-700 hover:bg-gray-100"
+                  ? "bg-gray-900 text-white border-2 border-gray-900"
+                  : "border-2 border-gray-400 text-gray-700 hover:bg-gray-100 cursor-pointer"
               }`}
             >
               {page}
@@ -90,7 +90,7 @@ export const Pagination: React.FC<PaginationProps> = ({
           className={`px-3 py-2 text-sm rounded border-2 ${
             currentPage === totalPages
               ? "text-gray-400 border-gray-300 cursor-not-allowed opacity-60"
-              : "text-gray-700 border-gray-400 hover:bg-gray-100"
+              : "text-gray-700 border-gray-400 hover:bg-gray-100 cursor-pointer"
           }`}
         >
           {"Next >"}
@@ -103,7 +103,7 @@ export const Pagination: React.FC<PaginationProps> = ({
           className={`px-3 py-2 text-sm rounded border-2 ${
             currentPage === totalPages
               ? "text-gray-400 border-gray-300 cursor-not-allowed opacity-60"
-              : "text-gray-700 border-gray-400 hover:bg-gray-100"
+              : "text-gray-700 border-gray-400 hover:bg-gray-100 cursor-pointer"
           }`}
         >
           {"Last >>"}

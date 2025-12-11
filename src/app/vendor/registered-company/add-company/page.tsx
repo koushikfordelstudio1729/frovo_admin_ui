@@ -27,7 +27,7 @@ const REGEX = {
   CIN: /^[A-Z]{1}\d{5}[A-Z]{2}\d{4}[A-Z]{3}\d{6}$/,
   DIN: /^\d{8}$/,
   EMAIL: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-  WEBSITE: /^https?:\/\/[a-zA-Z0-9.-]+\.[a-z]{2,}/,
+  WEBSITE: /^(https?:\/\/)?(www\.)?[a-zA-Z0-9.-]+\.[a-z]{2,}$/,
 };
 
 type CompanyForm = {
@@ -78,7 +78,7 @@ export default function AddCompanyPage() {
       return "Invalid email format";
 
     if (form.website && !REGEX.WEBSITE.test(form.website.trim()))
-      return "Invalid website URL. Use https://example.com";
+      return "Invalid website URL. Use example.com";
 
     return null;
   };
@@ -122,24 +122,25 @@ export default function AddCompanyPage() {
     <div className="min-h-screen bg-gray-50 p-6">
       <BackHeader title="Add Company" />
 
-      <div className="bg-white rounded-xl p-8 space-y-10 shadow-md">
+      <div className="bg-white rounded-xl p-8 space-y-10">
         {/* Company Identity */}
         <Label className="text-2xl font-semibold text-orange-500">
           Company Identity
         </Label>
 
-        <div className="grid grid-cols-2 gap-6">
+        <div className="grid grid-cols-2 mt-8 gap-6">
           <Select
-            label="Legal Entity Structure*"
+            label="Legal Entity Structure"
             options={legalEntityOptions}
             value={form.legalEntity}
             variant="orange"
+            selectClassName="py-4 px-4"
             onChange={(val) => handleChange("legalEntity", val)}
             placeholder="Select Entity Type"
           />
 
           <Input
-            label="Registered Company Name*"
+            label="Registered Company Name"
             value={form.companyName}
             variant="orange"
             onChange={(e) => handleChange("companyName", e.target.value)}
@@ -147,7 +148,7 @@ export default function AddCompanyPage() {
           />
 
           <Input
-            label="CIN / Registration No*"
+            label="Corperate Identification Number (CIN)"
             value={form.cin}
             variant="orange"
             onChange={(e) => handleChange("cin", e.target.value.toUpperCase())}
@@ -164,18 +165,21 @@ export default function AddCompanyPage() {
           />
         </div>
 
+        <hr className="border-2 border-gray-200" />
+
         {/* Contact & Location */}
-        <Label className="text-2xl font-semibold text-orange-500">
+        <Label className="text-2xl font-semibold  text-orange-500">
           Contact & Location
         </Label>
 
-        <div className="grid grid-cols-2 gap-6">
+        <div className="grid grid-cols-2 mt-8 gap-6">
           <Textarea
             label="Registered Office Address"
             variant="orange"
+            placeholder="Enter office address"
             value={form.officeAddress}
             onChange={(e) => handleChange("officeAddress", e.target.value)}
-            rows={5}
+            rows={6}
           />
 
           <div className="flex flex-col gap-6">
@@ -183,42 +187,47 @@ export default function AddCompanyPage() {
               label="Corporate Website"
               variant="orange"
               value={form.website}
-              placeholder="https://company.com"
+              placeholder="Enter website"
               onChange={(e) => handleChange("website", e.target.value)}
             />
 
             <Input
-              label="Official Email"
+              label="Official Email (Corporate)"
               variant="orange"
+              placeholder="Enter email address"
               value={form.email}
               onChange={(e) => handleChange("email", e.target.value)}
             />
           </div>
         </div>
 
+        <hr className="border-2 border-gray-200" />
+
         {/* Personnel */}
         <Label className="text-2xl font-semibold text-orange-500">
           Key Personnel
         </Label>
 
-        <div className="grid grid-cols-2 gap-6">
+        <div className="grid grid-cols-2 mt-8 gap-6">
           <Input
-            label="Director Name"
+            label="Director / Auth. Signatory Name"
             variant="orange"
+            placeholder="Enter director address"
             value={form.directorName}
             onChange={(e) => handleChange("directorName", e.target.value)}
           />
 
           <Input
-            label="DIN"
+            label="Director Identification No. (DIN)"
             variant="orange"
+            placeholder="Enter DIN"
             value={form.din}
             onChange={(e) => handleChange("din", e.target.value)}
           />
         </div>
 
         {/* Actions */}
-        <div className="flex justify-center gap-4 mt-10">
+        <div className="flex justify-center gap-4 mt-12">
           <Button
             variant="primary"
             onClick={handleSubmit}
