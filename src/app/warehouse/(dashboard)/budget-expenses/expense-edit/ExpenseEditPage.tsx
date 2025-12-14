@@ -46,6 +46,7 @@ export default function ExpenseEditPage() {
   const { fieldAgents, loading: fieldAgentsLoading } = useFieldAgents();
 
   const [billFile, setBillFile] = useState<File | null>(null);
+  const [existingBillUrl, setExistingBillUrl] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
@@ -86,6 +87,11 @@ export default function ExpenseEditPage() {
             status: expense.status || "pending",
             paymentStatus: expense.paymentStatus || "unpaid",
           });
+
+          // Set existing bill URL if available
+          if (expense.billUrl) {
+            setExistingBillUrl(expense.billUrl);
+          }
         } else {
           toast.error("Failed to load expense");
           router.push("/warehouse/budget-expenses");
@@ -101,6 +107,42 @@ export default function ExpenseEditPage() {
 
     fetchData();
   }, [expenseId, router]);
+
+  // Handle status update separately
+  const handleStatusChange = async (newStatus: string) => {
+    if (!expenseId) return;
+
+    try {
+      const response = await warehouseAPI.updateExpenseStatus(expenseId, { status: newStatus });
+      if (response.data.success) {
+        setFormData({ ...formData, status: newStatus });
+        toast.success("Status updated successfully");
+      } else {
+        toast.error(response.data.message || "Failed to update status");
+      }
+    } catch (error: any) {
+      console.error("Error updating status:", error);
+      toast.error(error?.response?.data?.message || "Failed to update status");
+    }
+  };
+
+  // Handle payment status update separately
+  const handlePaymentStatusChange = async (newPaymentStatus: string) => {
+    if (!expenseId) return;
+
+    try {
+      const response = await warehouseAPI.updateExpensePaymentStatus(expenseId, { paymentStatus: newPaymentStatus });
+      if (response.data.success) {
+        setFormData({ ...formData, paymentStatus: newPaymentStatus });
+        toast.success("Payment status updated successfully");
+      } else {
+        toast.error(response.data.message || "Failed to update payment status");
+      }
+    } catch (error: any) {
+      console.error("Error updating payment status:", error);
+      toast.error(error?.response?.data?.message || "Failed to update payment status");
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -142,23 +184,37 @@ export default function ExpenseEditPage() {
     try {
       setSubmitting(true);
 
+      // Only update basic expense details (not status or payment status)
       const payload = {
         category: formData.expenseCategory,
         amount: parseFloat(formData.amount),
         vendor: formData.vendor,
         date: new Date(formData.date).toISOString(),
         description: formData.description,
-        billUrl: billFile ? "https://example.com/bill123.pdf" : undefined, // In real app, upload file first
         assignedAgent: formData.assignedAgent,
         warehouseId: warehouse._id,
-        status: formData.status,
-        paymentStatus: formData.paymentStatus,
       };
 
       const response = await warehouseAPI.updateExpense(expenseId, payload);
 
       if (response.data.success) {
-        toast.success("Expense updated successfully");
+        // Upload bill if file is selected
+        if (billFile) {
+          try {
+            const uploadResponse = await warehouseAPI.uploadExpenseBill(expenseId, billFile);
+            if (uploadResponse.data.success) {
+              toast.success("Expense updated and bill uploaded successfully");
+            } else {
+              toast.success("Expense updated but bill upload failed");
+            }
+          } catch (uploadError: any) {
+            console.error("Error uploading bill:", uploadError);
+            toast.success("Expense updated but bill upload failed");
+          }
+        } else {
+          toast.success("Expense updated successfully");
+        }
+
         router.push("/warehouse/budget-expenses");
       } else {
         toast.error(response.data.message || "Failed to update expense");
@@ -334,9 +390,7 @@ export default function ExpenseEditPage() {
               value={formData.status}
               placeholder="Select Status"
               selectClassName="py-4 px-4 border-2 border-orange-300"
-              onChange={(val) =>
-                setFormData({ ...formData, status: val })
-              }
+              onChange={(val) => handleStatusChange(val)}
             />
           </div>
         </div>
@@ -353,9 +407,7 @@ export default function ExpenseEditPage() {
               value={formData.paymentStatus}
               placeholder="Select Payment Status"
               selectClassName="py-4 px-4 border-2 border-orange-300"
-              onChange={(val) =>
-                setFormData({ ...formData, paymentStatus: val })
-              }
+              onChange={(val) => handlePaymentStatusChange(val)}
             />
 
             {/* Upload Bill */}
@@ -363,7 +415,14 @@ export default function ExpenseEditPage() {
               <Label className="text-lg font-medium text-gray-700 mb-2 block">
                 Upload Bill (Optional)
               </Label>
-              <FileUpload label="" file={billFile} onChange={setBillFile} />
+              <FileUpload
+                label=""
+                file={billFile}
+                onChange={setBillFile}
+                existingFileUrl={existingBillUrl}
+                existingFileName="Bill Document"
+                onRemoveExisting={() => setExistingBillUrl("")}
+              />
             </div>
           </div>
 

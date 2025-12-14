@@ -142,6 +142,7 @@ export const apiConfig = {
         list: '/warehouse/expenses',
         getById: (id: string) => `/warehouse/expenses/${id}`,
         update: (id: string) => `/warehouse/expenses/${id}`,
+        uploadBill: (id: string) => `/warehouse/expenses/${id}/upload-bill`,
         delete: (id: string) => `/warehouse/expenses/${id}`,
         updateStatus: (id: string) => `/warehouse/expenses/${id}/status`,
         updatePaymentStatus: (id: string) => `/warehouse/expenses/${id}/payment-status`,

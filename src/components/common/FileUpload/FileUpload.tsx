@@ -1,13 +1,16 @@
 // components/FileUpload.tsx
 "use client";
 import { useRef } from "react";
-import { Trash2, FileText, Upload } from "lucide-react";
+import { Trash2, FileText, Upload, ExternalLink } from "lucide-react";
 
 interface FileUploadProps {
   label?: string;
   file?: File | null;
   onChange: (file: File | null) => void;
   accept?: string;
+  existingFileUrl?: string;
+  existingFileName?: string;
+  onRemoveExisting?: () => void;
 }
 
 export default function FileUpload({
@@ -15,8 +18,15 @@ export default function FileUpload({
   file,
   onChange,
   accept = ".jpg,.jpeg,.png,.pdf",
+  existingFileUrl,
+  existingFileName,
+  onRemoveExisting,
 }: FileUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const hasFile = file || existingFileUrl;
+  const fileName = file?.name || existingFileName || "Uploaded Bill";
+  const isImage = existingFileUrl?.match(/\.(jpg|jpeg|png|gif|webp)$/i);
 
   return (
     <div className="w-full max-w-md">
@@ -25,12 +35,12 @@ export default function FileUpload({
       </label>
       <div
         className="border-2 border-dashed border-orange-500 rounded-xl p-6"
-        onClick={() => !file && inputRef.current?.click()}
+        onClick={() => !hasFile && inputRef.current?.click()}
         role="button"
         tabIndex={0}
-        style={{ cursor: file ? "default" : "pointer" }}
+        style={{ cursor: hasFile ? "default" : "pointer" }}
       >
-        {!file ? (
+        {!hasFile ? (
           <div className="flex flex-col items-center justify-center">
             <Upload className="w-8 h-8 text-orange-500 mb-3 pointer-events-none" />
             <span className="bg-orange-500 px-4 py-1 rounded-lg text-white font-medium pointer-events-none">
@@ -54,24 +64,86 @@ export default function FileUpload({
             </span>
           </div>
         ) : (
-          <div className="flex items-center justify-between w-full">
-            <div className="flex items-center gap-2">
-              <FileText className="w-7 h-7 text-orange-500" />
-              <span className="text-base font-medium text-gray-800">
-                {file.name}
-              </span>
+          <div className="space-y-3">
+            {/* Image Preview */}
+            {existingFileUrl && isImage && !file && (
+              <div className="mb-3">
+                <img
+                  src={existingFileUrl}
+                  alt="Bill preview"
+                  className="max-w-full max-h-48 rounded-lg object-contain mx-auto"
+                />
+              </div>
+            )}
+
+            {/* File Info */}
+            <div className="flex items-center justify-between w-full">
+              <div className="flex items-center gap-2">
+                <FileText className="w-7 h-7 text-orange-500" />
+                <span className="text-base font-medium text-gray-800">
+                  {fileName}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                {/* View link for existing file */}
+                {existingFileUrl && !file && (
+                  <a
+                    href={existingFileUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-1"
+                    onClick={(e) => e.stopPropagation()}
+                    aria-label="View file"
+                  >
+                    <ExternalLink className="w-6 h-6 text-blue-600 hover:text-blue-700" />
+                  </a>
+                )}
+                {/* Remove button */}
+                <button
+                  type="button"
+                  className="ml-2"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (file) {
+                      onChange(null);
+                    } else if (onRemoveExisting) {
+                      onRemoveExisting();
+                    }
+                  }}
+                  aria-label="Remove file"
+                >
+                  <Trash2 className="w-6 h-6 text-gray-700 hover:text-red-500" />
+                </button>
+              </div>
             </div>
-            <button
-              type="button"
-              className="ml-4"
-              onClick={(e) => {
-                e.stopPropagation();
-                onChange(null);
-              }}
-              aria-label="Remove file"
-            >
-              <Trash2 className="w-6 h-6 text-gray-700 hover:text-red-500" />
-            </button>
+
+            {/* Replace button */}
+            {existingFileUrl && !file && (
+              <button
+                type="button"
+                className="w-full mt-2 px-4 py-2 text-sm font-medium text-orange-600 bg-orange-50 rounded-lg hover:bg-orange-100 transition-colors"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  inputRef.current?.click();
+                }}
+              >
+                Replace File
+              </button>
+            )}
+
+            <input
+              type="file"
+              accept={accept}
+              className="hidden"
+              ref={inputRef}
+              onChange={(e) =>
+                onChange(
+                  e.target.files && e.target.files.length > 0
+                    ? e.target.files[0]
+                    : null
+                )
+              }
+            />
           </div>
         )}
       </div>

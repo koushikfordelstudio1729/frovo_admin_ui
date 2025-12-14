@@ -448,6 +448,22 @@ export const warehouseAPI = {
     return api.put<any>(apiConfig.endpoints.warehouse.expenses.update(id), data);
   },
 
+  // Upload bill for expense
+  uploadExpenseBill: async (id: string, file: File) => {
+    const formData = new FormData();
+    formData.append('document', file);
+
+    return api.post<any>(
+      apiConfig.endpoints.warehouse.expenses.uploadBill(id),
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+  },
+
   // Delete expense
   deleteExpense: async (id: string) => {
     return api.delete<any>(apiConfig.endpoints.warehouse.expenses.delete(id));

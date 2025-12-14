@@ -86,7 +86,6 @@ export default function ExpenseEntryForm() {
         vendor: formData.vendor,
         date: new Date(formData.date).toISOString(),
         description: formData.description,
-        billUrl: billFile ? "https://example.com/bill123.pdf" : undefined, // In real app, upload file first
         assignedAgent: formData.assignedAgent,
         warehouseId: warehouse._id,
       };
@@ -94,7 +93,25 @@ export default function ExpenseEntryForm() {
       const response = await warehouseAPI.createExpense(payload);
 
       if (response.data.success) {
-        toast.success("Expense created successfully");
+        const expenseId = response.data.data._id;
+
+        // Upload bill if file is selected
+        if (billFile) {
+          try {
+            const uploadResponse = await warehouseAPI.uploadExpenseBill(expenseId, billFile);
+            if (uploadResponse.data.success) {
+              toast.success("Expense created and bill uploaded successfully");
+            } else {
+              toast.success("Expense created but bill upload failed");
+            }
+          } catch (uploadError: any) {
+            console.error("Error uploading bill:", uploadError);
+            toast.success("Expense created but bill upload failed");
+          }
+        } else {
+          toast.success("Expense created successfully");
+        }
+
         router.push("/warehouse/budget-expenses");
       } else {
         toast.error(response.data.message || "Failed to create expense");
