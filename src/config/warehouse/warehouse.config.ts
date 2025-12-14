@@ -22,6 +22,11 @@ export const warehouseNavigation: WarehouseMenuItem[] = [
     href: "/warehouse/create-grn",
     icon: "refresh",
   },
+  {
+    label: "GRN Summary",
+    href: "/warehouse/grn-summary",
+    icon: "clipboard",
+  },
   { label: "Inbound", href: "/warehouse/inbound", icon: "arrowUpRight" },
   {
     label: "Outbound",

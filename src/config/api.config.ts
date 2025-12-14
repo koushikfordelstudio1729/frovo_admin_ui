@@ -86,6 +86,12 @@ export const apiConfig = {
         updateStatus: (id: string) => `/warehouse/inbound/purchase-orders/${id}/status`,
         delete: (id: string) => `/warehouse/inbound/purchase-orders/${id}`,
       },
+      grn: {
+        list: '/warehouse/grn',
+        create: (poId: string) => `/warehouse/purchase-orders/${poId}/grn`,
+        getById: (id: string) => `/warehouse/grn/${id}`,
+        updateStatus: (id: string) => `/warehouse/grn/${id}/status`,
+      },
     },
 
     // Vendor-specific endpoints

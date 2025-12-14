@@ -14,6 +14,7 @@ export { default as Label } from "./Label";
 export { default as Checkbox } from "./Checkbox";
 export { default as EditableInput } from "./EditableInput";
 export { default as FileUpload } from "./FileUpload";
+export { default as MultipleFileUpload } from "./MultipleFileUpload";
 export { default as PasswordValidation } from "./PasswordValidation";
 export { default as PasswordToggleButton } from "./PasswordToggleButton";
 export { default as BackHeader } from "./BackHeader";

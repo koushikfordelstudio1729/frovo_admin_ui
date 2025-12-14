@@ -166,7 +166,6 @@ export interface POLineItem {
   unit_price: number;
   expected_delivery_date: string;
   location: string;
-  images?: AttachmentFile[];
 }
 
 export interface VendorDetails {
@@ -246,16 +245,6 @@ export interface CreatedByInfo {
 
 export type POStatus = 'draft' | 'approved' | 'received' | 'delivered' | 'cancelled';
 
-export interface AttachmentFile {
-  _id: string;
-  file_name: string;
-  file_url: string;
-  cloudinary_public_id?: string;
-  file_size: number;
-  mime_type: string;
-  uploaded_at?: string;
-}
-
 export interface PurchaseOrder {
   _id: string;
   po_number: string;
@@ -266,8 +255,6 @@ export interface PurchaseOrder {
   po_status: POStatus;
   po_raised_date: string;
   remarks: string;
-  attachment?: string;
-  attachments?: AttachmentFile[];
   createdBy: CreatedByInfo;
   createdAt: string;
   updatedAt: string;
@@ -280,7 +267,6 @@ export interface CreatePurchaseOrderPayload {
   po_status: POStatus;
   remarks: string;
   po_line_items: Omit<POLineItem, '_id'>[];
-  attachments?: File[];
 }
 
 export interface UpdatePOStatusPayload {

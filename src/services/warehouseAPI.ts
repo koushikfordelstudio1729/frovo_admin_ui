@@ -13,6 +13,11 @@ import type {
   CreatePurchaseOrderPayload,
   UpdatePOStatusPayload,
   PurchaseOrderParams,
+  GRNResponse,
+  GRNsResponse,
+  CreateGRNPayload,
+  UpdateGRNStatusPayload,
+  GRNParams,
 } from '@/types';
 
 export const warehouseAPI = {
@@ -109,8 +114,21 @@ export const warehouseAPI = {
   },
 
   // Create new purchase order
-  createPurchaseOrder: async (data: CreatePurchaseOrderPayload) => {
-    return api.post<PurchaseOrderResponse>(apiConfig.endpoints.warehouse.purchaseOrders.create, data);
+  createPurchaseOrder: async (data: CreatePurchaseOrderPayload | FormData) => {
+    // If FormData, we need to let browser set Content-Type with boundary
+    const config = data instanceof FormData
+      ? {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      : undefined;
+
+    return api.post<PurchaseOrderResponse>(
+      apiConfig.endpoints.warehouse.purchaseOrders.create,
+      data,
+      config
+    );
   },
 
   // Update purchase order status
@@ -121,5 +139,33 @@ export const warehouseAPI = {
   // Delete purchase order
   deletePurchaseOrder: async (id: string) => {
     return api.delete<PurchaseOrderResponse>(apiConfig.endpoints.warehouse.purchaseOrders.delete(id));
+  },
+
+  // GRN (Goods Receipt Note) APIs
+  // Get all GRNs with optional filters
+  getGRNs: async (params?: GRNParams) => {
+    const queryParams = new URLSearchParams();
+
+    if (params?.qc_status) queryParams.append('qc_status', params.qc_status);
+    if (params?.startDate) queryParams.append('startDate', params.startDate);
+    if (params?.endDate) queryParams.append('endDate', params.endDate);
+
+    const url = `${apiConfig.endpoints.warehouse.grn.list}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    return api.get<GRNsResponse>(url);
+  },
+
+  // Get GRN by ID
+  getGRNById: async (id: string) => {
+    return api.get<GRNResponse>(apiConfig.endpoints.warehouse.grn.getById(id));
+  },
+
+  // Create new GRN for a purchase order
+  createGRN: async (poId: string, data: CreateGRNPayload) => {
+    return api.post<GRNResponse>(apiConfig.endpoints.warehouse.grn.create(poId), data);
+  },
+
+  // Update GRN status
+  updateGRNStatus: async (id: string, data: UpdateGRNStatusPayload) => {
+    return api.patch<GRNResponse>(apiConfig.endpoints.warehouse.grn.updateStatus(id), data);
   },
 };

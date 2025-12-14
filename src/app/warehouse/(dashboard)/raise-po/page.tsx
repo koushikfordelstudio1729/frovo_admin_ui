@@ -1,6 +1,6 @@
 "use client";
 
-import { BackHeader, Button, Input, Select, Textarea } from "@/components";
+import { BackHeader, Button, Input, Select, Textarea, MultipleFileUpload } from "@/components";
 import { usePurchaseOrder, useVendors } from "@/hooks/warehouse";
 import { useState, useEffect, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -64,6 +64,13 @@ const RaisePO = () => {
   const [successMessage, setSuccessMessage] = useState("");
   const [validationError, setValidationError] = useState("");
   const [isEditMode, setIsEditMode] = useState(false);
+  const [lineItemImages, setLineItemImages] = useState<{ [key: number]: File[] }>({});
+  const [existingLineItemImages, setExistingLineItemImages] = useState<{ [key: number]: any[] }>({});
+
+  // Debug: Monitor lineItemImages state changes
+  useEffect(() => {
+    console.log('lineItemImages state changed:', lineItemImages);
+  }, [lineItemImages]);
 
   // Transform vendors to options format
   const vendorOptions = useMemo(() => {
@@ -103,6 +110,15 @@ const RaisePO = () => {
         expected_delivery_date: item.expected_delivery_date.split('T')[0],
         location: item.location,
       })));
+
+      // Load existing images
+      const existingImages: { [key: number]: any[] } = {};
+      purchaseOrder.po_line_items.forEach((item, index) => {
+        if (item.images && item.images.length > 0) {
+          existingImages[index] = item.images;
+        }
+      });
+      setExistingLineItemImages(existingImages);
     }
   }, [purchaseOrder, isEditMode]);
 
@@ -133,6 +149,18 @@ const RaisePO = () => {
         line_no: i + 1,
       }));
       setLineItems(renumbered);
+
+      // Remove images for deleted line item and reindex
+      const newImages: { [key: number]: File[] } = {};
+      Object.keys(lineItemImages).forEach(key => {
+        const idx = parseInt(key);
+        if (idx < index) {
+          newImages[idx] = lineItemImages[idx];
+        } else if (idx > index) {
+          newImages[idx - 1] = lineItemImages[idx];
+        }
+      });
+      setLineItemImages(newImages);
     }
   };
 
@@ -170,11 +198,44 @@ const RaisePO = () => {
     return true;
   };
 
+  const validateFiles = (): boolean => {
+    const maxFileSize = 5 * 1024 * 1024; // 5MB
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
+
+    for (let index in lineItemImages) {
+      const files = lineItemImages[index];
+      for (let file of files) {
+        if (!allowedTypes.includes(file.type)) {
+          setValidationError(`File ${file.name} in line item ${parseInt(index) + 1} has invalid type. Only JPG, PNG, and PDF allowed.`);
+          return false;
+        }
+        if (file.size > maxFileSize) {
+          setValidationError(`File ${file.name} in line item ${parseInt(index) + 1} exceeds 5MB size limit.`);
+          return false;
+        }
+      }
+    }
+    return true;
+  };
+
+  const updateLineItemImages = (index: number, files: File[]) => {
+    console.log(`updateLineItemImages called for index ${index}:`, files);
+    setLineItemImages(prev => {
+      const updated = {
+        ...prev,
+        [index]: files
+      };
+      console.log('Updated lineItemImages state:', updated);
+      return updated;
+    });
+  };
+
   const handleSubmit = async (status: "draft" | "approved") => {
     clearError();
     setSuccessMessage("");
 
     if (!validateForm()) return;
+    if (!validateFiles()) return;
 
     // Convert line items dates to ISO format
     const formattedLineItems = lineItems.map(item => ({
@@ -182,15 +243,60 @@ const RaisePO = () => {
       expected_delivery_date: new Date(item.expected_delivery_date!).toISOString(),
     }));
 
-    const payload = {
-      vendor: formData.vendor,
-      po_raised_date: new Date(formData.po_raised_date).toISOString(),
-      po_status: status,
-      remarks: formData.remarks,
-      po_line_items: formattedLineItems as Omit<POLineItem, '_id'>[],
-    };
+    let result;
 
-    const result = await createPurchaseOrder(payload);
+    // Check if there are any images
+    const hasImages = Object.keys(lineItemImages).some(key => {
+      const files = lineItemImages[parseInt(key)];
+      return files && files.length > 0;
+    });
+
+    console.log('Line Item Images:', lineItemImages);
+    console.log('Has Images:', hasImages);
+
+    // If there are images, use FormData; otherwise use JSON
+    if (hasImages) {
+      // Build FormData for file upload support
+      const formDataPayload = new FormData();
+      formDataPayload.append('vendor', formData.vendor);
+      formDataPayload.append('po_raised_date', new Date(formData.po_raised_date).toISOString());
+      formDataPayload.append('po_status', status);
+      formDataPayload.append('remarks', formData.remarks);
+      formDataPayload.append('po_line_items', JSON.stringify(formattedLineItems));
+
+      // Append images for each line item
+      Object.keys(lineItemImages).forEach(indexStr => {
+        const index = parseInt(indexStr);
+        const files = lineItemImages[index];
+        console.log(`Appending files for line item ${index}:`, files);
+
+        if (files && files.length > 0) {
+          files.forEach(file => {
+            console.log(`Appending file:`, file.name, file.type, file.size);
+            formDataPayload.append(`images_${index}`, file);
+          });
+        }
+      });
+
+      // Debug: Log FormData contents
+      console.log('FormData entries:');
+      for (let [key, value] of formDataPayload.entries()) {
+        console.log(key, value);
+      }
+
+      result = await createPurchaseOrder(formDataPayload);
+    } else {
+      // Use original JSON format when no images
+      const payload = {
+        vendor: formData.vendor,
+        po_raised_date: new Date(formData.po_raised_date).toISOString(),
+        po_status: status,
+        remarks: formData.remarks,
+        po_line_items: formattedLineItems as Omit<POLineItem, '_id'>[],
+      };
+
+      result = await createPurchaseOrder(payload);
+    }
 
     if (result) {
       setSuccessMessage(`Purchase Order ${result.po_number} created successfully!`);
@@ -383,6 +489,75 @@ const RaisePO = () => {
                   value={item.location}
                   onChange={(e) => updateLineItem(index, 'location', e.target.value)}
                 />
+              </div>
+
+              {/* Product Images for this line item */}
+              <div className="mt-6 pt-6 border-t border-gray-200">
+                <h5 className="text-sm font-semibold text-gray-700 mb-3">
+                  Product Images (Optional)
+                </h5>
+
+                {/* Show existing images in edit mode */}
+                {isEditMode && existingLineItemImages[index] && existingLineItemImages[index].length > 0 && (
+                  <div className="mb-4">
+                    <p className="text-xs text-gray-600 mb-2">Previously Uploaded Images:</p>
+                    <div className="grid grid-cols-4 gap-3">
+                      {existingLineItemImages[index].map((image: any) => (
+                        <a
+                          key={image._id}
+                          href={image.file_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="group relative aspect-square overflow-hidden rounded-lg border-2 border-blue-200 hover:border-blue-500 transition-all hover:shadow-lg bg-white"
+                        >
+                          {image.mime_type?.startsWith('image/') ? (
+                            <img
+                              src={image.file_url}
+                              alt={image.file_name}
+                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                              loading="lazy"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                              <div className="text-center">
+                                <svg className="w-6 h-6 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                </svg>
+                                <p className="text-xs text-gray-500 mt-1">PDF</p>
+                              </div>
+                            </div>
+                          )}
+                          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <p className="text-xs text-white truncate">{image.file_name}</p>
+                            <p className="text-xs text-gray-300">{(image.file_size / 1024).toFixed(1)} KB</p>
+                          </div>
+                        </a>
+                      ))}
+                    </div>
+                    <p className="text-xs text-blue-600 mt-2">
+                      Note: These images are from the original PO. Upload new images below if needed.
+                    </p>
+                  </div>
+                )}
+
+                {/* Upload new images */}
+                <div>
+                  <p className="text-sm font-medium text-gray-700 mb-2">
+                    {isEditMode ? 'Upload New Images' : 'Upload Images'}
+                  </p>
+                  <MultipleFileUpload
+                    files={lineItemImages[index] || []}
+                    onChange={(files) => updateLineItemImages(index, files)}
+                    accept=".jpg,.jpeg,.png,.pdf"
+                    maxFiles={5}
+                    maxSizePerFile={5 * 1024 * 1024}
+                  />
+                  <p className="text-xs text-gray-500 mt-2">
+                    {isEditMode
+                      ? '✨ You can upload multiple new images (up to 5 files, 5MB each)'
+                      : 'Upload multiple product images or documents (Max 5 files, 5MB each)'}
+                  </p>
+                </div>
               </div>
             </div>
           ))}

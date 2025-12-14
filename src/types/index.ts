@@ -82,4 +82,12 @@ export type {
   PurchaseOrderResponse,
   PurchaseOrdersResponse,
   PurchaseOrderParams,
+  QCStatus,
+  GRNLineItem,
+  GRN,
+  CreateGRNPayload,
+  UpdateGRNStatusPayload,
+  GRNResponse,
+  GRNsResponse,
+  GRNParams,
 } from './warehouse.types';

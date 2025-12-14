@@ -12,7 +12,7 @@ interface UsePurchaseOrderReturn {
   updating: boolean;
   deleting: boolean;
   getPurchaseOrder: (id: string) => Promise<void>;
-  createPurchaseOrder: (data: CreatePurchaseOrderPayload) => Promise<PurchaseOrder | null>;
+  createPurchaseOrder: (data: CreatePurchaseOrderPayload | FormData) => Promise<PurchaseOrder | null>;
   updatePOStatus: (id: string, data: UpdatePOStatusPayload) => Promise<PurchaseOrder | null>;
   deletePurchaseOrder: (id: string) => Promise<boolean>;
   clearError: () => void;
@@ -50,11 +50,11 @@ export const usePurchaseOrder = (): UsePurchaseOrderReturn => {
     }
   }, []);
 
-  const createPurchaseOrder = useCallback(async (data: CreatePurchaseOrderPayload): Promise<PurchaseOrder | null> => {
+  const createPurchaseOrder = useCallback(async (data: CreatePurchaseOrderPayload | FormData): Promise<PurchaseOrder | null> => {
     try {
       setCreating(true);
       setError(null);
-      console.log('usePurchaseOrder - Creating PO:', data);
+      console.log('usePurchaseOrder - Creating PO:', data instanceof FormData ? 'FormData' : data);
 
       const response = await warehouseAPI.createPurchaseOrder(data);
       const apiResponse = response.data;
