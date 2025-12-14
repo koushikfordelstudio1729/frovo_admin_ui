@@ -115,6 +115,17 @@ export const apiConfig = {
         approve: (id: string) => `/warehouse/returns/${id}/approve`,
         reject: (id: string) => `/warehouse/returns/${id}/reject`,
       },
+      inventory: {
+        dashboard: (warehouseId: string) => `/warehouse/inventory/dashboard/${warehouseId}`,
+        stats: (warehouseId: string) => `/warehouse/inventory/stats/${warehouseId}`,
+        getById: (id: string) => `/warehouse/inventory/${id}`,
+        update: (id: string) => `/warehouse/inventory/${id}`,
+        archive: (id: string) => `/warehouse/inventory/${id}/archive`,
+        unarchive: (id: string) => `/warehouse/inventory/${id}/unarchive`,
+        archived: (warehouseId: string) => `/warehouse/inventory/archived/${warehouseId}`,
+        bulkArchive: '/warehouse/inventory/bulk-archive',
+        bulkUnarchive: '/warehouse/inventory/bulk-unarchive',
+      },
     },
 
     // Vendor-specific endpoints

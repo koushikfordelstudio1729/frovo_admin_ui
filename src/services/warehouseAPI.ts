@@ -36,6 +36,13 @@ import type {
   ReturnQueueResponse,
   CreateReturnOrderPayload,
   ReturnQueueParams,
+  InventoryDashboardResponse,
+  InventoryStatsResponse,
+  InventoryItemResponse,
+  InventoryDashboardParams,
+  UpdateInventoryItemPayload,
+  BulkArchivePayload,
+  ArchivedInventoryResponse,
 } from '@/types';
 
 export const warehouseAPI = {
@@ -285,5 +292,67 @@ export const warehouseAPI = {
   // Reject return order
   rejectReturn: async (id: string) => {
     return api.patch<ReturnOrderResponse>(apiConfig.endpoints.warehouse.returns.reject(id), {});
+  },
+
+  // Inventory APIs
+  // Get inventory dashboard with pagination and filters
+  getInventoryDashboard: async (warehouseId: string, params?: InventoryDashboardParams) => {
+    const queryParams = new URLSearchParams();
+
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    if (params?.status) queryParams.append('status', params.status);
+    if (params?.expiryStatus) queryParams.append('expiryStatus', params.expiryStatus);
+    if (params?.sku) queryParams.append('sku', params.sku);
+    if (params?.batchId) queryParams.append('batchId', params.batchId);
+
+    const url = `${apiConfig.endpoints.warehouse.inventory.dashboard(warehouseId)}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    return api.get<InventoryDashboardResponse>(url);
+  },
+
+  // Get inventory statistics for a warehouse
+  getInventoryStats: async (warehouseId: string) => {
+    return api.get<InventoryStatsResponse>(apiConfig.endpoints.warehouse.inventory.stats(warehouseId));
+  },
+
+  // Get inventory item by ID
+  getInventoryItemById: async (id: string) => {
+    return api.get<InventoryItemResponse>(apiConfig.endpoints.warehouse.inventory.getById(id));
+  },
+
+  // Update inventory item
+  updateInventoryItem: async (id: string, data: UpdateInventoryItemPayload) => {
+    return api.put<InventoryItemResponse>(apiConfig.endpoints.warehouse.inventory.update(id), data);
+  },
+
+  // Archive inventory item
+  archiveInventoryItem: async (id: string) => {
+    return api.patch<InventoryItemResponse>(apiConfig.endpoints.warehouse.inventory.archive(id), {});
+  },
+
+  // Unarchive inventory item
+  unarchiveInventoryItem: async (id: string) => {
+    return api.patch<InventoryItemResponse>(apiConfig.endpoints.warehouse.inventory.unarchive(id), {});
+  },
+
+  // Get archived inventory with pagination
+  getArchivedInventory: async (warehouseId: string, params?: InventoryDashboardParams) => {
+    const queryParams = new URLSearchParams();
+
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+
+    const url = `${apiConfig.endpoints.warehouse.inventory.archived(warehouseId)}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    return api.get<ArchivedInventoryResponse>(url);
+  },
+
+  // Bulk archive inventory items
+  bulkArchiveInventory: async (data: BulkArchivePayload) => {
+    return api.post<InventoryItemResponse>(apiConfig.endpoints.warehouse.inventory.bulkArchive, data);
+  },
+
+  // Bulk unarchive inventory items
+  bulkUnarchiveInventory: async (data: BulkArchivePayload) => {
+    return api.post<InventoryItemResponse>(apiConfig.endpoints.warehouse.inventory.bulkUnarchive, data);
   },
 };

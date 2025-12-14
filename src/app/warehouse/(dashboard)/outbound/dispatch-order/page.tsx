@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, Plus, Trash2 } from "lucide-react";
 import { Input, Select, Button, Label, Textarea } from "@/components";
 import { warehouseAPI } from "@/services/warehouseAPI";
+import { useMyWarehouse } from "@/hooks/warehouse";
 import type { FieldAgent, CreateDispatchOrderPayload, PurchaseOrder, GRN } from "@/types";
 import { toast } from "react-hot-toast";
 
@@ -21,6 +22,7 @@ interface SKUOption {
 
 export default function DispatchOrderPage() {
   const router = useRouter();
+  const { warehouse, loading: warehouseLoading } = useMyWarehouse();
   const [loading, setLoading] = useState(false);
   const [fieldAgents, setFieldAgents] = useState<FieldAgent[]>([]);
   const [loadingAgents, setLoadingAgents] = useState(true);
@@ -189,6 +191,7 @@ export default function DispatchOrderPage() {
           quantity: parseInt(p.quantity, 10),
         })),
         assignedAgent: formData.assignedAgent,
+        warehouse: warehouse?._id || "",
         notes: formData.notes,
         status: "pending",
       };
@@ -230,6 +233,7 @@ export default function DispatchOrderPage() {
         quantity: parseInt(p.quantity, 10),
       })),
       assignedAgent: fieldAgents.find(a => a._id === formData.assignedAgent)?.name || formData.assignedAgent,
+      warehouse: warehouse?._id || "",
       notes: formData.notes,
       status: "pending",
     };
@@ -237,6 +241,29 @@ export default function DispatchOrderPage() {
     console.log("Preview Data:", previewData);
     toast.success("Preview data logged to console");
   };
+
+  if (warehouseLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center py-12">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
+          <p className="mt-4 text-gray-600">Loading warehouse...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!warehouse) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="text-red-600">
+            <strong>Error:</strong> No warehouse assigned to your account
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 p-4">
@@ -252,6 +279,32 @@ export default function DispatchOrderPage() {
         <h1 className="text-2xl font-semibold text-gray-900">
           Dispatch Order Form
         </h1>
+      </div>
+
+      {/* Warehouse Info Card */}
+      <div className="bg-linear-to-r from-orange-50 to-orange-100 border border-orange-200 rounded-lg p-4 mb-6">
+        <div className="flex items-center gap-3">
+          <div className="bg-orange-500 p-2 rounded-lg">
+            <svg
+              className="w-5 h-5 text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+              />
+            </svg>
+          </div>
+          <div>
+            <p className="text-sm font-medium text-orange-900">Creating dispatch order for:</p>
+            <p className="text-lg font-bold text-orange-950">{warehouse.name}</p>
+            <p className="text-xs text-orange-700">Code: {warehouse.code}</p>
+          </div>
+        </div>
       </div>
 
       <form onSubmit={handleSubmit} className="max-w-full bg-white rounded-2xl p-8">

@@ -427,6 +427,7 @@ export interface CreateDispatchOrderPayload {
   destination: string;
   products: DispatchProduct[];
   assignedAgent: string;
+  warehouse: string;
   notes: string;
   status?: DispatchStatus;
 }
@@ -555,6 +556,7 @@ export interface ReturnOrder {
 export interface CreateReturnOrderPayload {
   batchId: string;
   vendor: string;
+  warehouse: string;
   reason: string;
   quantity: number;
   returnType?: ReturnType;
@@ -577,4 +579,119 @@ export interface ReturnQueueResponse {
 export interface ReturnQueueParams {
   status?: ReturnStatus;
   returnType?: ReturnType;
+}
+
+// Inventory Types
+export type InventoryStatus = 'active' | 'low_stock' | 'out_of_stock' | 'archived';
+export type ExpiryStatus = 'expiring_soon' | 'expired' | 'normal';
+
+export interface InventoryLocation {
+  zone: string;
+  aisle: string;
+  rack: string;
+  bin: string;
+}
+
+export interface InventoryWarehouse {
+  _id: string;
+  name: string;
+  code: string;
+}
+
+export interface InventoryItem {
+  _id: string;
+  sku: string;
+  productName: string;
+  batchId: string;
+  warehouse: InventoryWarehouse;
+  quantity: number;
+  minStockLevel: number;
+  maxStockLevel: number;
+  age: number;
+  status: InventoryStatus;
+  isArchived: boolean;
+  location: InventoryLocation;
+  expiryDate?: string;
+  archivedAt?: string;
+  createdBy: CreatedByInfo;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+}
+
+export interface InventoryStats {
+  totalItems: number;
+  activeItems: number;
+  archivedItems: number;
+  lowStockItems: number;
+  expiredItems: number;
+  nearExpiryItems: number;
+  totalStockValue: number;
+  statusBreakdown: {
+    [key: string]: number;
+  };
+}
+
+export interface InventoryDashboardData {
+  inventory: InventoryItem[];
+  total: number;
+  page: number;
+  totalPages: number;
+  filters: Record<string, any>;
+}
+
+export interface InventoryDashboardResponse {
+  success: boolean;
+  message: string;
+  data: InventoryDashboardData;
+  timestamp: string;
+}
+
+export interface InventoryStatsResponse {
+  success: boolean;
+  message: string;
+  data: InventoryStats;
+  timestamp: string;
+}
+
+export interface InventoryItemResponse {
+  success: boolean;
+  message: string;
+  data: InventoryItem;
+  timestamp: string;
+}
+
+export interface InventoryDashboardParams {
+  page?: number;
+  limit?: number;
+  status?: string;
+  expiryStatus?: string;
+  sku?: string;
+  batchId?: string;
+}
+
+export interface UpdateInventoryItemPayload {
+  quantity?: number;
+  minStockLevel?: number;
+  maxStockLevel?: number;
+  expiryDate?: string;
+  location?: InventoryLocation;
+}
+
+export interface BulkArchivePayload {
+  inventoryIds: string[];
+}
+
+export interface ArchivedInventoryData {
+  inventory: InventoryItem[];
+  total: number;
+  page: number;
+  totalPages: number;
+}
+
+export interface ArchivedInventoryResponse {
+  success: boolean;
+  message: string;
+  data: ArchivedInventoryData;
+  timestamp: string;
 }

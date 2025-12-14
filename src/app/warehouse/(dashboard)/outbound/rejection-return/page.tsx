@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Plus, Eye, X } from "lucide-react";
 import {
@@ -13,8 +13,9 @@ import {
   ConfirmDialog,
   Drawer
 } from "@/components";
-import { useReturnQueue, useVendors } from "@/hooks/warehouse";
-import type { ReturnOrder, CreateReturnOrderPayload } from "@/types";
+import { useReturnQueue, useVendors, useMyWarehouse } from "@/hooks/warehouse";
+import { warehouseAPI } from "@/services/warehouseAPI";
+import type { ReturnOrder, CreateReturnOrderPayload, InventoryItem } from "@/types";
 import { toast } from "react-hot-toast";
 
 const returnQueueColumns = [
@@ -60,6 +61,10 @@ export default function RejectionReturnQueuePage() {
   } = useReturnQueue();
 
   const { vendors } = useVendors();
+  const { warehouse } = useMyWarehouse();
+
+  // Inventory state for batch IDs
+  const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>([]);
 
   // Form state
   const [isFormVisible, setIsFormVisible] = useState(false);
@@ -102,6 +107,41 @@ export default function RejectionReturnQueuePage() {
     }));
   }, [vendors]);
 
+  // Batch ID options from inventory
+  const batchIdOptions = useMemo(() => {
+    // Get unique batch IDs from inventory
+    const uniqueBatchIds = Array.from(
+      new Set(inventoryItems.map(item => item.batchId))
+    );
+
+    return uniqueBatchIds.map(batchId => ({
+      label: batchId,
+      value: batchId,
+    }));
+  }, [inventoryItems]);
+
+  // Fetch inventory items for batch IDs
+  useEffect(() => {
+    const fetchInventory = async () => {
+      if (!warehouse?._id) return;
+
+      try {
+        const response = await warehouseAPI.getInventoryDashboard(warehouse._id, {
+          limit: 1000, // Get all items
+        });
+
+        const apiResponse = response.data;
+        if (apiResponse.success && apiResponse.data) {
+          setInventoryItems(apiResponse.data.inventory);
+        }
+      } catch (err) {
+        console.error('Error fetching inventory for batch IDs:', err);
+      }
+    };
+
+    fetchInventory();
+  }, [warehouse?._id]);
+
   // Reset form
   const resetForm = () => {
     setFormData({
@@ -136,6 +176,7 @@ export default function RejectionReturnQueuePage() {
     const payload: CreateReturnOrderPayload = {
       batchId: formData.batchId,
       vendor: formData.vendor,
+      warehouse: warehouse?._id || "",
       reason: formData.reason,
       quantity: formData.quantity,
       returnType: "damaged", // Default type
@@ -350,6 +391,34 @@ export default function RejectionReturnQueuePage() {
         </Button>
       </div>
 
+      {/* Warehouse Info Card */}
+      {warehouse && (
+        <div className="bg-linear-to-r from-orange-50 to-orange-100 border border-orange-200 rounded-lg p-4 mb-6">
+          <div className="flex items-center gap-3">
+            <div className="bg-orange-500 p-2 rounded-lg">
+              <svg
+                className="w-5 h-5 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                />
+              </svg>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-orange-900">Managing returns for:</p>
+              <p className="text-lg font-bold text-orange-950">{warehouse.name}</p>
+              <p className="text-xs text-orange-700">Code: {warehouse.code}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Create Return Order Drawer */}
       <Drawer
         isOpen={isFormVisible}
@@ -383,12 +452,13 @@ export default function RejectionReturnQueuePage() {
           <Label className="text-lg font-semibold text-gray-700 mb-2 block">
             Batch ID
           </Label>
-          <Input
-            type="text"
-            placeholder="e.g., DC-998877"
-            variant="default"
+          <Select
+            id="batchId"
             value={formData.batchId}
-            onChange={(e) => setFormData({ ...formData, batchId: e.target.value })}
+            options={batchIdOptions}
+            placeholder="Select Batch ID"
+            onChange={(val) => setFormData({ ...formData, batchId: val })}
+            selectClassName="w-full bg-gray-100 px-4 py-3 border border-gray-300 rounded-lg"
           />
         </div>
 
