@@ -13,6 +13,7 @@ import {
   UserRoundCog,
   User,
   Settings,
+  Warehouse,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { adminNavigation } from "@/config/admin/admin.config";
@@ -28,6 +29,7 @@ const iconMap: Record<string, React.ComponentType<{ size?: number }>> = {
   clipboard: Clipboard,
   history: History,
   star: UserRoundCog,
+  warehouse: Warehouse,
   user: User,
   settings: Settings,
 };

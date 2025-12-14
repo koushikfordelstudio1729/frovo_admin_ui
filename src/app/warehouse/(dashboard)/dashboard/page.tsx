@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { Button, Input, Label, Select, StatCard, Table } from "@/components";
 import StackedBarChart from "@/components/charts/StackedBarChart";
+import { useMyWarehouse } from "@/hooks/warehouse";
 import {
   categoryOptions,
   partnerOptions,
@@ -17,6 +18,10 @@ import {
   ArrowBigDown,
   ArrowBigUp,
   ClipboardClock,
+  Warehouse as WarehouseIcon,
+  MapPin,
+  User,
+  Package,
 } from "lucide-react";
 
 const statCards = [
@@ -69,10 +74,14 @@ const lowStockColumns = [
 ];
 
 export default function Dashboard() {
+  const { warehouse: myWarehouse, loading: warehouseLoading, error: warehouseError } = useMyWarehouse();
   const [date, setDate] = useState("");
   const [category, setCategory] = useState("");
   const [partner, setPartner] = useState("");
   const [warehouse, setWarehouse] = useState("");
+
+  // Debug: Log warehouse data
+  console.log('Dashboard - Warehouse data:', { myWarehouse, warehouseLoading, warehouseError });
 
   const handleView = (row: any) => {
     console.log("View", row);
@@ -120,6 +129,76 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen pt-12">
+      {/* Warehouse Information Header */}
+      {warehouseLoading ? (
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <div className="animate-pulse flex space-x-4">
+            <div className="flex-1 space-y-3 py-1">
+              <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+              <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+            </div>
+          </div>
+        </div>
+      ) : warehouseError ? (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+          <p className="text-red-600 text-sm">
+            <strong>Error loading warehouse:</strong> {warehouseError}
+          </p>
+        </div>
+      ) : myWarehouse ? (
+        <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg shadow-lg p-6 mb-6 text-white">
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-3">
+                <WarehouseIcon className="w-8 h-8" />
+                <div>
+                  <h1 className="text-2xl font-bold">{myWarehouse.name}</h1>
+                  <p className="text-blue-100 text-sm">Code: {myWarehouse.code}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                <div className="flex items-center gap-2">
+                  <MapPin className="w-5 h-5 text-blue-200" />
+                  <div>
+                    <p className="text-xs text-blue-200">Location</p>
+                    <p className="text-sm font-medium">{myWarehouse.location}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <Package className="w-5 h-5 text-blue-200" />
+                  <div>
+                    <p className="text-xs text-blue-200">Capacity</p>
+                    <p className="text-sm font-medium">{myWarehouse.capacity.toLocaleString()} units</p>
+                  </div>
+                </div>
+
+                {myWarehouse.manager && (
+                  <div className="flex items-center gap-2">
+                    <User className="w-5 h-5 text-blue-200" />
+                    <div>
+                      <p className="text-xs text-blue-200">Manager</p>
+                      <p className="text-sm font-medium">{myWarehouse.manager.name}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className={`px-4 py-2 rounded-full text-sm font-semibold ${
+                myWarehouse.isActive
+                  ? 'bg-green-400 text-green-900'
+                  : 'bg-red-400 text-red-900'
+              }`}>
+                {myWarehouse.isActive ? 'Active' : 'Inactive'}
+              </span>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
       <div className="flex items-end w-full gap-6">
         {/* Select Date */}
         <div>

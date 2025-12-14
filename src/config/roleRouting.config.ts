@@ -72,6 +72,22 @@ export const ROLE_ROUTES: Record<string, RoleRouteConfig> = {
     defaultRoute: "/warehouse/dashboard",
     description: "General warehouse access",
   },
+
+  // Warehouse Manager Full - Full warehouse operations access
+  warehouse_manager_full: {
+    systemRole: "warehouse_manager_full",
+    uiAccess: "Warehouse Portal",
+    defaultRoute: "/warehouse/dashboard",
+    description: "Warehouse operations with full access - can manage POs, create GRNs, and manage inventory",
+  },
+
+  // Warehouse Manager - Standard warehouse manager
+  warehouse_manager: {
+    systemRole: "warehouse_manager",
+    uiAccess: "Warehouse Portal",
+    defaultRoute: "/warehouse/dashboard",
+    description: "Warehouse operations with partner-level access",
+  },
 };
 
 /**
@@ -113,14 +129,21 @@ export const getRedirectPathByRole = (systemRole: string): string => {
  * @returns The redirect path for the user
  */
 export const getRedirectPathByUser = (user: {
-  roles?: Array<{ systemRole: string }>;
+  roles?: Array<{ systemRole?: string; key?: string }>;
 }): string => {
   if (!user.roles || user.roles.length === 0) {
     console.warn("User has no roles. Using default fallback route.");
     return DEFAULT_FALLBACK_ROUTE;
   }
 
-  const primaryRole = user.roles[0].systemRole;
+  // Try to get systemRole first (for system roles), fallback to key (for custom roles)
+  const primaryRole = user.roles[0].systemRole || user.roles[0].key;
+
+  if (!primaryRole) {
+    console.warn("User role has no systemRole or key property. Using default fallback route.");
+    return DEFAULT_FALLBACK_ROUTE;
+  }
+
   return getRedirectPathByRole(primaryRole);
 };
 

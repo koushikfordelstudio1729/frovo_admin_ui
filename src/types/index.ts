@@ -47,3 +47,17 @@ export type {
   UsersResponse,
   UserQueryParams,
 } from './user.types';
+
+// Warehouse types
+export type {
+  Warehouse,
+  WarehouseManager,
+  WarehouseCreatedBy,
+  WarehouseManagerDetails,
+  CreateWarehousePayload,
+  UpdateWarehousePayload,
+  WarehousePagination,
+  WarehousesResponse,
+  WarehouseResponse,
+  WarehouseSearchParams,
+} from './warehouse.types';

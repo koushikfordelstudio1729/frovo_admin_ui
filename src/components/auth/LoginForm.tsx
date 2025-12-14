@@ -7,6 +7,7 @@ import Link from "next/link";
 import { Button, Checkbox, Input } from "@/components/common";
 import PasswordToggleButton from "@/components/common/PasswordToggleButton";
 import { authAPI } from "@/services/authAPI";
+import { warehouseAPI } from "@/services/warehouseAPI";
 import { storageUtils } from "@/utils";
 import type { User as AuthUser } from "@/types/auth.types";
 import { getRedirectPathByUser } from "@/config/roleRouting.config";
@@ -121,6 +122,30 @@ export const LoginForm: React.FC<LoginFormProps> = ({
         if (rememberMe) {
           localStorage.setItem("rememberMe", "true");
           localStorage.setItem("email", email);
+        }
+
+        // Check if user is a warehouse manager and fetch their warehouse
+        const userRole = user.roles?.[0]?.systemRole || user.roles?.[0]?.key;
+        const isWarehouseManager =
+          userRole === 'warehouse_manager' ||
+          userRole === 'warehouse_manager_full' ||
+          userRole === 'warehouse_admin' ||
+          userRole === 'warehouse_staff';
+
+        if (isWarehouseManager) {
+          try {
+            const warehouseResponse = await warehouseAPI.getMyWarehouse();
+            // Access response.data because warehouseAPI returns Axios response
+            const warehouseData = warehouseResponse.data;
+            if (warehouseData.success && warehouseData.data) {
+              // Store the complete data object (warehouse + manager)
+              storageUtils.setWarehouse(warehouseData.data);
+              console.log('Warehouse data loaded:', warehouseData.data.warehouse.name);
+            }
+          } catch (warehouseErr) {
+            console.warn('Failed to fetch warehouse data:', warehouseErr);
+            // Don't block login if warehouse fetch fails
+          }
         }
 
         // Redirect based on user's role using centralized routing config

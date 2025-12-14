@@ -68,7 +68,7 @@ api.interceptors.response.use(
       if (!refreshToken) {
         storageUtils.clearAuthData();
         if (typeof window !== 'undefined') {
-          window.location.href = '/admin/login';
+          window.location.href = '/login';
         }
         return Promise.reject(error);
       }
@@ -101,7 +101,7 @@ api.interceptors.response.use(
         processQueue(err as AxiosError, null);
         storageUtils.clearAuthData();
         if (typeof window !== 'undefined') {
-          window.location.href = '/admin/login';
+          window.location.href = '/login';
         }
         return Promise.reject(err);
       } finally {

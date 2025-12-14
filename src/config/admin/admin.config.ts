@@ -46,6 +46,11 @@ export const adminNavigation: AdminMenuItem[] = [
     icon: "star",
   },
   {
+    label: "Warehouse Management",
+    href: "/admin/warehouse-management",
+    icon: "warehouse",
+  },
+  {
     label: "User Profile",
     href: "/admin/user-profile",
     icon: "user",

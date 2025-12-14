@@ -49,6 +49,14 @@ export const apiConfig = {
     },
     accessRequests: '/access-requests',
     auditLogs: '/audit-logs',
+    warehouses: {
+      list: '/warehouse/warehouses',
+      create: '/warehouse/warehouses',
+      getById: (id: string) => `/warehouse/warehouses/${id}`,
+      update: (id: string) => `/warehouse/warehouses/${id}`,
+      delete: (id: string) => `/warehouse/warehouses/${id}`,
+      myWarehouse: '/warehouse/warehouses/my-warehouse',
+    },
   },
 
   statusCodes: {

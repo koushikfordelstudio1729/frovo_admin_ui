@@ -139,13 +139,13 @@ export default function UserProfilePage() {
       storageUtils.clearAuthData();
 
       // Redirect to login page
-      router.push("/admin/login");
+      router.push("/login");
     } catch (err) {
       console.error("Logout error:", err);
 
       // Even if API call fails, clear local data and redirect
       storageUtils.clearAuthData();
-      router.push("/admin/login");
+      router.push("/login");
     } finally {
       setIsLoggingOut(false);
     }

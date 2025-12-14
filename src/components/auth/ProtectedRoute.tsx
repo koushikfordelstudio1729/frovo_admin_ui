@@ -19,7 +19,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
 
       if (!token) {
         // No token found, redirect to login
-        router.push("/admin/login");
+        router.push("/login");
       } else {
         // Token exists, allow access
         setIsAuthenticated(true);

@@ -87,6 +87,20 @@ class StorageUtils {
     this.removeToken();
     this.removeRefreshToken();
     this.removeUser();
+    this.removeWarehouse();
+  }
+
+  // Warehouse-specific storage methods
+  setWarehouse(warehouse: unknown): void {
+    this.setItem('warehouse', warehouse);
+  }
+
+  getWarehouse<T>(): T | null {
+    return this.getItem<T>('warehouse');
+  }
+
+  removeWarehouse(): void {
+    this.removeItem('warehouse');
   }
 }
 
