@@ -355,4 +355,66 @@ export const warehouseAPI = {
   bulkUnarchiveInventory: async (data: BulkArchivePayload) => {
     return api.post<InventoryItemResponse>(apiConfig.endpoints.warehouse.inventory.bulkUnarchive, data);
   },
+
+  // Report APIs
+  // Get all report types
+  getReportTypes: async () => {
+    return api.get<any>(apiConfig.endpoints.warehouse.reports.types);
+  },
+
+  // Get inventory summary report
+  getInventorySummaryReport: async (warehouseId: string) => {
+    const url = `${apiConfig.endpoints.warehouse.reports.inventorySummary}?warehouseId=${warehouseId}`;
+    return api.get<any>(url);
+  },
+
+  // Get purchase orders report
+  getPurchaseOrdersReport: async (warehouseId: string) => {
+    const url = `${apiConfig.endpoints.warehouse.reports.purchaseOrders}?warehouseId=${warehouseId}`;
+    return api.get<any>(url);
+  },
+
+  // Get inventory turnover report
+  getInventoryTurnoverReport: async (warehouseId: string) => {
+    const url = `${apiConfig.endpoints.warehouse.reports.inventoryTurnover}?warehouseId=${warehouseId}`;
+    return api.get<any>(url);
+  },
+
+  // Get QC summary report
+  getQCSummaryReport: async (warehouseId: string) => {
+    const url = `${apiConfig.endpoints.warehouse.reports.qcSummary}?warehouseId=${warehouseId}`;
+    return api.get<any>(url);
+  },
+
+  // Get efficiency report
+  getEfficiencyReport: async (warehouseId: string) => {
+    const url = `${apiConfig.endpoints.warehouse.reports.efficiency}?warehouseId=${warehouseId}`;
+    return api.get<any>(url);
+  },
+
+  // Get stock ageing report
+  getStockAgeingReport: async (warehouseId: string) => {
+    const url = `${apiConfig.endpoints.warehouse.reports.stockAgeing}?warehouseId=${warehouseId}`;
+    return api.get<any>(url);
+  },
+
+  // Get generic report
+  getGenericReport: async (type: string, warehouseId: string) => {
+    const url = `${apiConfig.endpoints.warehouse.reports.generic}?type=${type}&warehouseId=${warehouseId}`;
+    return api.get<any>(url);
+  },
+
+  // Export report
+  exportReport: async (type: string, format: 'csv' | 'json', warehouseId: string) => {
+    const url = `${apiConfig.endpoints.warehouse.reports.export}?type=${type}&format=${format}&warehouseId=${warehouseId}`;
+
+    if (format === 'csv') {
+      // For CSV, we need to handle it differently to download the file
+      return api.get(url, {
+        responseType: 'blob',
+      });
+    }
+
+    return api.get<any>(url);
+  },
 };

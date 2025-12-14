@@ -695,3 +695,205 @@ export interface ArchivedInventoryResponse {
   data: ArchivedInventoryData;
   timestamp: string;
 }
+
+// Report Types
+export interface ReportType {
+  value: string;
+  label: string;
+}
+
+export interface ReportTypesResponse {
+  success: boolean;
+  message: string;
+  data: ReportType[];
+  timestamp: string;
+}
+
+// Inventory Summary Report
+export interface InventorySummaryData {
+  totalSKUs: number;
+  stockOutSKUs: number;
+  totalPOs: number;
+  pendingPOs: number;
+  pendingRefills: number;
+  completedRefills: number;
+  totalStockValue: number;
+  lowStockItems: number;
+  nearExpirySKUs: number;
+  stockAccuracy: number;
+}
+
+export interface InventorySummaryReport {
+  summary: InventorySummaryData;
+  inventoryDetails: InventoryItem[];
+  generatedOn: string;
+  filters: {
+    warehouse: string;
+  };
+}
+
+export interface InventorySummaryResponse {
+  success: boolean;
+  message: string;
+  data: InventorySummaryReport;
+  timestamp: string;
+}
+
+// Purchase Orders Report
+export interface PurchaseOrdersSummary {
+  totalPOs: number;
+  pendingPOs: number;
+  approvedPOs: number;
+  rejectedPOs: number;
+  totalPOValue: number;
+  averagePOValue: number;
+}
+
+export interface PurchaseOrdersReport {
+  summary: PurchaseOrdersSummary;
+  purchaseOrders: PurchaseOrder[];
+  generatedOn: string;
+  filters: {
+    warehouse: string;
+  };
+}
+
+export interface PurchaseOrdersReportResponse {
+  success: boolean;
+  message: string;
+  data: PurchaseOrdersReport;
+  timestamp: string;
+}
+
+// Inventory Turnover Report
+export interface InventoryTurnoverItem {
+  _id: string;
+  sku: string;
+  productName: string;
+  category: string;
+  currentQuantity: number;
+  averageStock: number;
+  totalReceived: number;
+  stockOutCount: number;
+  lastUpdated: string;
+  turnoverRate: number;
+}
+
+export interface InventoryTurnoverSummary {
+  totalSKUs: number;
+  averageTurnover: number;
+  highTurnoverItems: number;
+  lowTurnoverItems: number;
+}
+
+export interface InventoryTurnoverReport {
+  report: string;
+  data: InventoryTurnoverItem[];
+  summary: InventoryTurnoverSummary;
+  generatedOn: string;
+  filters: {
+    warehouse: string;
+  };
+}
+
+export interface InventoryTurnoverResponse {
+  success: boolean;
+  message: string;
+  data: InventoryTurnoverReport;
+  timestamp: string;
+}
+
+// QC Summary Report
+export interface QCSummaryData {
+  _id: string;
+  count: number;
+}
+
+export interface QCSummary {
+  totalReceivings: number;
+  passRate: number;
+  failedCount: number;
+  pendingCount: number;
+  totalValue: number;
+}
+
+export interface QCSummaryReport {
+  report: string;
+  data: QCSummaryData[];
+  details: PurchaseOrder[];
+  summary: QCSummary;
+  generatedOn: string;
+  filters: {
+    warehouse: string;
+  };
+}
+
+export interface QCSummaryResponse {
+  success: boolean;
+  message: string;
+  data: QCSummaryReport;
+  timestamp: string;
+}
+
+// Efficiency Report
+export interface EfficiencyInventory {
+  _id: null;
+  avgUtilization: number;
+  lowStockCount: number;
+  totalItems: number;
+}
+
+export interface EfficiencyReport {
+  report: string;
+  dispatchEfficiency: Record<string, any>;
+  inventoryEfficiency: EfficiencyInventory;
+  overallScore: number;
+  generatedOn: string;
+  filters: {
+    warehouse: string;
+  };
+}
+
+export interface EfficiencyResponse {
+  success: boolean;
+  message: string;
+  data: EfficiencyReport;
+  timestamp: string;
+}
+
+// Stock Ageing Report
+export interface StockAgeingBuckets {
+  '0-30 days': number;
+  '31-60 days': number;
+  '61-90 days': number;
+  '90+ days': number;
+}
+
+export interface StockAgeingReport {
+  report: string;
+  ageingBuckets: StockAgeingBuckets;
+  totalItems: number;
+  generatedOn: string;
+}
+
+export interface StockAgeingResponse {
+  success: boolean;
+  message: string;
+  data: StockAgeingReport;
+  timestamp: string;
+}
+
+// Generic Report Response
+export interface GenericReportResponse {
+  success: boolean;
+  message: string;
+  data: any;
+  timestamp: string;
+}
+
+// Export Report Params
+export interface ExportReportParams {
+  type: string;
+  format: 'csv' | 'json';
+  warehouseId: string;
+}

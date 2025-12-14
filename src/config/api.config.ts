@@ -126,6 +126,17 @@ export const apiConfig = {
         bulkArchive: '/warehouse/inventory/bulk-archive',
         bulkUnarchive: '/warehouse/inventory/bulk-unarchive',
       },
+      reports: {
+        types: '/warehouse/reports/types',
+        inventorySummary: '/warehouse/reports/inventory-summary',
+        purchaseOrders: '/warehouse/reports/purchase-orders',
+        inventoryTurnover: '/warehouse/reports/inventory-turnover',
+        qcSummary: '/warehouse/reports/qc-summary',
+        efficiency: '/warehouse/reports/efficiency',
+        stockAgeing: '/warehouse/reports/stock-ageing',
+        generic: '/warehouse/reports',
+        export: '/warehouse/reports/export',
+      },
     },
 
     // Vendor-specific endpoints

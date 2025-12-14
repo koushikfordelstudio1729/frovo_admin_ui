@@ -2,100 +2,68 @@ import Table from "@/components/name&table/Table";
 import { Badge } from "../common";
 
 const columns = [
-  { key: "poId", label: "PO ID" },
+  { key: "poNumber", label: "PO Number" },
   { key: "vendor", label: "Vendor" },
-  { key: "sku", label: "SKU" },
-  { key: "orderedQty", label: "Ordered Qty" },
-  { key: "approvedQty", label: "Approved Qty" },
+  { key: "totalItems", label: "Total Items" },
+  { key: "totalQty", label: "Total Qty" },
   { key: "poValue", label: "PO Value" },
-  { key: "expectedDelivery", label: "Expected Delivery" },
+  { key: "poRaisedDate", label: "PO Raised Date" },
   { key: "poStatus", label: "PO Status" },
 ];
 
-const data = [
-  {
-    poId: "#103",
-    vendor: "Vendor_Name",
-    sku: "SNACKS-133",
-    orderedQty: 466,
-    approvedQty: 460,
-    poValue: 450,
-    expectedDelivery: "20-10-2025",
-    poStatus: "Active",
-  },
-  {
-    poId: "#104",
-    vendor: "ACME Corp",
-    sku: "DRINKS-208",
-    orderedQty: 320,
-    approvedQty: 320,
-    poValue: 290,
-    expectedDelivery: "21-10-2025",
-    poStatus: "Inactive",
-  },
-  {
-    poId: "#105",
-    vendor: "Fleetgo Logistics",
-    sku: "CANDY-90",
-    orderedQty: 220,
-    approvedQty: 198,
-    poValue: 175,
-    expectedDelivery: "22-10-2025",
-    poStatus: "Active",
-  },
-  {
-    poId: "#106",
-    vendor: "Snack Express",
-    sku: "CHIPS-300",
-    orderedQty: 111,
-    approvedQty: 100,
-    poValue: 105,
-    expectedDelivery: "23-10-2025",
-    poStatus: "Inactive",
-  },
-  {
-    poId: "#107",
-    vendor: "MegaVends",
-    sku: "JUICE-45",
-    orderedQty: 145,
-    approvedQty: 142,
-    poValue: 120,
-    expectedDelivery: "20-10-2025",
-    poStatus: "Active",
-  },
-  {
-    poId: "#108",
-    vendor: "Vendor_Name",
-    sku: "SNACKS-100",
-    orderedQty: 70,
-    approvedQty: 70,
-    poValue: 50,
-    expectedDelivery: "19-10-2025",
-    poStatus: "Inactive",
-  },
-];
+interface PurchaseOrderTableProps {
+  reportData?: any;
+}
 
-export default function PurchaseOrderTable() {
+export default function PurchaseOrderTable({ reportData }: PurchaseOrderTableProps) {
+  // Transform report data to table format
+  const data = reportData?.purchaseOrders?.map((po: any) => {
+    const totalQty = po.po_line_items?.reduce((sum: number, item: any) => sum + item.quantity, 0) || 0;
+    const poValue = po.po_line_items?.reduce((sum: number, item: any) => sum + (item.quantity * item.unit_price), 0) || 0;
+
+    return {
+      poNumber: po.po_number || 'N/A',
+      vendor: po.vendor?.vendor_name || po.vendor_details?.vendor_name || 'N/A',
+      totalItems: po.po_line_items?.length || 0,
+      totalQty: totalQty,
+      poValue: `₹${poValue.toLocaleString()}`,
+      poRaisedDate: po.po_raised_date ? new Date(po.po_raised_date).toLocaleDateString() : 'N/A',
+      poStatus: po.po_status || 'N/A',
+    };
+  }) || [];
+
   return (
     <div className="mt-8">
       <div className="text-lg text-gray-700 font-semibold mb-2">
         Purchase Orders
       </div>
-      <Table
-        columns={columns}
-        data={data}
-        renderCell={(key, value) =>
-          key === "poStatus" ? (
-            <Badge
-              label={value}
-              variant={value === "Active" ? "active" : "inactive"}
-              size="md"
-            />
-          ) : (
-            value
-          )
-        }
-      />
+      {data.length === 0 ? (
+        <div className="text-center py-12 bg-gray-50 rounded-lg">
+          <p className="text-gray-500">No purchase orders found</p>
+        </div>
+      ) : (
+        <Table
+          columns={columns}
+          data={data}
+          renderCell={(key, value) =>
+            key === "poStatus" ? (
+              <Badge
+                label={value.toUpperCase()}
+                variant={
+                  value === "approved" || value === "received"
+                    ? "active"
+                    : value === "pending"
+                    ? "warning"
+                    : "inactive"
+                }
+                size="md"
+              />
+            ) : (
+              value
+            )
+          }
+        />
+      )}
     </div>
   );
 }

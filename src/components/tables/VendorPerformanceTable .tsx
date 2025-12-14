@@ -10,64 +10,20 @@ const columns = [
   { key: "rejection", label: "Rejection" },
 ];
 
-const data = [
-  {
-    vendorId: "#4232",
-    vendorName: "Vendor@123",
-    totalPOs: 232,
-    onTime: "78%",
-    delay: "34%",
-    rejection: "2%",
-  },
-  {
-    vendorId: "#5301",
-    vendorName: "PackWell Ltd",
-    totalPOs: 119,
-    onTime: "91%",
-    delay: "8%",
-    rejection: "0.6%",
-  },
-  {
-    vendorId: "#1840",
-    vendorName: "FreshMart",
-    totalPOs: 300,
-    onTime: "85%",
-    delay: "10%",
-    rejection: "1.2%",
-  },
-  {
-    vendorId: "#2259",
-    vendorName: "Urban Juices",
-    totalPOs: 74,
-    onTime: "72%",
-    delay: "21%",
-    rejection: "3%",
-  },
-  {
-    vendorId: "#9104",
-    vendorName: "SnackNation",
-    totalPOs: 198,
-    onTime: "94%",
-    delay: "3%",
-    rejection: "0.5%",
-  },
-  {
-    vendorId: "#3671",
-    vendorName: "SweetTreats Inc.",
-    totalPOs: 155,
-    onTime: "88%",
-    delay: "7%",
-    rejection: "1.8%",
-  },
-];
+interface VendorPerformanceTableProps {
+  reportData?: any;
+}
 
-export default function VendorPerformanceTable() {
+export default function VendorPerformanceTable({ reportData }: VendorPerformanceTableProps) {
   return (
     <div className="mt-8">
       <div className="text-lg text-gray-700 font-semibold mb-2">
         Vendor Performance
       </div>
-      <Table columns={columns} data={data} />
+      <div className="text-center py-12 bg-gray-50 rounded-lg">
+        <p className="text-gray-500">Vendor performance report coming soon</p>
+        <p className="text-sm text-gray-400 mt-2">This feature is under development</p>
+      </div>
     </div>
   );
 }

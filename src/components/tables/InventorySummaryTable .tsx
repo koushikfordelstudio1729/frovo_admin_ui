@@ -2,93 +2,69 @@ import Table from "@/components/name&table/Table";
 import { Badge } from "../common";
 
 const columns = [
-  { key: "skuId", label: "SKU ID" },
+  { key: "sku", label: "SKU" },
   { key: "productName", label: "Product Name" },
-  { key: "category", label: "Category" },
+  { key: "batchId", label: "Batch ID" },
   { key: "currentQty", label: "Current Qty" },
-  { key: "threshold", label: "Threshold" },
-  { key: "stockStatus", label: "Stock Status" },
-  { key: "lastUpdated", label: "Last Updated" },
+  { key: "minStock", label: "Min Stock" },
+  { key: "maxStock", label: "Max Stock" },
+  { key: "status", label: "Status" },
+  { key: "location", label: "Location" },
 ];
 
-const data = [
-  {
-    skuId: "SNACKS-12",
-    productName: "Lays Onion",
-    category: "Snacks",
-    currentQty: 466,
-    threshold: "High",
-    stockStatus: "Active",
-    lastUpdated: "20-10-2025, 11:06AM",
-  },
-  {
-    skuId: "DRINKS-03",
-    productName: "Diet Coke",
-    category: "Beverages",
-    currentQty: 122,
-    threshold: "Low",
-    stockStatus: "Inactive",
-    lastUpdated: "20-10-2025, 11:09AM",
-  },
-  {
-    skuId: "CANDY-29",
-    productName: "Mentos Mint",
-    category: "Candy",
-    currentQty: 380,
-    threshold: "High",
-    stockStatus: "Active",
-    lastUpdated: "21-10-2025, 09:28AM",
-  },
-  {
-    skuId: "SNACKS-88",
-    productName: "Uncle Chips",
-    category: "Snacks",
-    currentQty: 90,
-    threshold: "Critical",
-    stockStatus: "Inactive",
-    lastUpdated: "18-10-2025, 06:11PM",
-  },
-  {
-    skuId: "JUICE-17",
-    productName: "Tropicana Orange",
-    category: "Beverages",
-    currentQty: 311,
-    threshold: "High",
-    stockStatus: "Active",
-    lastUpdated: "19-10-2025, 10:01AM",
-  },
-  {
-    skuId: "CHOC-034",
-    productName: "5 Star",
-    category: "Chocolate",
-    currentQty: 157,
-    threshold: "Medium",
-    stockStatus: "Active",
-    lastUpdated: "20-10-2025, 07:55AM",
-  },
-];
+interface InventorySummaryTableProps {
+  reportData?: any;
+}
 
-export default function InventorySummaryTable() {
+export default function InventorySummaryTable({ reportData }: InventorySummaryTableProps) {
+  // Transform report data to table format
+  const data = reportData?.inventoryDetails?.map((item: any) => {
+    return {
+      sku: item.sku || 'N/A',
+      productName: item.productName || 'N/A',
+      batchId: item.batchId || 'N/A',
+      currentQty: item.quantity || 0,
+      minStock: item.minStockLevel || 0,
+      maxStock: item.maxStockLevel || 0,
+      status: item.status || 'N/A',
+      location: item.location
+        ? `${item.location.zone}-${item.location.aisle}-${item.location.rack}-${item.location.bin}`
+        : 'N/A',
+    };
+  }) || [];
+
   return (
     <div className="mt-8">
       <div className="text-lg text-gray-700 font-semibold mb-2">
-        Inventory Summary Table
+        Inventory Summary
       </div>
-      <Table
-        columns={columns}
-        data={data}
-        renderCell={(key, value) =>
-          key === "stockStatus" ? (
-            <Badge
-              label={value}
-              variant={value === "Active" ? "active" : "warning"}
-              size="md"
-            />
-          ) : (
-            value
-          )
-        }
-      />
+      {data.length === 0 ? (
+        <div className="text-center py-12 bg-gray-50 rounded-lg">
+          <p className="text-gray-500">No inventory data found</p>
+        </div>
+      ) : (
+        <Table
+          columns={columns}
+          data={data}
+          renderCell={(key, value) =>
+            key === "status" ? (
+              <Badge
+                label={value.toUpperCase()}
+                variant={
+                  value === "active"
+                    ? "active"
+                    : value === "low_stock"
+                    ? "warning"
+                    : "inactive"
+                }
+                size="md"
+              />
+            ) : (
+              value
+            )
+          }
+        />
+      )}
     </div>
   );
 }
