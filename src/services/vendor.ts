@@ -9,6 +9,9 @@ export const getVendorDashboard = () =>
 export const getVendorById = (id: string) =>
   api.get(`${BASE_VENDOR_ADMIN}/vendors/${id}/edit`);
 
+export const getVendors = (page = 1, limit = 100) =>
+  api.get(`${BASE_VENDOR}?page=${page}&limit=${limit}`);
+
 export const createVendor = (payload: any) =>
   api.post(`${BASE_VENDOR}/create`, payload);
 

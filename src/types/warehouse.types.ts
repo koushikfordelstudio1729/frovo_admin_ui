@@ -152,3 +152,145 @@ export interface DashboardParams {
   category?: string;
   partner?: string;
 }
+
+// Purchase Order Types
+export interface POLineItem {
+  _id?: string;
+  line_no: number;
+  sku: string;
+  productName: string;
+  quantity: number;
+  category: string;
+  pack_size: string;
+  uom: string;
+  unit_price: number;
+  expected_delivery_date: string;
+  location: string;
+}
+
+export interface VendorDetails {
+  vendor_name: string;
+  vendor_billing_name: string;
+  vendor_email: string;
+  vendor_phone: string;
+  vendor_category: string;
+  gst_number: string;
+  verification_status: string;
+  vendor_address: string;
+  vendor_contact: string;
+  vendor_id: string;
+}
+
+export interface VendorInfo {
+  _id: string;
+  vendor_name: string;
+  vendor_email: string;
+}
+
+export interface Vendor {
+  _id: string;
+  vendor_name: string;
+  vendor_billing_name: string;
+  vendor_type: string[];
+  vendor_category: string;
+  primary_contact_name: string;
+  contact_phone: string;
+  vendor_email: string;
+  vendor_address: string;
+  vendor_id: string;
+  cin?: string;
+  company_registration_number?: string;
+  bank_account_number: string;
+  ifsc_code: string;
+  payment_terms: string;
+  payment_methods: string;
+  gst_number: string;
+  pan_number: string;
+  tds_rate: number;
+  billing_cycle: string;
+  vendor_status_cycle: string;
+  verification_status: string;
+  risk_rating: string;
+  risk_notes: string;
+  contract_terms: string;
+  contract_expiry_date: string;
+  contract_renewal_date: string;
+  internal_notes: string;
+  createdBy: CreatedByInfo;
+  verified_by?: CreatedByInfo;
+  documents: any[];
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+}
+
+export interface VendorsResponse {
+  success: boolean;
+  data: {
+    vendors: Vendor[];
+    pagination?: {
+      page: number;
+      limit: number;
+      total: number;
+      totalPages: number;
+    };
+  };
+}
+
+export interface CreatedByInfo {
+  name: string;
+  email: string;
+  id: string;
+}
+
+export type POStatus = 'draft' | 'approved' | 'received' | 'delivered' | 'cancelled';
+
+export interface PurchaseOrder {
+  _id: string;
+  po_number: string;
+  po_line_items: POLineItem[];
+  vendor: VendorInfo | null;
+  vendor_details: VendorDetails;
+  warehouse?: string;
+  po_status: POStatus;
+  po_raised_date: string;
+  remarks: string;
+  createdBy: CreatedByInfo;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+}
+
+export interface CreatePurchaseOrderPayload {
+  vendor: string;
+  po_raised_date: string;
+  po_status: POStatus;
+  remarks: string;
+  po_line_items: Omit<POLineItem, '_id'>[];
+}
+
+export interface UpdatePOStatusPayload {
+  po_status: POStatus;
+  remarks?: string;
+}
+
+export interface PurchaseOrderResponse {
+  success: boolean;
+  message: string;
+  data: PurchaseOrder;
+  timestamp: string;
+}
+
+export interface PurchaseOrdersResponse {
+  success: boolean;
+  message: string;
+  data: PurchaseOrder[];
+  timestamp: string;
+}
+
+export interface PurchaseOrderParams {
+  po_status?: POStatus;
+  startDate?: string;
+  endDate?: string;
+  vendor?: string;
+}

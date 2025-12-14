@@ -1,0 +1,99 @@
+import { env } from './admin/environment';
+
+// Common API configuration shared across all modules
+export const apiConfig = {
+  baseURL: env.apiUrl,
+  timeout: 10000,
+  retryAttempts: 3,
+  retryDelay: 1000,
+
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+  },
+
+  statusCodes: {
+    OK: 200,
+    CREATED: 201,
+    BAD_REQUEST: 400,
+    UNAUTHORIZED: 401,
+    FORBIDDEN: 403,
+    NOT_FOUND: 404,
+    INTERNAL_SERVER_ERROR: 500,
+  },
+
+  endpoints: {
+    // Auth endpoints (shared across all modules)
+    auth: {
+      login: '/auth/login',
+      register: '/auth/register',
+      logout: '/auth/logout',
+      refresh: '/auth/refresh-token',
+      verify: '/auth/verify',
+      me: '/auth/me',
+      changePassword: '/auth/change-password',
+      forgotPassword: '/auth/forgot-password',
+      resetPassword: '/auth/reset-password',
+    },
+
+    // User endpoints (shared)
+    user: {
+      profile: '/user/profile',
+      updateProfile: '/user/profile',
+    },
+
+    // Admin-specific endpoints
+    admin: {
+      permissions: {
+        list: '/permissions',
+        search: '/permissions/search',
+        byModule: (module: string) => `/permissions/module/${module}`,
+      },
+      roles: '/roles',
+      departments: '/departments',
+      users: {
+        list: '/users',
+        search: '/users/search',
+        create: '/users',
+        getById: (id: string) => `/users/${id}`,
+        update: (id: string) => `/users/${id}`,
+        delete: (id: string) => `/users/${id}`,
+        updateStatus: (id: string) => `/users/${id}/status`,
+        updatePassword: (id: string) => `/users/${id}/password`,
+        getPermissions: (id: string) => `/users/${id}/permissions`,
+        assignRoles: (id: string) => `/users/${id}/roles`,
+        removeRole: (id: string, roleId: string) => `/users/${id}/roles/${roleId}`,
+      },
+      accessRequests: '/access-requests',
+      auditLogs: '/audit-logs',
+      warehouses: {
+        list: '/warehouse/warehouses',
+        create: '/warehouse/warehouses',
+        getById: (id: string) => `/warehouse/warehouses/${id}`,
+        update: (id: string) => `/warehouse/warehouses/${id}`,
+        delete: (id: string) => `/warehouse/warehouses/${id}`,
+      },
+    },
+
+    // Warehouse-specific endpoints
+    warehouse: {
+      myWarehouse: '/warehouse/warehouses/my-warehouse',
+      dashboard: '/warehouse/dashboard',
+      purchaseOrders: {
+        list: '/warehouse/inbound/purchase-orders',
+        create: '/warehouse/inbound/purchase-orders',
+        getById: (id: string) => `/warehouse/inbound/purchase-orders/${id}`,
+        updateStatus: (id: string) => `/warehouse/inbound/purchase-orders/${id}/status`,
+        delete: (id: string) => `/warehouse/inbound/purchase-orders/${id}`,
+      },
+    },
+
+    // Vendor-specific endpoints
+    vendor: {
+      list: '/vendors',
+    },
+  },
+};
+
+// Export for backward compatibility with existing code
+export { apiConfig as default };
