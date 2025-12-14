@@ -508,3 +508,57 @@ export interface QCTemplatesResponse {
 export interface QCTemplateParams {
   sku?: string;
 }
+
+// Return Order Types
+export type ReturnStatus = 'pending' | 'approved' | 'rejected';
+export type ReturnType = 'damaged' | 'expired' | 'quality_issue' | 'other';
+
+export interface ReturnOrderVendor {
+  _id: string;
+  vendor_name: string;
+  vendor_email: string;
+}
+
+export interface ReturnOrder {
+  _id: string;
+  batchId: string;
+  sku?: string;
+  productName?: string;
+  vendor: ReturnOrderVendor | null;
+  reason: string;
+  quantity: number;
+  status: ReturnStatus;
+  returnType: ReturnType;
+  images: string[];
+  createdBy: CreatedByInfo;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+}
+
+export interface CreateReturnOrderPayload {
+  batchId: string;
+  vendor: string;
+  reason: string;
+  quantity: number;
+  returnType?: ReturnType;
+}
+
+export interface ReturnOrderResponse {
+  success: boolean;
+  message: string;
+  data: ReturnOrder;
+  timestamp: string;
+}
+
+export interface ReturnQueueResponse {
+  success: boolean;
+  message: string;
+  data: ReturnOrder[];
+  timestamp: string;
+}
+
+export interface ReturnQueueParams {
+  status?: ReturnStatus;
+  returnType?: ReturnType;
+}

@@ -29,6 +29,10 @@ import type {
   CreateQCTemplatePayload,
   UpdateQCTemplatePayload,
   QCTemplateParams,
+  ReturnOrderResponse,
+  ReturnQueueResponse,
+  CreateReturnOrderPayload,
+  ReturnQueueParams,
 } from '@/types';
 
 export const warehouseAPI = {
@@ -241,5 +245,32 @@ export const warehouseAPI = {
   // Delete QC template
   deleteQCTemplate: async (id: string) => {
     return api.delete<QCTemplateResponse>(apiConfig.endpoints.warehouse.qcTemplates.delete(id));
+  },
+
+  // Return Order APIs
+  // Get return queue with optional filters
+  getReturnQueue: async (params?: ReturnQueueParams) => {
+    const queryParams = new URLSearchParams();
+
+    if (params?.status) queryParams.append('status', params.status);
+    if (params?.returnType) queryParams.append('returnType', params.returnType);
+
+    const url = `${apiConfig.endpoints.warehouse.returns.queue}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    return api.get<ReturnQueueResponse>(url);
+  },
+
+  // Create new return order
+  createReturnOrder: async (data: CreateReturnOrderPayload) => {
+    return api.post<ReturnOrderResponse>(apiConfig.endpoints.warehouse.returns.create, data);
+  },
+
+  // Approve return order
+  approveReturn: async (id: string) => {
+    return api.patch<ReturnOrderResponse>(apiConfig.endpoints.warehouse.returns.approve(id), {});
+  },
+
+  // Reject return order
+  rejectReturn: async (id: string) => {
+    return api.patch<ReturnOrderResponse>(apiConfig.endpoints.warehouse.returns.reject(id), {});
   },
 };

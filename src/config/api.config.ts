@@ -108,6 +108,12 @@ export const apiConfig = {
         update: (id: string) => `/warehouse/qc/templates/${id}`,
         delete: (id: string) => `/warehouse/qc/templates/${id}`,
       },
+      returns: {
+        queue: '/warehouse/returns/queue',
+        create: '/warehouse/returns',
+        approve: (id: string) => `/warehouse/returns/${id}/approve`,
+        reject: (id: string) => `/warehouse/returns/${id}/reject`,
+      },
     },
 
     // Vendor-specific endpoints
