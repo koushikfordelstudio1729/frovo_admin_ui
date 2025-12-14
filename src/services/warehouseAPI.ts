@@ -24,6 +24,11 @@ import type {
   UpdateDispatchStatusPayload,
   DispatchOrderParams,
   FieldAgentsResponse,
+  QCTemplateResponse,
+  QCTemplatesResponse,
+  CreateQCTemplatePayload,
+  UpdateQCTemplatePayload,
+  QCTemplateParams,
 } from '@/types';
 
 export const warehouseAPI = {
@@ -205,5 +210,36 @@ export const warehouseAPI = {
   // Get all field agents
   getFieldAgents: async () => {
     return api.get<FieldAgentsResponse>(apiConfig.endpoints.warehouse.fieldAgents.list);
+  },
+
+  // QC Template APIs
+  // Get all QC templates with optional filters
+  getQCTemplates: async (params?: QCTemplateParams) => {
+    const queryParams = new URLSearchParams();
+
+    if (params?.sku) queryParams.append('sku', params.sku);
+
+    const url = `${apiConfig.endpoints.warehouse.qcTemplates.list}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    return api.get<QCTemplatesResponse>(url);
+  },
+
+  // Get QC template by ID
+  getQCTemplateById: async (id: string) => {
+    return api.get<QCTemplateResponse>(apiConfig.endpoints.warehouse.qcTemplates.getById(id));
+  },
+
+  // Create new QC template
+  createQCTemplate: async (data: CreateQCTemplatePayload) => {
+    return api.post<QCTemplateResponse>(apiConfig.endpoints.warehouse.qcTemplates.create, data);
+  },
+
+  // Update QC template
+  updateQCTemplate: async (id: string, data: UpdateQCTemplatePayload) => {
+    return api.put<QCTemplateResponse>(apiConfig.endpoints.warehouse.qcTemplates.update(id), data);
+  },
+
+  // Delete QC template
+  deleteQCTemplate: async (id: string) => {
+    return api.delete<QCTemplateResponse>(apiConfig.endpoints.warehouse.qcTemplates.delete(id));
   },
 };

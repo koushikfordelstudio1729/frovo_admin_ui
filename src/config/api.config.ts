@@ -101,6 +101,13 @@ export const apiConfig = {
       fieldAgents: {
         list: '/warehouse/field-agents',
       },
+      qcTemplates: {
+        list: '/warehouse/qc/templates',
+        create: '/warehouse/qc/templates',
+        getById: (id: string) => `/warehouse/qc/templates/${id}`,
+        update: (id: string) => `/warehouse/qc/templates/${id}`,
+        delete: (id: string) => `/warehouse/qc/templates/${id}`,
+      },
     },
 
     // Vendor-specific endpoints

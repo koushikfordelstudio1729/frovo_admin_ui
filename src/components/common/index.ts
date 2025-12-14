@@ -20,3 +20,4 @@ export { default as PasswordToggleButton } from "./PasswordToggleButton";
 export { default as BackHeader } from "./BackHeader";
 export { default as Radio } from "./Radio";
 export { default as ConfirmDialog } from "./ConfirmDialog";
+export { Drawer } from "./Drawer";

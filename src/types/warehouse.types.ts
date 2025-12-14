@@ -459,3 +459,52 @@ export interface FieldAgentsResponse {
   data: FieldAgent[];
   timestamp: string;
 }
+
+// QC Template Types
+export interface QCParameter {
+  _id?: string;
+  name: string;
+  value: string;
+}
+
+export interface QCTemplate {
+  _id: string;
+  title: string;
+  sku: string;
+  parameters: QCParameter[];
+  isActive: boolean;
+  createdBy: CreatedByInfo;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+}
+
+export interface CreateQCTemplatePayload {
+  title: string;
+  sku: string;
+  parameters: Omit<QCParameter, '_id'>[];
+}
+
+export interface UpdateQCTemplatePayload {
+  title?: string;
+  sku?: string;
+  parameters?: Omit<QCParameter, '_id'>[];
+}
+
+export interface QCTemplateResponse {
+  success: boolean;
+  message: string;
+  data: QCTemplate;
+  timestamp: string;
+}
+
+export interface QCTemplatesResponse {
+  success: boolean;
+  message: string;
+  data: QCTemplate[];
+  timestamp: string;
+}
+
+export interface QCTemplateParams {
+  sku?: string;
+}
