@@ -137,6 +137,17 @@ export const apiConfig = {
         generic: '/warehouse/reports',
         export: '/warehouse/reports/export',
       },
+      expenses: {
+        create: '/warehouse/expenses',
+        list: '/warehouse/expenses',
+        getById: (id: string) => `/warehouse/expenses/${id}`,
+        update: (id: string) => `/warehouse/expenses/${id}`,
+        delete: (id: string) => `/warehouse/expenses/${id}`,
+        updateStatus: (id: string) => `/warehouse/expenses/${id}/status`,
+        updatePaymentStatus: (id: string) => `/warehouse/expenses/${id}/payment-status`,
+        summary: '/warehouse/expenses/summary',
+        monthlyTrend: '/warehouse/expenses/trend/monthly',
+      },
     },
 
     // Vendor-specific endpoints

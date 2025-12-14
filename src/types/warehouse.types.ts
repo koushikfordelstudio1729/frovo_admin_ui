@@ -897,3 +897,126 @@ export interface ExportReportParams {
   format: 'csv' | 'json';
   warehouseId: string;
 }
+
+// Expense Types
+export type ExpenseCategory = 'transport' | 'supplies' | 'equipment' | 'staffing' | 'maintenance' | 'utilities' | 'other';
+export type ExpenseStatus = 'pending' | 'approved' | 'rejected';
+export type PaymentStatus = 'paid' | 'unpaid' | 'partially_paid';
+
+export interface CreateExpensePayload {
+  category: ExpenseCategory;
+  amount: number;
+  vendor: string;
+  date: string;
+  description: string;
+  billUrl?: string;
+  assignedAgent: string;
+  warehouseId: string;
+}
+
+export interface UpdateExpensePayload {
+  category?: ExpenseCategory;
+  amount?: number;
+  vendor?: string;
+  date?: string;
+  description?: string;
+  billUrl?: string;
+  assignedAgent?: string;
+}
+
+export interface UpdateExpenseStatusPayload {
+  status: ExpenseStatus;
+}
+
+export interface UpdatePaymentStatusPayload {
+  paymentStatus: PaymentStatus;
+}
+
+export interface Expense {
+  _id: string;
+  category: ExpenseCategory;
+  amount: number;
+  vendor: {
+    _id: string;
+    vendor_name: string;
+    vendor_email: string;
+  };
+  date: string;
+  description: string;
+  billUrl?: string;
+  status: ExpenseStatus;
+  assignedAgent: {
+    _id: string;
+    name: string;
+  };
+  warehouseId: {
+    _id: string;
+    name: string;
+    code: string;
+  };
+  paymentStatus: PaymentStatus;
+  createdBy: {
+    name: string;
+    email: string;
+    id: string;
+  };
+  approvedAt?: string;
+  approvedBy?: {
+    name: string;
+    email: string;
+    id: string;
+  };
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+}
+
+export interface ExpenseResponse {
+  success: boolean;
+  message: string;
+  data: Expense;
+  timestamp: string;
+}
+
+export interface ExpensesResponse {
+  success: boolean;
+  message: string;
+  data: Expense[];
+  timestamp: string;
+}
+
+export interface ExpenseSummary {
+  total: number;
+  approved: number;
+  pending: number;
+  rejected: number;
+  byCategory: Record<string, number>;
+  byMonth: Record<string, number>;
+  paymentSummary: {
+    paid: number;
+    unpaid: number;
+    partially_paid: number;
+  };
+}
+
+export interface ExpenseSummaryResponse {
+  success: boolean;
+  message: string;
+  data: ExpenseSummary;
+  timestamp: string;
+}
+
+export interface MonthlyExpenseTrend {
+  totalAmount: number;
+  approvedAmount: number;
+  pendingAmount: number;
+  expenseCount: number;
+  period: string;
+}
+
+export interface MonthlyExpenseTrendResponse {
+  success: boolean;
+  message: string;
+  data: MonthlyExpenseTrend[];
+  timestamp: string;
+}

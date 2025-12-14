@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Badge, Button, Select, StatCard, Table } from "@/components";
-import { expenseData } from "@/config/warehouse";
-import { Cog, Plus } from "lucide-react";
+import { DollarSign, Plus, TrendingUp, Clock } from "lucide-react";
 import SimpleLineChart from "@/components/charts/SimpleLineChart";
 import { useRouter } from "next/navigation";
+import { useMyWarehouse } from "@/hooks/warehouse";
+import { warehouseAPI } from "@/services/warehouseAPI";
+import { toast } from "react-hot-toast";
 
 const expenseColumns = [
   { key: "date", label: "Date" },
@@ -13,14 +15,26 @@ const expenseColumns = [
   { key: "amount", label: "Amount" },
   { key: "vendor", label: "Vendor" },
   { key: "status", label: "Status" },
+  { key: "paymentStatus", label: "Payment" },
   { key: "actions", label: "Actions" },
 ];
 
 export const categoryOptions = [
-  { label: "Staffing ", value: "staffing " },
-  { label: "Supplies ", value: "supplies " },
-  { label: "Equipment ", value: "equipment " },
-  { label: "Transport ", value: "transport " },
+  { label: "All", value: "" },
+  { label: "Transport", value: "transport" },
+  { label: "Supplies", value: "supplies" },
+  { label: "Equipment", value: "equipment" },
+  { label: "Staffing", value: "staffing" },
+  { label: "Maintenance", value: "maintenance" },
+  { label: "Utilities", value: "utilities" },
+  { label: "Other", value: "other" },
+];
+
+const statusFilterOptions = [
+  { label: "All", value: "" },
+  { label: "Pending", value: "pending" },
+  { label: "Approved", value: "approved" },
+  { label: "Rejected", value: "rejected" },
 ];
 
 const months = [
@@ -38,25 +52,79 @@ const months = [
   { value: "december", label: "December" },
 ];
 
-export default function ExpenseTable() {
-  const [month, setMonth] = useState("");
-  const [category, setCategory] = useState("");
+export default function BudgetExpensesPage() {
   const router = useRouter();
+  const { warehouse, loading: warehouseLoading } = useMyWarehouse();
+
+  const [category, setCategory] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [expenses, setExpenses] = useState<any[]>([]);
+  const [summary, setSummary] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+  const [deleting, setDeleting] = useState<string | null>(null);
+
+  // Fetch expenses and summary
+  useEffect(() => {
+    if (!warehouse?._id) return;
+
+    const fetchExpensesData = async () => {
+      try {
+        setLoading(true);
+
+        // Fetch expenses with filters
+        const expensesResponse = await warehouseAPI.getExpenses(warehouse._id, {
+          category: category || undefined,
+          status: statusFilter || undefined,
+        });
+
+        // Fetch summary
+        const summaryResponse = await warehouseAPI.getExpenseSummary(warehouse._id);
+
+        if (expensesResponse.data.success) {
+          setExpenses(expensesResponse.data.data);
+        }
+
+        if (summaryResponse.data.success) {
+          setSummary(summaryResponse.data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching expenses:", error);
+        toast.error("Failed to load expenses");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchExpensesData();
+  }, [warehouse?._id, category, statusFilter]);
 
   const handleEdit = (row: any) => {
-    const queryParams = new URLSearchParams({
-      id: row.id || "",
-      date: row.date || "",
-      category: row.category || "",
-      amount: row.amount || "",
-      vendor: row.vendor || "",
-    }).toString();
-
-    router.push(`/warehouse/budget-expenses/expense-edit?${queryParams}`);
+    router.push(`/warehouse/budget-expenses/expense-edit?id=${row._id}`);
   };
 
-  const handleDelete = (row: any) => {
-    console.log("Delete", row);
+  const handleDelete = async (row: any) => {
+    if (!confirm(`Are you sure you want to delete this expense (${row.category})?`)) {
+      return;
+    }
+
+    try {
+      setDeleting(row._id);
+      const response = await warehouseAPI.deleteExpense(row._id);
+
+      if (response.data.success) {
+        toast.success("Expense deleted successfully");
+        // Refresh expenses list
+        setExpenses((prev) => prev.filter((exp) => exp._id !== row._id));
+      } else {
+        toast.error(response.data.message || "Failed to delete expense");
+      }
+    } catch (error: any) {
+      console.error("Error deleting expense:", error);
+      const errorMessage = error?.response?.data?.message || error?.message || "Failed to delete expense";
+      toast.error(errorMessage);
+    } finally {
+      setDeleting(null);
+    }
   };
 
   const renderExpenseCell = (
@@ -64,16 +132,56 @@ export default function ExpenseTable() {
     value: any,
     row?: Record<string, any>
   ) => {
+    if (key === "date") {
+      return new Date(value).toLocaleDateString();
+    }
+
+    if (key === "category") {
+      return value.charAt(0).toUpperCase() + value.slice(1);
+    }
+
+    if (key === "amount") {
+      return `₹${value.toLocaleString()}`;
+    }
+
+    if (key === "vendor") {
+      return row?.vendor?.vendor_name || "N/A";
+    }
+
     if (key === "status") {
       return (
         <Badge
-          variant={value === "Approve" ? "active" : "warning"}
-          label={value}
-          className="px-3 py-3 text-sm rounded-full"
+          variant={
+            value === "approved"
+              ? "approved"
+              : value === "pending"
+              ? "warning"
+              : "rejected"
+          }
+          label={value.toUpperCase()}
+          className="px-3 py-1 text-sm rounded-full"
           size="md"
         />
       );
     }
+
+    if (key === "paymentStatus") {
+      return (
+        <Badge
+          variant={
+            value === "paid"
+              ? "active"
+              : value === "partially_paid"
+              ? "warning"
+              : "inactive"
+          }
+          label={value.replace("_", " ").toUpperCase()}
+          className="px-3 py-1 text-sm rounded-full"
+          size="md"
+        />
+      );
+    }
+
     if (key === "actions") {
       return (
         <div className="flex items-center gap-2">
@@ -92,19 +200,70 @@ export default function ExpenseTable() {
             variant="reject"
             className="bg-gray-800 text-white rounded-md px-4 py-1"
             onClick={() => handleDelete(row)}
+            disabled={deleting === row?._id}
           >
-            Delete
+            {deleting === row?._id ? "Deleting..." : "Delete"}
           </Button>
         </div>
       );
     }
+
     return value;
   };
 
+  if (warehouseLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center py-12">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
+          <p className="mt-4 text-gray-600">Loading warehouse...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!warehouse) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="text-red-600">
+            <strong>Error:</strong> No warehouse assigned to your account
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen pt-12">
+    <div className="min-h-screen pt-12 bg-gray-50 p-6">
+      {/* Warehouse Info Card */}
+      <div className="bg-linear-to-r from-orange-50 to-orange-100 border border-orange-200 rounded-lg p-4 mb-6">
+        <div className="flex items-center gap-3">
+          <div className="bg-orange-500 p-2 rounded-lg">
+            <svg
+              className="w-5 h-5 text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+              />
+            </svg>
+          </div>
+          <div>
+            <p className="text-sm font-medium text-orange-900">Managing expenses for:</p>
+            <p className="text-lg font-bold text-orange-950">{warehouse.name}</p>
+            <p className="text-xs text-orange-700">Code: {warehouse.code}</p>
+          </div>
+        </div>
+      </div>
+
       <div className="flex items-end w-full gap-6">
-        {/* Category Filter*/}
+        {/* Category Filter */}
         <div>
           <Select
             label="Category Filter"
@@ -116,18 +275,18 @@ export default function ExpenseTable() {
           />
         </div>
 
-        {/* Monthly View */}
+        {/* Status Filter */}
         <div>
           <Select
-            label="Monthly view"
-            value={month}
-            onChange={setMonth}
-            options={months}
-            placeholder="Select month"
+            label="Status Filter"
+            id="filter-status"
+            value={statusFilter}
+            options={statusFilterOptions}
             selectClassName="px-6 py-2 bg-white text-sm"
-            iconSize={18}
+            onChange={(val) => setStatusFilter(val)}
           />
         </div>
+
         <div className="flex-1" />
 
         {/* Add Expense */}
@@ -144,36 +303,60 @@ export default function ExpenseTable() {
           </Button>
         </div>
       </div>
-      <div className=" flex flex-row gap-6 mt-6">
-        <StatCard title="Total" count={"120"} icon={Cog} className="p-8 w-sm" />
+
+      {/* Stat Cards */}
+      <div className="flex flex-row gap-6 mt-6">
+        <StatCard
+          title="Total Expenses"
+          count={summary ? `₹${summary.total.toLocaleString()}` : "₹0"}
+          icon={DollarSign}
+          className="p-8 w-sm"
+        />
         <StatCard
           title="Approved"
-          count={"120"}
-          icon={Cog}
+          count={summary ? `₹${summary.approved.toLocaleString()}` : "₹0"}
+          icon={TrendingUp}
           className="p-8 w-sm"
         />
         <StatCard
           title="Pending"
-          count={"120"}
-          icon={Cog}
+          count={summary ? `₹${summary.pending.toLocaleString()}` : "₹0"}
+          icon={Clock}
           className="p-8 w-sm"
         />
       </div>
+
       {/* Stacked Bar Chart */}
       <div className="mt-6">
         <SimpleLineChart />
       </div>
-      {/* Tables */}
-      <div className="space-y-10 mt-8">
-        {/* Dispatched order table */}
-        <div className="mt-6">
-          <Table
-            columns={expenseColumns}
-            data={expenseData}
-            renderCell={renderExpenseCell}
-          />
+
+      {/* Loading State */}
+      {loading && (
+        <div className="mt-6 text-center py-12">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
+          <p className="mt-4 text-gray-600">Loading expenses...</p>
         </div>
-      </div>
+      )}
+
+      {/* Expenses Table */}
+      {!loading && (
+        <div className="space-y-10 mt-8">
+          <div className="mt-6">
+            {expenses.length === 0 ? (
+              <div className="text-center py-12 bg-gray-50 rounded-lg">
+                <p className="text-gray-500">No expenses found</p>
+              </div>
+            ) : (
+              <Table
+                columns={expenseColumns}
+                data={expenses}
+                renderCell={renderExpenseCell}
+              />
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

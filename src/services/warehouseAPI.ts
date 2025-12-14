@@ -417,4 +417,67 @@ export const warehouseAPI = {
 
     return api.get<any>(url);
   },
+
+  // Expense APIs
+  // Create expense
+  createExpense: async (data: any) => {
+    return api.post<any>(apiConfig.endpoints.warehouse.expenses.create, data);
+  },
+
+  // Get all expenses
+  getExpenses: async (warehouseId: string, filters?: { category?: string; status?: string }) => {
+    let url = `${apiConfig.endpoints.warehouse.expenses.list}?warehouseId=${warehouseId}`;
+
+    if (filters?.category) {
+      url += `&category=${filters.category}`;
+    }
+    if (filters?.status) {
+      url += `&status=${filters.status}`;
+    }
+
+    return api.get<any>(url);
+  },
+
+  // Get expense by ID
+  getExpenseById: async (id: string) => {
+    return api.get<any>(apiConfig.endpoints.warehouse.expenses.getById(id));
+  },
+
+  // Update expense
+  updateExpense: async (id: string, data: any) => {
+    return api.put<any>(apiConfig.endpoints.warehouse.expenses.update(id), data);
+  },
+
+  // Delete expense
+  deleteExpense: async (id: string) => {
+    return api.delete<any>(apiConfig.endpoints.warehouse.expenses.delete(id));
+  },
+
+  // Update expense status
+  updateExpenseStatus: async (id: string, data: any) => {
+    return api.patch<any>(apiConfig.endpoints.warehouse.expenses.updateStatus(id), data);
+  },
+
+  // Update expense payment status
+  updateExpensePaymentStatus: async (id: string, data: any) => {
+    return api.patch<any>(apiConfig.endpoints.warehouse.expenses.updatePaymentStatus(id), data);
+  },
+
+  // Get expense summary
+  getExpenseSummary: async (warehouseId: string) => {
+    const url = `${apiConfig.endpoints.warehouse.expenses.summary}?warehouseId=${warehouseId}`;
+    return api.get<any>(url);
+  },
+
+  // Get monthly expense trend
+  getMonthlyExpenseTrend: async (warehouseId: string, months: number = 12) => {
+    const url = `${apiConfig.endpoints.warehouse.expenses.monthlyTrend}?warehouseId=${warehouseId}&months=${months}`;
+    return api.get<any>(url);
+  },
+
+  // Vendor APIs
+  // Get all vendors
+  getVendors: async () => {
+    return api.get<any>(apiConfig.endpoints.vendor.list);
+  },
 };
