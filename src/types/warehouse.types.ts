@@ -379,3 +379,83 @@ export interface GRNParams {
   startDate?: string;
   endDate?: string;
 }
+
+// Dispatch Order Types
+export type DispatchStatus = 'pending' | 'in_transit' | 'delivered' | 'cancelled';
+
+export interface DispatchProduct {
+  _id?: string;
+  sku: string;
+  quantity: number;
+}
+
+export interface FieldAgent {
+  _id: string;
+  name: string;
+  assignedRoutes: string[];
+  isActive: boolean;
+  createdBy: {
+    name: string;
+    id: string;
+  };
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+}
+
+export interface DispatchOrder {
+  _id: string;
+  dispatchId: string;
+  destination: string;
+  products: DispatchProduct[];
+  assignedAgent: {
+    _id: string;
+    name: string;
+    assignedRoutes?: string[];
+    isActive?: boolean;
+  };
+  notes: string;
+  status: DispatchStatus;
+  createdBy: CreatedByInfo;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+}
+
+export interface CreateDispatchOrderPayload {
+  dispatchId: string;
+  destination: string;
+  products: DispatchProduct[];
+  assignedAgent: string;
+  notes: string;
+  status?: DispatchStatus;
+}
+
+export interface UpdateDispatchStatusPayload {
+  status: DispatchStatus;
+}
+
+export interface DispatchOrderResponse {
+  success: boolean;
+  message: string;
+  data: DispatchOrder;
+  timestamp: string;
+}
+
+export interface DispatchOrdersResponse {
+  success: boolean;
+  message: string;
+  data: DispatchOrder[];
+  timestamp: string;
+}
+
+export interface DispatchOrderParams {
+  status?: DispatchStatus;
+}
+
+export interface FieldAgentsResponse {
+  success: boolean;
+  message: string;
+  data: FieldAgent[];
+  timestamp: string;
+}

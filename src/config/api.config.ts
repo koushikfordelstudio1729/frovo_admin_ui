@@ -92,6 +92,15 @@ export const apiConfig = {
         getById: (id: string) => `/warehouse/grn/${id}`,
         updateStatus: (id: string) => `/warehouse/grn/${id}/status`,
       },
+      dispatchOrders: {
+        list: '/warehouse/outbound/dispatches',
+        create: '/warehouse/outbound/dispatch',
+        getById: (id: string) => `/warehouse/outbound/dispatches/${id}`,
+        updateStatus: (id: string) => `/warehouse/outbound/dispatches/${id}/status`,
+      },
+      fieldAgents: {
+        list: '/warehouse/field-agents',
+      },
     },
 
     // Vendor-specific endpoints

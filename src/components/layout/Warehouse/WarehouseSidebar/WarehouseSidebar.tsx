@@ -132,17 +132,19 @@ export const WarehouseSidebar: React.FC = () => {
   }
 
   return (
-    <aside className="w-64 bg-white min-h-screen fixed left-0 top-0 overflow-y-auto p-6">
-      <div className="mb-6 flex justify-center">
-        <Image
-          src="/images/logo.svg"
-          alt="frovo logo"
-          width={130}
-          height={50}
-          priority
-        />
+    <aside className="w-64 bg-white h-screen fixed left-0 top-0 flex flex-col">
+      <div className="p-6 pb-4 flex-shrink-0">
+        <div className="flex justify-center">
+          <Image
+            src="/images/logo.svg"
+            alt="frovo logo"
+            width={130}
+            height={50}
+            priority
+          />
+        </div>
       </div>
-      <nav className="space-y-5">
+      <nav className="flex-1 overflow-y-auto px-6 pb-6 space-y-5" style={{ scrollbarWidth: 'thin', scrollbarColor: '#fb923c #f3f4f6' }}>
         <div className="bg-[#FFEAE4] rounded-2xl py-3 space-y-1">
           {group1.map(TopLevelSidebar)}
         </div>

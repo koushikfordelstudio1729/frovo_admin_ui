@@ -33,6 +33,7 @@ export const warehouseNavigation: WarehouseMenuItem[] = [
     icon: "arrowDownLeft",
     children: [
       { label: "Dispatch Order", href: "/warehouse/outbound/dispatch-order" },
+      { label: "Dispatch Summary", href: "/warehouse/outbound/dispatch-summary" },
       {
         label: "QC Checklist Templates",
         href: "/warehouse/outbound/qc-checklist",

@@ -18,6 +18,12 @@ import type {
   CreateGRNPayload,
   UpdateGRNStatusPayload,
   GRNParams,
+  DispatchOrderResponse,
+  DispatchOrdersResponse,
+  CreateDispatchOrderPayload,
+  UpdateDispatchStatusPayload,
+  DispatchOrderParams,
+  FieldAgentsResponse,
 } from '@/types';
 
 export const warehouseAPI = {
@@ -167,5 +173,37 @@ export const warehouseAPI = {
   // Update GRN status
   updateGRNStatus: async (id: string, data: UpdateGRNStatusPayload) => {
     return api.patch<GRNResponse>(apiConfig.endpoints.warehouse.grn.updateStatus(id), data);
+  },
+
+  // Dispatch Order APIs
+  // Get all dispatch orders with optional filters
+  getDispatchOrders: async (params?: DispatchOrderParams) => {
+    const queryParams = new URLSearchParams();
+
+    if (params?.status) queryParams.append('status', params.status);
+
+    const url = `${apiConfig.endpoints.warehouse.dispatchOrders.list}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    return api.get<DispatchOrdersResponse>(url);
+  },
+
+  // Get dispatch order by ID
+  getDispatchOrderById: async (id: string) => {
+    return api.get<DispatchOrderResponse>(apiConfig.endpoints.warehouse.dispatchOrders.getById(id));
+  },
+
+  // Create new dispatch order
+  createDispatchOrder: async (data: CreateDispatchOrderPayload) => {
+    return api.post<DispatchOrderResponse>(apiConfig.endpoints.warehouse.dispatchOrders.create, data);
+  },
+
+  // Update dispatch order status
+  updateDispatchOrderStatus: async (id: string, data: UpdateDispatchStatusPayload) => {
+    return api.patch<DispatchOrderResponse>(apiConfig.endpoints.warehouse.dispatchOrders.updateStatus(id), data);
+  },
+
+  // Field Agent APIs
+  // Get all field agents
+  getFieldAgents: async () => {
+    return api.get<FieldAgentsResponse>(apiConfig.endpoints.warehouse.fieldAgents.list);
   },
 };
