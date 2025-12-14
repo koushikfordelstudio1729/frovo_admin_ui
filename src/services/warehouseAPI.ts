@@ -24,6 +24,9 @@ import type {
   UpdateDispatchStatusPayload,
   DispatchOrderParams,
   FieldAgentsResponse,
+  FieldAgentResponse,
+  CreateFieldAgentPayload,
+  FieldAgentParams,
   QCTemplateResponse,
   QCTemplatesResponse,
   CreateQCTemplatePayload,
@@ -211,9 +214,19 @@ export const warehouseAPI = {
   },
 
   // Field Agent APIs
-  // Get all field agents
-  getFieldAgents: async () => {
-    return api.get<FieldAgentsResponse>(apiConfig.endpoints.warehouse.fieldAgents.list);
+  // Get all field agents with optional filters
+  getFieldAgents: async (params?: FieldAgentParams) => {
+    const queryParams = new URLSearchParams();
+
+    if (params?.isActive !== undefined) queryParams.append('isActive', params.isActive.toString());
+
+    const url = `${apiConfig.endpoints.warehouse.fieldAgents.list}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    return api.get<FieldAgentsResponse>(url);
+  },
+
+  // Create new field agent
+  createFieldAgent: async (data: CreateFieldAgentPayload) => {
+    return api.post<FieldAgentResponse>(apiConfig.endpoints.warehouse.fieldAgents.create, data);
   },
 
   // QC Template APIs

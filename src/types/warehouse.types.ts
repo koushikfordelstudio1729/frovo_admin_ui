@@ -453,11 +453,27 @@ export interface DispatchOrderParams {
   status?: DispatchStatus;
 }
 
+export interface CreateFieldAgentPayload {
+  name: string;
+  assignedRoutes: string[];
+}
+
+export interface FieldAgentResponse {
+  success: boolean;
+  message: string;
+  data: FieldAgent;
+  timestamp: string;
+}
+
 export interface FieldAgentsResponse {
   success: boolean;
   message: string;
   data: FieldAgent[];
   timestamp: string;
+}
+
+export interface FieldAgentParams {
+  isActive?: boolean;
 }
 
 // QC Template Types

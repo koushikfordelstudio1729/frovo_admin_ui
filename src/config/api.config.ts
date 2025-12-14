@@ -100,6 +100,7 @@ export const apiConfig = {
       },
       fieldAgents: {
         list: '/warehouse/field-agents',
+        create: '/warehouse/field-agents',
       },
       qcTemplates: {
         list: '/warehouse/qc/templates',

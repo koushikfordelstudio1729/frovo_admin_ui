@@ -8,3 +8,4 @@ export { useVendors } from './useVendors';
 export { useGRNs } from './useGRNs';
 export { useGRN } from './useGRN';
 export { useQCTemplates } from './useQCTemplates';
+export { useFieldAgents } from './useFieldAgents';
