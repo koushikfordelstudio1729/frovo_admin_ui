@@ -6,7 +6,7 @@ import { usePurchaseOrders, usePurchaseOrder } from "@/hooks/warehouse";
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
-import { Eye, Edit, Trash2, X } from "lucide-react";
+import { Eye, Edit, Trash2, X, FileText } from "lucide-react";
 import type { POStatus, PurchaseOrder } from "@/types";
 
 const poSummaryColumns = [
@@ -149,6 +149,10 @@ const PoSummery = () => {
     });
   };
 
+  const handleCreateGRN = (row: any) => {
+    router.push(`/warehouse/create-grn?poId=${row._id}`);
+  };
+
   const closeDialog = () => {
     setConfirmDialog({ ...confirmDialog, isOpen: false });
   };
@@ -184,6 +188,15 @@ const PoSummery = () => {
             onClick={() => handleView(row)}
           >
             <Eye className="text-green-500 w-5 h-5" />
+          </Button>
+          <Button
+            title="Create GRN"
+            size="sm"
+            className="bg-transparent shadow-none hover:bg-gray-100 p-2"
+            onClick={() => handleCreateGRN(row)}
+            disabled={row?.po_status !== 'approved'}
+          >
+            <FileText className="text-purple-500 w-5 h-5" />
           </Button>
           <Button
             title="Edit"
