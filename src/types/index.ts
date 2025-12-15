@@ -84,6 +84,7 @@ export type {
   PurchaseOrderParams,
   QCStatus,
   GRNLineItem,
+  GRNQuantityItem,
   GRN,
   CreateGRNPayload,
   UpdateGRNStatusPayload,

@@ -185,8 +185,24 @@ export const warehouseAPI = {
   },
 
   // Create new GRN for a purchase order
-  createGRN: async (poId: string, data: CreateGRNPayload) => {
-    return api.post<GRNResponse>(apiConfig.endpoints.warehouse.grn.create(poId), data);
+  createGRN: async (poId: string, data: CreateGRNPayload | FormData) => {
+    // For FormData, delete Content-Type to let axios set it with boundary
+    if (data instanceof FormData) {
+      return api.post<GRNResponse>(
+        apiConfig.endpoints.warehouse.grn.create(poId),
+        data,
+        {
+          headers: {
+            'Content-Type': undefined, // Delete the default application/json header
+          },
+        }
+      );
+    }
+
+    return api.post<GRNResponse>(
+      apiConfig.endpoints.warehouse.grn.create(poId),
+      data
+    );
   },
 
   // Update GRN status

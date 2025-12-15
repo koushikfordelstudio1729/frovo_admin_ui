@@ -324,6 +324,18 @@ export interface GRNLineItem {
   unit_price: number;
   expected_delivery_date: string;
   location: string;
+  received_quantity?: number;
+  accepted_quantity?: number;
+  rejected_quantity?: number;
+}
+
+export interface GRNQuantityItem {
+  sku: string;
+  received_quantity: number;
+  accepted_quantity: number;
+  rejected_quantity: number;
+  expiry_date: string;
+  item_remarks?: string;
 }
 
 export interface GRN {
@@ -346,13 +358,14 @@ export interface GRN {
 }
 
 export interface CreateGRNPayload {
+  document: File;                    // File upload for scanned challan
   delivery_challan: string;
   transporter_name: string;
   vehicle_number: string;
-  recieved_date: string;
-  remarks: string;
-  scanned_challan: string;
   qc_status: QCStatus;
+  received_date?: string;            // Optional
+  remarks?: string;                  // Optional
+  quantities?: GRNQuantityItem[];    // Optional - for future enhancement
 }
 
 export interface UpdateGRNStatusPayload {

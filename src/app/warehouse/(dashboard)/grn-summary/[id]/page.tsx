@@ -311,7 +311,16 @@ const GRNDetail = () => {
                     Category
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Quantity
+                    Ordered Qty
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Received
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Accepted
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Rejected
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Unit Price
@@ -340,6 +349,21 @@ const GRNDetail = () => {
                     <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
                       {item.quantity} {item.uom}
                     </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 bg-orange-50">
+                      <span className="font-medium text-orange-700">
+                        {item.received_quantity || item.quantity}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 bg-green-50">
+                      <span className="font-medium text-green-700">
+                        {item.accepted_quantity || 0}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 bg-red-50">
+                      <span className="font-medium text-red-700">
+                        {item.rejected_quantity || 0}
+                      </span>
+                    </td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
                       ₹{item.unit_price.toFixed(2)}
                     </td>
@@ -354,7 +378,7 @@ const GRNDetail = () => {
               </tbody>
               <tfoot className="bg-gray-50">
                 <tr>
-                  <td colSpan={6} className="px-4 py-3 text-right font-semibold text-gray-900">
+                  <td colSpan={9} className="px-4 py-3 text-right font-semibold text-gray-900">
                     Grand Total:
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap font-bold text-gray-900 text-lg">
