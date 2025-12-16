@@ -79,6 +79,7 @@ export interface WarehouseResponse {
   success: boolean;
   message: string;
   data: {
+    name: string | undefined;
     warehouse: Warehouse;
     manager: WarehouseManagerDetails;
   };

@@ -112,7 +112,9 @@ const GRNDetail = () => {
             </h2>
             <Badge
               variant={statusVariantMap[grn.qc_status] || "info"}
-              label={grn.qc_status.charAt(0).toUpperCase() + grn.qc_status.slice(1)}
+              label={
+                grn.qc_status.charAt(0).toUpperCase() + grn.qc_status.slice(1)
+              }
               size="md"
               showDot={true}
               className="px-3 py-1 text-sm rounded-full"
@@ -123,7 +125,7 @@ const GRNDetail = () => {
               variant="secondary"
               size="sm"
               onClick={() => setIsEditingStatus(true)}
-              className="rounded-lg flex items-center gap-2"
+              className="rounded-lg py-2 flex items-center gap-2"
             >
               <Edit2 className="w-4 h-4" />
               Update Status
@@ -133,8 +135,10 @@ const GRNDetail = () => {
 
         {/* Update Status Section */}
         {isEditingStatus && (
-          <div className="mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Update QC Status</h3>
+          <div className="mb-6 bg-yellow-50 border border-orange-200 rounded-lg p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Update QC Status
+            </h3>
             <div className="grid grid-cols-2 gap-4">
               <Select
                 id="new-qc-status"
@@ -181,15 +185,21 @@ const GRNDetail = () => {
 
         {/* GRN Information */}
         <div className="bg-gray-50 rounded-lg p-6 mb-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">GRN Information</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            GRN Information
+          </h3>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             <div>
               <p className="text-sm text-gray-600">Delivery Challan</p>
-              <p className="font-medium text-gray-900">{grn.delivery_challan}</p>
+              <p className="font-medium text-gray-900">
+                {grn.delivery_challan}
+              </p>
             </div>
             <div>
               <p className="text-sm text-gray-600">Transporter Name</p>
-              <p className="font-medium text-gray-900">{grn.transporter_name}</p>
+              <p className="font-medium text-gray-900">
+                {grn.transporter_name}
+              </p>
             </div>
             <div>
               <p className="text-sm text-gray-600">Vehicle Number</p>
@@ -203,7 +213,9 @@ const GRNDetail = () => {
             </div>
             <div>
               <p className="text-sm text-gray-600">Created By</p>
-              <p className="font-medium text-gray-900">{grn.createdBy?.name || "N/A"}</p>
+              <p className="font-medium text-gray-900">
+                {grn.createdBy?.name || "N/A"}
+              </p>
             </div>
             <div>
               <p className="text-sm text-gray-600">Created At</p>
@@ -235,20 +247,29 @@ const GRNDetail = () => {
 
         {/* Purchase Order Information */}
         <div className="bg-blue-50 rounded-lg p-6 mb-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Purchase Order Information</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            Purchase Order Information
+          </h3>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             <div>
               <p className="text-sm text-gray-600">PO Number</p>
-              <p className="font-medium text-gray-900">{grn.purchase_order.po_number}</p>
+              <p className="font-medium text-gray-900">
+                {grn.purchase_order.po_number}
+              </p>
             </div>
             <div>
               <p className="text-sm text-gray-600">PO Status</p>
-              <p className="font-medium text-gray-900 capitalize">{grn.purchase_order.po_status}</p>
+              <p className="font-medium text-gray-900 capitalize">
+                {grn.purchase_order.po_status}
+              </p>
             </div>
             <div>
               <p className="text-sm text-gray-600">PO Raised Date</p>
               <p className="font-medium text-gray-900">
-                {format(new Date(grn.purchase_order.po_raised_date), "dd MMM yyyy")}
+                {format(
+                  new Date(grn.purchase_order.po_raised_date),
+                  "dd MMM yyyy"
+                )}
               </p>
             </div>
           </div>
@@ -256,35 +277,51 @@ const GRNDetail = () => {
 
         {/* Vendor Information */}
         <div className="bg-green-50 rounded-lg p-6 mb-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Vendor Information</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            Vendor Information
+          </h3>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             <div>
               <p className="text-sm text-gray-600">Vendor Name</p>
-              <p className="font-medium text-gray-900">{grn.vendor_details.vendor_name}</p>
+              <p className="font-medium text-gray-900">
+                {grn.vendor_details.vendor_name}
+              </p>
             </div>
             <div>
               <p className="text-sm text-gray-600">Billing Name</p>
-              <p className="font-medium text-gray-900">{grn.vendor_details.vendor_billing_name}</p>
+              <p className="font-medium text-gray-900">
+                {grn.vendor_details.vendor_billing_name}
+              </p>
             </div>
             <div>
               <p className="text-sm text-gray-600">Vendor ID</p>
-              <p className="font-medium text-gray-900">{grn.vendor_details.vendor_id}</p>
+              <p className="font-medium text-gray-900">
+                {grn.vendor_details.vendor_id}
+              </p>
             </div>
             <div>
               <p className="text-sm text-gray-600">Email</p>
-              <p className="font-medium text-gray-900">{grn.vendor_details.vendor_email}</p>
+              <p className="font-medium text-gray-900">
+                {grn.vendor_details.vendor_email}
+              </p>
             </div>
             <div>
               <p className="text-sm text-gray-600">Phone</p>
-              <p className="font-medium text-gray-900">{grn.vendor_details.vendor_phone}</p>
+              <p className="font-medium text-gray-900">
+                {grn.vendor_details.vendor_phone}
+              </p>
             </div>
             <div>
               <p className="text-sm text-gray-600">GST Number</p>
-              <p className="font-medium text-gray-900">{grn.vendor_details.gst_number}</p>
+              <p className="font-medium text-gray-900">
+                {grn.vendor_details.gst_number}
+              </p>
             </div>
             <div className="col-span-2">
               <p className="text-sm text-gray-600">Address</p>
-              <p className="font-medium text-gray-900">{grn.vendor_details.vendor_address}</p>
+              <p className="font-medium text-gray-900">
+                {grn.vendor_details.vendor_address}
+              </p>
             </div>
           </div>
         </div>
@@ -342,7 +379,9 @@ const GRNDetail = () => {
                     <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 font-medium">
                       {item.sku}
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-900">{item.productName}</td>
+                    <td className="px-4 py-3 text-sm text-gray-900">
+                      {item.productName}
+                    </td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
                       {item.category}
                     </td>
@@ -378,13 +417,19 @@ const GRNDetail = () => {
               </tbody>
               <tfoot className="bg-gray-50">
                 <tr>
-                  <td colSpan={9} className="px-4 py-3 text-right font-semibold text-gray-900">
+                  <td
+                    colSpan={9}
+                    className="px-4 py-3 text-right font-semibold text-gray-900"
+                  >
                     Grand Total:
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap font-bold text-gray-900 text-lg">
                     ₹
                     {grn.grn_line_items
-                      .reduce((sum, item) => sum + item.quantity * item.unit_price, 0)
+                      .reduce(
+                        (sum, item) => sum + item.quantity * item.unit_price,
+                        0
+                      )
                       .toFixed(2)}
                   </td>
                   <td></td>

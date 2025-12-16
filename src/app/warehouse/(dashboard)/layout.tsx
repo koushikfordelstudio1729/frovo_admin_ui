@@ -12,11 +12,13 @@ export default function DashboardLayout({
 }) {
   return (
     <WarehouseProtectedRoute>
-      <div className="flex">
+      <div className="min-h-screen bg-gray-50">
         <WarehouseSidebar />
-        <main className="ml-64 flex-1 bg-gray-50 min-h-screen">
+
+        <main className="pl-64 min-h-screen">
           <WarehouseHeader />
-          <div className="pt-10 p-8">{children}</div>
+
+          <div className="pt-12 px-8 pb-8 max-w-full">{children}</div>
         </main>
       </div>
     </WarehouseProtectedRoute>

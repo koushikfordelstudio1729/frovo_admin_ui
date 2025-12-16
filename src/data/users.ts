@@ -9,8 +9,8 @@ export const DUMMY_USERS: User[] = [
     redirectPath: "/admin/roles-permissions",
   },
   {
-    email: "warehouse.manager@example.com",
-    password: "SecurePassword123!",
+    email: "dsfsdkoushi@gmai.com",
+    password: "SuperAdmin@123",
     role: "warehouse_admin",
     name: "Warehouse Admin",
     redirectPath: "/warehouse/dashboard",

@@ -11,11 +11,16 @@ import {
   Table,
   Badge,
   ConfirmDialog,
-  Drawer
+  Drawer,
+  Pagination,
 } from "@/components";
 import { useReturnQueue, useVendors, useMyWarehouse } from "@/hooks/warehouse";
 import { warehouseAPI } from "@/services/warehouseAPI";
-import type { ReturnOrder, CreateReturnOrderPayload, InventoryItem } from "@/types";
+import type {
+  ReturnOrder,
+  CreateReturnOrderPayload,
+  InventoryItem,
+} from "@/types";
 import { toast } from "react-hot-toast";
 
 const returnQueueColumns = [
@@ -29,14 +34,12 @@ const returnQueueColumns = [
 ];
 
 const statusOptions = [
-  { label: "All", value: "" },
   { label: "Pending", value: "pending" },
   { label: "Approved", value: "approved" },
   { label: "Rejected", value: "rejected" },
 ];
 
 const returnTypeOptions = [
-  { label: "All", value: "" },
   { label: "Damaged", value: "damaged" },
   { label: "Expired", value: "expired" },
   { label: "Quality Issue", value: "quality_issue" },
@@ -46,7 +49,6 @@ const returnTypeOptions = [
 export default function RejectionReturnQueuePage() {
   const router = useRouter();
 
-  // Fetch return queue and vendors
   const {
     returns,
     loading,
@@ -57,7 +59,7 @@ export default function RejectionReturnQueuePage() {
     rejectReturn,
     creating,
     approving,
-    rejecting
+    rejecting,
   } = useReturnQueue();
 
   const { vendors } = useVendors();
@@ -93,28 +95,31 @@ export default function RejectionReturnQueuePage() {
     isLoading: false,
   });
 
-  // Filter state
+  // Filter state (auto-applied)
   const [statusFilter, setStatusFilter] = useState("");
   const [returnTypeFilter, setReturnTypeFilter] = useState("");
-  const [appliedStatusFilter, setAppliedStatusFilter] = useState("");
-  const [appliedReturnTypeFilter, setAppliedReturnTypeFilter] = useState("");
+  const hasActiveFilters = !!statusFilter || !!returnTypeFilter;
+
+  // pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
 
   // Vendor options
-  const vendorOptions = useMemo(() => {
-    return vendors.map(vendor => ({
-      label: vendor.vendor_name,
-      value: vendor._id,
-    }));
-  }, [vendors]);
+  const vendorOptions = useMemo(
+    () =>
+      vendors.map((vendor) => ({
+        label: vendor.vendor_name,
+        value: vendor._id,
+      })),
+    [vendors]
+  );
 
   // Batch ID options from inventory
   const batchIdOptions = useMemo(() => {
-    // Get unique batch IDs from inventory
     const uniqueBatchIds = Array.from(
-      new Set(inventoryItems.map(item => item.batchId))
+      new Set(inventoryItems.map((item) => item.batchId))
     );
-
-    return uniqueBatchIds.map(batchId => ({
+    return uniqueBatchIds.map((batchId) => ({
       label: batchId,
       value: batchId,
     }));
@@ -124,18 +129,19 @@ export default function RejectionReturnQueuePage() {
   useEffect(() => {
     const fetchInventory = async () => {
       if (!warehouse?._id) return;
-
       try {
-        const response = await warehouseAPI.getInventoryDashboard(warehouse._id, {
-          limit: 1000, // Get all items
-        });
-
+        const response = await warehouseAPI.getInventoryDashboard(
+          warehouse._id,
+          {
+            limit: 1000,
+          }
+        );
         const apiResponse = response.data;
         if (apiResponse.success && apiResponse.data) {
           setInventoryItems(apiResponse.data.inventory);
         }
       } catch (err) {
-        console.error('Error fetching inventory for batch IDs:', err);
+        console.error("Error fetching inventory for batch IDs:", err);
       }
     };
 
@@ -155,9 +161,8 @@ export default function RejectionReturnQueuePage() {
 
   // Create return order
   const handleCreateReturn = async () => {
-    // Validation
     if (!formData.batchId.trim()) {
-      toast.error("Please enter a batch ID");
+      toast.error("Please select a batch ID");
       return;
     }
     if (!formData.vendor) {
@@ -179,7 +184,7 @@ export default function RejectionReturnQueuePage() {
       warehouse: warehouse?._id || "",
       reason: formData.reason,
       quantity: formData.quantity,
-      returnType: "damaged", // Default type
+      returnType: "damaged",
     };
 
     const success = await createReturn(payload);
@@ -188,35 +193,47 @@ export default function RejectionReturnQueuePage() {
     }
   };
 
-  // Apply filters
-  const handleApplyFilters = () => {
-    setAppliedStatusFilter(statusFilter);
-    setAppliedReturnTypeFilter(returnTypeFilter);
+  // Auto-apply filters
+  const handleStatusFilterChange = (val: string) => {
+    setStatusFilter(val);
+    setCurrentPage(1);
     refetch({
-      status: statusFilter as any,
+      status: val as any,
       returnType: returnTypeFilter as any,
     });
   };
 
-  // Clear individual filter
+  const handleReturnTypeFilterChange = (val: string) => {
+    setReturnTypeFilter(val);
+    setCurrentPage(1);
+    refetch({
+      status: statusFilter as any,
+      returnType: val as any,
+    });
+  };
+
   const clearStatusFilter = () => {
     setStatusFilter("");
-    setAppliedStatusFilter("");
-    refetch({ returnType: appliedReturnTypeFilter as any });
+    setCurrentPage(1);
+    refetch({
+      status: "" as any,
+      returnType: returnTypeFilter as any,
+    });
   };
 
   const clearReturnTypeFilter = () => {
     setReturnTypeFilter("");
-    setAppliedReturnTypeFilter("");
-    refetch({ status: appliedStatusFilter as any });
+    setCurrentPage(1);
+    refetch({
+      status: statusFilter as any,
+      returnType: "" as any,
+    });
   };
 
-  // Clear all filters
   const clearAllFilters = () => {
     setStatusFilter("");
     setReturnTypeFilter("");
-    setAppliedStatusFilter("");
-    setAppliedReturnTypeFilter("");
+    setCurrentPage(1);
     refetch({});
   };
 
@@ -227,8 +244,8 @@ export default function RejectionReturnQueuePage() {
       title: "Approve Return",
       message: `Are you sure you want to approve the return for batch "${returnOrder.batchId}"?`,
       onConfirm: async () => {
-        const success = await approveReturn(returnOrder._id);
-        setConfirmDialog({ ...confirmDialog, isOpen: false });
+        await approveReturn(returnOrder._id);
+        setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
       },
       isLoading: approving,
     });
@@ -241,8 +258,8 @@ export default function RejectionReturnQueuePage() {
       title: "Reject Return",
       message: `Are you sure you want to reject the return for batch "${returnOrder.batchId}"?`,
       onConfirm: async () => {
-        const success = await rejectReturn(returnOrder._id);
-        setConfirmDialog({ ...confirmDialog, isOpen: false });
+        await rejectReturn(returnOrder._id);
+        setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
       },
       isLoading: rejecting,
     });
@@ -258,38 +275,48 @@ export default function RejectionReturnQueuePage() {
 
   // Close dialogs
   const closeConfirmDialog = () => {
-    setConfirmDialog({ ...confirmDialog, isOpen: false });
+    setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
   };
 
   const closeViewDialog = () => {
     setViewDialog({ isOpen: false, returnOrder: null });
   };
 
-  // Get status label
+  // Get status / type labels
   const getStatusLabel = (value: string) => {
-    const option = statusOptions.find(opt => opt.value === value);
+    const option = statusOptions.find((opt) => opt.value === value);
     return option?.label || value;
   };
 
-  // Get return type label
   const getReturnTypeLabel = (value: string) => {
-    const option = returnTypeOptions.find(opt => opt.value === value);
+    const option = returnTypeOptions.find((opt) => opt.value === value);
     return option?.label || value;
   };
 
   // Transform data for table
-  const tableData = useMemo(() => {
-    return returns.map((returnOrder) => ({
-      batchId: returnOrder.batchId,
-      vendor_name: returnOrder.vendor?.vendor_name || "N/A",
-      reason: returnOrder.reason,
-      quantity: returnOrder.quantity,
-      returnType: returnOrder.returnType,
-      status: returnOrder.status,
-      _id: returnOrder._id,
-      _rawData: returnOrder,
-    }));
-  }, [returns]);
+  const tableData = useMemo(
+    () =>
+      returns.map((returnOrder) => ({
+        batchId: returnOrder.batchId,
+        vendor_name: returnOrder.vendor?.vendor_name || "N/A",
+        reason: returnOrder.reason,
+        quantity: returnOrder.quantity,
+        returnType: returnOrder.returnType,
+        status: returnOrder.status,
+        _id: returnOrder._id,
+        _rawData: returnOrder,
+      })),
+    [returns]
+  );
+
+  // Pagination
+  const totalPages = Math.max(1, Math.ceil(tableData.length / pageSize));
+  const paginatedData = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return tableData.slice(startIndex, startIndex + pageSize);
+  }, [tableData, currentPage, pageSize]);
+
+  const handlePageChange = (page: number) => setCurrentPage(page);
 
   // Render cell
   const renderCell = (key: string, value: any, row?: Record<string, any>) => {
@@ -314,7 +341,7 @@ export default function RejectionReturnQueuePage() {
     if (key === "returnType") {
       return (
         <span className="text-sm text-gray-700 capitalize">
-          {value.replace(/_/g, ' ')}
+          {value.replace(/_/g, " ")}
         </span>
       );
     }
@@ -361,8 +388,6 @@ export default function RejectionReturnQueuePage() {
 
     return value;
   };
-
-  const hasActiveFilters = appliedStatusFilter || appliedReturnTypeFilter;
 
   return (
     <div className="min-h-screen bg-gray-50 p-4">
@@ -411,8 +436,12 @@ export default function RejectionReturnQueuePage() {
               </svg>
             </div>
             <div>
-              <p className="text-sm font-medium text-orange-900">Managing returns for:</p>
-              <p className="text-lg font-bold text-orange-950">{warehouse.name}</p>
+              <p className="text-sm font-medium text-orange-900">
+                Managing returns for:
+              </p>
+              <p className="text-lg font-bold text-orange-950">
+                {warehouse.name}
+              </p>
               <p className="text-xs text-orange-700">Code: {warehouse.code}</p>
             </div>
           </div>
@@ -487,7 +516,9 @@ export default function RejectionReturnQueuePage() {
             placeholder="e.g., Damaged packaging found during inspection"
             variant="default"
             value={formData.reason}
-            onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, reason: e.target.value })
+            }
           />
         </div>
 
@@ -501,39 +532,47 @@ export default function RejectionReturnQueuePage() {
             placeholder="e.g., 10"
             variant="default"
             value={formData.quantity}
-            onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value) || 0 })}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                quantity: parseInt(e.target.value) || 0,
+              })
+            }
           />
         </div>
       </Drawer>
 
       {/* Filter Section */}
-      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Filters</h3>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="pt-6 mb-6">
+        <div className="grid grid-cols-4 gap-8">
           <Select
             id="status-filter"
             label="Status"
             options={statusOptions}
             value={statusFilter}
-            onChange={setStatusFilter}
-            selectClassName="px-4 py-2"
+            onChange={handleStatusFilterChange}
+            selectClassName="px-4 py-3 border-2 border-orange-300"
           />
           <Select
             id="return-type-filter"
             label="Return Type"
             options={returnTypeOptions}
             value={returnTypeFilter}
-            onChange={setReturnTypeFilter}
-            selectClassName="px-4 py-2"
+            onChange={handleReturnTypeFilterChange}
+            selectClassName="px-4 py-3 border-2 border-orange-300"
           />
           <div className="flex items-end">
-            <Button
-              onClick={handleApplyFilters}
-              variant="primary"
-              className="rounded-lg w-full"
-            >
-              Apply Filters
-            </Button>
+            {hasActiveFilters && (
+              <div>
+                <Button
+                  onClick={clearAllFilters}
+                  variant="secondary"
+                  className="rounded-lg w-full"
+                >
+                  Clear Filters
+                </Button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -541,11 +580,15 @@ export default function RejectionReturnQueuePage() {
         {hasActiveFilters && (
           <div className="mt-4 pt-4 border-t border-gray-200">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-sm font-semibold text-gray-700">Active Filters:</span>
+              <span className="text-sm font-semibold text-gray-700">
+                Active Filters:
+              </span>
 
-              {appliedStatusFilter && (
+              {statusFilter && (
                 <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-800 px-4 py-2 rounded-full">
-                  <span className="font-medium text-sm">Status: {getStatusLabel(appliedStatusFilter)}</span>
+                  <span className="font-medium text-sm">
+                    Status: {getStatusLabel(statusFilter)}
+                  </span>
                   <button
                     onClick={clearStatusFilter}
                     className="ml-1 hover:bg-blue-200 rounded-full p-1 transition-colors"
@@ -557,9 +600,11 @@ export default function RejectionReturnQueuePage() {
                 </div>
               )}
 
-              {appliedReturnTypeFilter && (
+              {returnTypeFilter && (
                 <div className="inline-flex items-center gap-2 bg-orange-100 text-orange-800 px-4 py-2 rounded-full">
-                  <span className="font-medium text-sm">Type: {getReturnTypeLabel(appliedReturnTypeFilter)}</span>
+                  <span className="font-medium text-sm">
+                    Type: {getReturnTypeLabel(returnTypeFilter)}
+                  </span>
                   <button
                     onClick={clearReturnTypeFilter}
                     className="ml-1 hover:bg-orange-200 rounded-full p-1 transition-colors"
@@ -570,13 +615,6 @@ export default function RejectionReturnQueuePage() {
                   </button>
                 </div>
               )}
-
-              <button
-                onClick={clearAllFilters}
-                className="ml-2 text-sm text-red-600 hover:text-red-700 font-semibold underline"
-              >
-                Clear All
-              </button>
             </div>
           </div>
         )}
@@ -599,30 +637,43 @@ export default function RejectionReturnQueuePage() {
         </div>
       )}
 
-      {/* Table */}
+      {/* Table + Pagination */}
       {!loading && !error && (
         <>
           <div className="mt-6">
             <Table
               columns={returnQueueColumns}
-              data={tableData}
+              data={paginatedData}
               renderCell={renderCell}
             />
           </div>
 
-          {/* Empty State */}
           {tableData.length === 0 && (
             <div className="text-center py-12 bg-gray-50 rounded-lg mt-6">
               <p className="text-gray-500">No return orders found</p>
             </div>
           )}
+
+          <div className="mt-6 flex justify-end">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
+          </div>
         </>
       )}
 
       {/* View Return Order Dialog */}
       {viewDialog.isOpen && viewDialog.returnOrder && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          onClick={closeViewDialog}
+        >
+          <div
+            className="bg-white rounded-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold text-gray-900">
                 Return Order Details
@@ -638,60 +689,97 @@ export default function RejectionReturnQueuePage() {
 
             <div className="space-y-4">
               <div>
-                <Label className="text-sm font-semibold text-gray-600">Batch ID</Label>
-                <p className="text-lg text-gray-900">{viewDialog.returnOrder.batchId}</p>
+                <Label className="text-sm font-semibold text-gray-600">
+                  Batch ID
+                </Label>
+                <p className="text-lg text-gray-900">
+                  {viewDialog.returnOrder.batchId}
+                </p>
               </div>
 
               <div>
-                <Label className="text-sm font-semibold text-gray-600">Vendor</Label>
-                <p className="text-lg text-gray-900">{viewDialog.returnOrder.vendor?.vendor_name || "N/A"}</p>
+                <Label className="text-sm font-semibold text-gray-600">
+                  Vendor
+                </Label>
+                <p className="text-lg text-gray-900">
+                  {viewDialog.returnOrder.vendor?.vendor_name || "N/A"}
+                </p>
                 {viewDialog.returnOrder.vendor && (
-                  <p className="text-sm text-gray-600">{viewDialog.returnOrder.vendor.vendor_email}</p>
+                  <p className="text-sm text-gray-600">
+                    {viewDialog.returnOrder.vendor.vendor_email}
+                  </p>
                 )}
               </div>
 
               <div>
-                <Label className="text-sm font-semibold text-gray-600">Reason</Label>
-                <p className="text-lg text-gray-900">{viewDialog.returnOrder.reason}</p>
+                <Label className="text-sm font-semibold text-gray-600">
+                  Reason
+                </Label>
+                <p className="text-lg text-gray-900">
+                  {viewDialog.returnOrder.reason}
+                </p>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-sm font-semibold text-gray-600">Quantity</Label>
-                  <p className="text-lg text-gray-900">{viewDialog.returnOrder.quantity}</p>
+                  <Label className="text-sm font-semibold text-gray-600">
+                    Quantity
+                  </Label>
+                  <p className="text-lg text-gray-900">
+                    {viewDialog.returnOrder.quantity}
+                  </p>
                 </div>
                 <div>
-                  <Label className="text-sm font-semibold text-gray-600">Return Type</Label>
+                  <Label className="text-sm font-semibold text-gray-600">
+                    Return Type
+                  </Label>
                   <p className="text-lg text-gray-900 capitalize">
-                    {viewDialog.returnOrder.returnType.replace(/_/g, ' ')}
+                    {viewDialog.returnOrder.returnType.replace(/_/g, " ")}
                   </p>
                 </div>
               </div>
 
               <div>
-                <Label className="text-sm font-semibold text-gray-600">Status</Label>
+                <Label className="text-sm font-semibold text-gray-600">
+                  Status:
+                </Label>
+
                 <Badge
                   variant={
-                    viewDialog.returnOrder.status === "approved" ? "approved" :
-                    viewDialog.returnOrder.status === "pending" ? "orange" : "inactive"
+                    viewDialog.returnOrder.status === "approved"
+                      ? "approved"
+                      : viewDialog.returnOrder.status === "pending"
+                      ? "orange"
+                      : "inactive"
                   }
-                  label={viewDialog.returnOrder.status.charAt(0).toUpperCase() + viewDialog.returnOrder.status.slice(1)}
+                  label={
+                    viewDialog.returnOrder.status.charAt(0).toUpperCase() +
+                    viewDialog.returnOrder.status.slice(1)
+                  }
                   size="md"
                   showDot={true}
-                  className="px-3 py-1 text-sm rounded-full"
+                  className="px-3 mx-4 py-1 text-sm rounded-full"
                 />
               </div>
 
               <div className="pt-4 border-t border-gray-200">
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <Label className="text-xs font-semibold text-gray-600">Created By</Label>
-                    <p className="text-gray-900">{viewDialog.returnOrder.createdBy?.name || "N/A"}</p>
+                    <Label className="text-xs font-semibold text-gray-600">
+                      Created By
+                    </Label>
+                    <p className="text-gray-900">
+                      {viewDialog.returnOrder.createdBy?.name || "N/A"}
+                    </p>
                   </div>
                   <div>
-                    <Label className="text-xs font-semibold text-gray-600">Created At</Label>
+                    <Label className="text-xs font-semibold text-gray-600">
+                      Created At
+                    </Label>
                     <p className="text-gray-900">
-                      {new Date(viewDialog.returnOrder.createdAt).toLocaleDateString()}
+                      {new Date(
+                        viewDialog.returnOrder.createdAt
+                      ).toLocaleDateString()}
                     </p>
                   </div>
                 </div>
@@ -717,9 +805,13 @@ export default function RejectionReturnQueuePage() {
         isOpen={confirmDialog.isOpen}
         title={confirmDialog.title}
         message={confirmDialog.message}
-        confirmText={confirmDialog.title.includes("Approve") ? "Approve" : "Reject"}
+        confirmText={
+          confirmDialog.title.includes("Approve") ? "Approve" : "Reject"
+        }
         cancelText="Cancel"
-        confirmVariant={confirmDialog.title.includes("Approve") ? "primary" : "danger"}
+        confirmVariant={
+          confirmDialog.title.includes("Approve") ? "primary" : "danger"
+        }
         onConfirm={confirmDialog.onConfirm}
         onCancel={closeConfirmDialog}
         isLoading={confirmDialog.isLoading}

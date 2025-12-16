@@ -1,4 +1,3 @@
-// components/FileUpload.tsx
 "use client";
 import { useRef } from "react";
 import { Trash2, FileText, Upload, ExternalLink } from "lucide-react";

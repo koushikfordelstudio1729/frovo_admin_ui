@@ -1,6 +1,13 @@
 "use client";
 
-import { BackHeader, Badge, Button, Table, Select, Input } from "@/components";
+import {
+  BackHeader,
+  Badge,
+  Button,
+  Table,
+  Select,
+  Pagination,
+} from "@/components";
 import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
@@ -21,7 +28,6 @@ const dispatchSummaryColumns = [
 ];
 
 const statusOptions = [
-  { label: "All", value: "" },
   { label: "Pending", value: "pending" },
   { label: "In Transit", value: "in_transit" },
   { label: "Delivered", value: "delivered" },
@@ -41,6 +47,10 @@ const DispatchSummary = () => {
   const [dispatchOrders, setDispatchOrders] = useState<DispatchOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
 
   // View dialog state
   const [viewDialog, setViewDialog] = useState<{
@@ -88,22 +98,26 @@ const DispatchSummary = () => {
     fetchDispatchOrders();
   }, []);
 
-  // Apply filters
-  const handleApplyFilters = () => {
+  // auto-apply filter when status changes
+  const handleStatusFilterChange = (val: string) => {
+    setStatusFilter(val);
+    setCurrentPage(1);
     const params: any = {};
-    if (statusFilter) params.status = statusFilter as DispatchStatus;
+    if (val) params.status = val as DispatchStatus;
     fetchDispatchOrders(params);
   };
 
   // Clear status filter
   const clearStatusFilter = () => {
     setStatusFilter("");
+    setCurrentPage(1);
     fetchDispatchOrders({});
   };
 
   // Clear all filters
   const clearAllFilters = () => {
     setStatusFilter("");
+    setCurrentPage(1);
     fetchDispatchOrders({});
   };
 
@@ -112,7 +126,7 @@ const DispatchSummary = () => {
 
   // Get status label
   const getStatusLabel = (value: string) => {
-    const option = statusOptions.find(opt => opt.value === value);
+    const option = statusOptions.find((opt) => opt.value === value);
     return option?.label || value;
   };
 
@@ -121,9 +135,10 @@ const DispatchSummary = () => {
     return dispatchOrders.map((dispatch) => ({
       dispatchId: dispatch.dispatchId,
       status: dispatch.status,
-      destination: dispatch.destination.length > 50
-        ? dispatch.destination.substring(0, 50) + "..."
-        : dispatch.destination,
+      destination:
+        dispatch.destination.length > 50
+          ? dispatch.destination.substring(0, 50) + "..."
+          : dispatch.destination,
       assignedAgent: dispatch.assignedAgent.name,
       total_products: dispatch.products.length,
       created_by: dispatch.createdBy?.name || "N/A",
@@ -133,8 +148,20 @@ const DispatchSummary = () => {
     }));
   }, [dispatchOrders]);
 
+  // client-side pagination
+  const totalPages = Math.max(1, Math.ceil(tableData.length / pageSize));
+  const paginatedData = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    return tableData.slice(startIndex, endIndex);
+  }, [tableData, currentPage, pageSize]);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
   const handleView = (row: any) => {
-    const dispatch = dispatchOrders.find(d => d._id === row._id);
+    const dispatch = dispatchOrders.find((d) => d._id === row._id);
     if (dispatch) {
       setViewDialog({
         isOpen: true,
@@ -165,7 +192,11 @@ const DispatchSummary = () => {
 
       if (apiResponse.success) {
         toast.success("Dispatch status updated successfully");
-        setUpdateDialog({ isOpen: false, dispatchId: null, currentStatus: null });
+        setUpdateDialog({
+          isOpen: false,
+          dispatchId: null,
+          currentStatus: null,
+        });
         fetchDispatchOrders(); // Refresh the list
       }
     } catch (err) {
@@ -219,7 +250,9 @@ const DispatchSummary = () => {
             size="sm"
             className="bg-transparent shadow-none hover:bg-gray-100 p-2"
             onClick={() => handleUpdateStatus(row)}
-            disabled={row?.status === 'delivered' || row?.status === 'cancelled'}
+            disabled={
+              row?.status === "delivered" || row?.status === "cancelled"
+            }
           >
             <Edit2 className="text-blue-500 w-5 h-5" />
           </Button>
@@ -232,28 +265,39 @@ const DispatchSummary = () => {
 
   return (
     <div className="min-h-screen pt-4">
-      <BackHeader title="Dispatch Summary" />
+      {/* Header + Create button top-right */}
+      <div className="flex items-center justify-between">
+        <BackHeader title="Dispatch Summary" />
+        <Button
+          className="rounded-lg px-6 mt-4"
+          variant="primary"
+          onClick={() => router.push("/warehouse/outbound/dispatch-order")}
+        >
+          Create Dispatch Order
+        </Button>
+      </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-lg shadow-md p-6 mt-6">
-        <h3 className="text-lg font-semibold mb-4">Filters</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="mt-6">
+        <div className="grid grid-cols-5 gap-8">
           <Select
             id="status-filter"
             label="Status"
             options={statusOptions}
             value={statusFilter}
-            onChange={setStatusFilter}
-            selectClassName="px-4 py-2"
+            onChange={handleStatusFilterChange}
+            selectClassName="px-4 py-3 border-2 border-orange-300"
           />
-          <div className="flex items-end">
-            <Button
-              onClick={handleApplyFilters}
-              variant="primary"
-              className="rounded-lg w-full"
-            >
-              Apply Filters
-            </Button>
+          <div className="w-32 flex items-end">
+            {hasActiveFilters && (
+              <Button
+                onClick={clearAllFilters}
+                variant="secondary"
+                className="rounded-lg w-full"
+              >
+                Clear Filters
+              </Button>
+            )}
           </div>
         </div>
 
@@ -261,7 +305,9 @@ const DispatchSummary = () => {
         {hasActiveFilters && (
           <div className="mt-4 pt-4 border-t border-gray-200">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-sm font-medium text-gray-700">Active Filters:</span>
+              <span className="text-sm font-medium text-gray-700">
+                Active Filters:
+              </span>
 
               {statusFilter && (
                 <div className="inline-flex items-center gap-1 bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-sm">
@@ -275,13 +321,6 @@ const DispatchSummary = () => {
                   </button>
                 </div>
               )}
-
-              <button
-                onClick={clearAllFilters}
-                className="ml-2 text-sm text-red-600 hover:text-red-700 font-medium underline"
-              >
-                Clear All
-              </button>
             </div>
           </div>
         )}
@@ -304,13 +343,13 @@ const DispatchSummary = () => {
         </div>
       )}
 
-      {/* Table */}
+      {/* Table + Pagination */}
       {!loading && !error && (
         <>
           <div className="mt-6">
             <Table
               columns={dispatchSummaryColumns}
-              data={tableData}
+              data={paginatedData}
               renderCell={renderCell}
             />
           </div>
@@ -321,35 +360,42 @@ const DispatchSummary = () => {
               <p className="text-gray-500">No dispatch orders found</p>
             </div>
           )}
+
+          <div className="mt-6 flex justify-end">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
+          </div>
         </>
       )}
 
-      {/* Create Dispatch Button */}
-      <div className="mt-8">
-        <Button
-          className="rounded-lg px-6"
-          variant="primary"
-          onClick={() => router.push("/warehouse/outbound/dispatch-order")}
-        >
-          Create Dispatch Order
-        </Button>
-      </div>
-
       {/* View Dispatch Dialog */}
       {viewDialog.isOpen && viewDialog.dispatch && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
+        <div
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          onClick={() => setViewDialog({ isOpen: false, dispatch: null })}
+        >
+          <div
+            className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
             {/* Header */}
-            <div className="bg-gradient-to-r from-orange-500 to-orange-600 px-8 py-6 flex justify-between items-center">
+            <div className="bg-linear-to-r from-orange-500 to-orange-600 px-8 py-6 flex justify-between items-center">
               <div>
-                <h2 className="text-2xl font-bold text-white">Dispatch Order Details</h2>
-                <p className="text-orange-100 text-sm mt-1">ID: {viewDialog.dispatch.dispatchId}</p>
+                <h2 className="text-2xl font-bold text-white">
+                  Dispatch Order Details
+                </h2>
+                <p className="text-orange-100 text-sm mt-1">
+                  ID: {viewDialog.dispatch.dispatchId}
+                </p>
               </div>
               <button
                 onClick={() => setViewDialog({ isOpen: false, dispatch: null })}
                 className="text-white hover:bg-orange-600 rounded-full p-2 transition-colors"
               >
-                <X className="w-6 h-6" />
+                <X className="w-6 h-6 cursor-pointer" />
               </button>
             </div>
 
@@ -360,28 +406,42 @@ const DispatchSummary = () => {
                 <div className="bg-gray-50 rounded-xl p-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <p className="text-sm font-medium text-gray-500 mb-2">Status</p>
+                      <p className="text-sm font-medium text-gray-500 mb-2">
+                        Status
+                      </p>
                       <Badge
                         variant={
-                          viewDialog.dispatch.status === "delivered" ? "approved" :
-                          viewDialog.dispatch.status === "in_transit" ? "info" :
-                          viewDialog.dispatch.status === "cancelled" ? "inactive" : "orange"
+                          viewDialog.dispatch.status === "delivered"
+                            ? "approved"
+                            : viewDialog.dispatch.status === "in_transit"
+                            ? "info"
+                            : viewDialog.dispatch.status === "cancelled"
+                            ? "inactive"
+                            : "orange"
                         }
-                        label={viewDialog.dispatch.status.replace('_', ' ').toUpperCase()}
+                        label={viewDialog.dispatch.status
+                          .replace("_", " ")
+                          .toUpperCase()}
                         size="lg"
                         showDot={true}
                         className="inline-flex"
                       />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-500 mb-2">Assigned Agent</p>
+                      <p className="text-sm font-medium text-gray-500 mb-2">
+                        Assigned Agent
+                      </p>
                       <div className="flex items-center gap-2">
                         <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
                           <span className="text-orange-600 font-semibold text-sm">
-                            {viewDialog.dispatch.assignedAgent.name.charAt(0).toUpperCase()}
+                            {viewDialog.dispatch.assignedAgent.name
+                              .charAt(0)
+                              .toUpperCase()}
                           </span>
                         </div>
-                        <p className="font-semibold text-gray-900">{viewDialog.dispatch.assignedAgent.name}</p>
+                        <p className="font-semibold text-gray-900">
+                          {viewDialog.dispatch.assignedAgent.name}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -390,22 +450,49 @@ const DispatchSummary = () => {
                 {/* Destination */}
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                    <svg className="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <svg
+                      className="w-5 h-5 text-orange-500"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
                     </svg>
                     Destination
                   </h3>
                   <div className="bg-blue-50 border-l-4 border-blue-500 rounded-r-lg p-4">
-                    <p className="text-gray-900">{viewDialog.dispatch.destination}</p>
+                    <p className="text-gray-900">
+                      {viewDialog.dispatch.destination}
+                    </p>
                   </div>
                 </div>
 
                 {/* Products */}
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                    <svg className="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                    <svg
+                      className="w-5 h-5 text-orange-500"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+                      />
                     </svg>
                     Products ({viewDialog.dispatch.products.length})
                   </h3>
@@ -426,12 +513,17 @@ const DispatchSummary = () => {
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-100">
                         {viewDialog.dispatch.products.map((product, index) => (
-                          <tr key={index} className="hover:bg-gray-50 transition-colors">
+                          <tr
+                            key={index}
+                            className="hover:bg-gray-50 transition-colors"
+                          >
                             <td className="px-6 py-4 text-sm text-gray-500">
                               {index + 1}
                             </td>
                             <td className="px-6 py-4">
-                              <p className="text-sm font-medium text-gray-900">{product.sku}</p>
+                              <p className="text-sm font-medium text-gray-900">
+                                {product.sku}
+                              </p>
                             </td>
                             <td className="px-6 py-4 text-right">
                               <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-800">
@@ -443,12 +535,18 @@ const DispatchSummary = () => {
                       </tbody>
                       <tfoot className="bg-gray-50">
                         <tr>
-                          <td colSpan={2} className="px-6 py-4 text-sm font-semibold text-gray-700">
+                          <td
+                            colSpan={2}
+                            className="px-6 py-4 text-sm font-semibold text-gray-700"
+                          >
                             Total Items
                           </td>
                           <td className="px-6 py-4 text-right">
                             <span className="text-sm font-bold text-orange-600">
-                              {viewDialog.dispatch.products.reduce((sum, p) => sum + p.quantity, 0)}
+                              {viewDialog.dispatch.products.reduce(
+                                (sum, p) => sum + p.quantity,
+                                0
+                              )}
                             </span>
                           </td>
                         </tr>
@@ -461,33 +559,57 @@ const DispatchSummary = () => {
                 {viewDialog.dispatch.notes && (
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                      <svg className="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                      <svg
+                        className="w-5 h-5 text-orange-500"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"
+                        />
                       </svg>
                       Notes
                     </h3>
                     <div className="bg-yellow-50 border-l-4 border-yellow-500 rounded-r-lg p-4">
-                      <p className="text-gray-900 italic">{viewDialog.dispatch.notes}</p>
+                      <p className="text-gray-900 italic">
+                        {viewDialog.dispatch.notes}
+                      </p>
                     </div>
                   </div>
                 )}
 
                 {/* Metadata */}
                 <div className="bg-gray-50 rounded-xl p-6">
-                  <h3 className="text-sm font-semibold text-gray-700 mb-4 uppercase tracking-wider">Order Information</h3>
+                  <h3 className="text-sm font-semibold text-gray-700 mb-4 uppercase tracking-wider">
+                    Order Information
+                  </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <p className="text-sm text-gray-500 mb-1">Created By</p>
-                      <p className="font-semibold text-gray-900">{viewDialog.dispatch.createdBy.name}</p>
-                      <p className="text-xs text-gray-500 mt-1">{viewDialog.dispatch.createdBy.email}</p>
+                      <p className="font-semibold text-gray-900">
+                        {viewDialog.dispatch.createdBy.name}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {viewDialog.dispatch.createdBy.email}
+                      </p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-500 mb-1">Created At</p>
                       <p className="font-semibold text-gray-900">
-                        {format(new Date(viewDialog.dispatch.createdAt), "dd MMM yyyy")}
+                        {format(
+                          new Date(viewDialog.dispatch.createdAt),
+                          "dd MMM yyyy"
+                        )}
                       </p>
                       <p className="text-xs text-gray-500 mt-1">
-                        {format(new Date(viewDialog.dispatch.createdAt), "HH:mm:ss")}
+                        {format(
+                          new Date(viewDialog.dispatch.createdAt),
+                          "HH:mm:ss"
+                        )}
                       </p>
                     </div>
                   </div>
@@ -511,16 +633,38 @@ const DispatchSummary = () => {
 
       {/* Update Status Dialog */}
       {updateDialog.isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-md w-full">
+        <div
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          onClick={() =>
+            setUpdateDialog({
+              isOpen: false,
+              dispatchId: null,
+              currentStatus: null,
+            })
+          }
+        >
+          <div
+            className="bg-white rounded-lg max-w-md w-full"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="p-6">
               <div className="flex justify-between items-start mb-4">
-                <h2 className="text-xl font-bold text-gray-900">Update Dispatch Status</h2>
+                <h2 className="text-xl font-bold text-gray-900">
+                  Update Dispatch Status
+                </h2>
                 <button
-                  onClick={() => setUpdateDialog({ isOpen: false, dispatchId: null, currentStatus: null })}
+                  onClick={() =>
+                    setUpdateDialog({
+                      isOpen: false,
+                      dispatchId: null,
+                      currentStatus: null,
+                    })
+                  }
                   className="text-gray-400 hover:text-gray-600"
                 >
-                  <X className="w-6 h-6" />
+                  <div className="cursor-pointer">
+                    <X className="w-6 h-6" />
+                  </div>
                 </button>
               </div>
 
@@ -528,11 +672,19 @@ const DispatchSummary = () => {
                 <p className="text-sm text-gray-500 mb-2">Current Status</p>
                 <Badge
                   variant={
-                    updateDialog.currentStatus === "delivered" ? "approved" :
-                    updateDialog.currentStatus === "in_transit" ? "info" :
-                    updateDialog.currentStatus === "cancelled" ? "inactive" : "orange"
+                    updateDialog.currentStatus === "delivered"
+                      ? "approved"
+                      : updateDialog.currentStatus === "in_transit"
+                      ? "info"
+                      : updateDialog.currentStatus === "cancelled"
+                      ? "inactive"
+                      : "orange"
                   }
-                  label={updateDialog.currentStatus?.replace('_', ' ').toUpperCase() || ''}
+                  label={
+                    updateDialog.currentStatus
+                      ?.replace("_", " ")
+                      .toUpperCase() || ""
+                  }
                   size="md"
                 />
               </div>
@@ -549,7 +701,14 @@ const DispatchSummary = () => {
               <div className="mt-6 flex justify-end gap-3">
                 <Button
                   variant="secondary"
-                  onClick={() => setUpdateDialog({ isOpen: false, dispatchId: null, currentStatus: null })}
+                  onClick={() =>
+                    setUpdateDialog({
+                      isOpen: false,
+                      dispatchId: null,
+                      currentStatus: null,
+                    })
+                  }
+                  className="rounded-lg"
                   disabled={updating}
                 >
                   Cancel
@@ -557,7 +716,10 @@ const DispatchSummary = () => {
                 <Button
                   variant="primary"
                   onClick={handleStatusUpdate}
-                  disabled={updating || newStatus === updateDialog.currentStatus}
+                  className="rounded-lg"
+                  disabled={
+                    updating || newStatus === updateDialog.currentStatus
+                  }
                 >
                   {updating ? "Updating..." : "Update Status"}
                 </Button>

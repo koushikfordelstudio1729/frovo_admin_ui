@@ -17,7 +17,7 @@ export default function MultipleFileUpload({
   onChange,
   accept = ".jpg,.jpeg,.png,.pdf",
   maxFiles = 10,
-  maxSizePerFile = 5 * 1024 * 1024, // 5MB default
+  maxSizePerFile = 5 * 1024 * 1024, 
 }: MultipleFileUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -154,7 +154,7 @@ export default function MultipleFileUpload({
                 </div>
                 <button
                   type="button"
-                  className="flex-shrink-0"
+                  className="shrink-0"
                   onClick={() => removeFile(index)}
                   aria-label={`Remove ${file.name}`}
                 >

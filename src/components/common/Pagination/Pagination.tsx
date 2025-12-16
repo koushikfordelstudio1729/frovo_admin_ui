@@ -1,5 +1,4 @@
 "use client";
-
 import React from "react";
 
 interface PaginationProps {
@@ -14,19 +13,53 @@ export const Pagination: React.FC<PaginationProps> = ({
   onPageChange,
 }) => {
   const createPageButtons = () => {
-    const pages = [];
+    const pages: (number | "...")[] = [];
+    const maxVisible = 5;
+
+    if (totalPages <= maxVisible + 2) {
+      // Show all pages if total is small
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+      return pages;
+    }
+
+    // Always show first page
     pages.push(1);
 
-    if (currentPage > 3) pages.push("...");
+    // Calculate the range of pages to show
+    let startPage: number;
+    let endPage: number;
 
-    const start = Math.max(2, currentPage - 1);
-    const end = Math.min(totalPages - 1, currentPage + 1);
-
-    for (let i = start; i <= end; i++) pages.push(i);
-
-    if (currentPage < totalPages - 2) pages.push("...");
-
-    if (totalPages > 1) pages.push(totalPages);
+    if (currentPage <= 3) {
+      // Near the start
+      startPage = 2;
+      endPage = maxVisible;
+      for (let i = startPage; i <= endPage; i++) {
+        pages.push(i);
+      }
+      pages.push("...");
+      pages.push(totalPages);
+    } else if (currentPage >= totalPages - 2) {
+      // Near the end
+      pages.push("...");
+      startPage = totalPages - maxVisible + 1;
+      endPage = totalPages - 1;
+      for (let i = startPage; i <= endPage; i++) {
+        pages.push(i);
+      }
+      pages.push(totalPages);
+    } else {
+      // In the middle
+      pages.push("...");
+      startPage = currentPage - 1;
+      endPage = currentPage + 1;
+      for (let i = startPage; i <= endPage; i++) {
+        pages.push(i);
+      }
+      pages.push("...");
+      pages.push(totalPages);
+    }
 
     return pages;
   };
@@ -42,8 +75,8 @@ export const Pagination: React.FC<PaginationProps> = ({
           disabled={currentPage === 1}
           className={`px-3 py-2 text-sm rounded border-2 ${
             currentPage === 1
-              ? "text-gray-400  border-gray-300 cursor-not-allowed opacity-60"
-              : "text-gray-700 border-gray-400 hover:bg-gray-100 cursor-pointer"
+              ? "text-gray-400 border-gray-300 cursor-not-allowed opacity-60"
+              : "text-gray-700 border-gray-400 hover:bg-gray-100"
           }`}
         >
           {"<< First"}
@@ -56,32 +89,41 @@ export const Pagination: React.FC<PaginationProps> = ({
           className={`px-3 py-2 text-sm rounded border-2 ${
             currentPage === 1
               ? "text-gray-400 border-gray-300 cursor-not-allowed opacity-60"
-              : "text-gray-700 border-gray-400 hover:bg-gray-100 cursor-pointer"
+              : "text-gray-700 border-gray-400 hover:bg-gray-100"
           }`}
         >
           {"< Back"}
         </button>
 
         {/* PAGE NUMBERS */}
-        {pages.map((page, idx) =>
-          page === "..." ? (
-            <span key={idx} className="px-3 py-2 text-sm text-gray-500">
-              ...
-            </span>
-          ) : (
+        {pages.map((page, idx) => {
+          const key = `page-${idx}`;
+
+          if (page === "...") {
+            return (
+              <span
+                key={key}
+                className="px-3 py-2 text-sm text-gray-500 select-none"
+              >
+                ...
+              </span>
+            );
+          }
+
+          return (
             <button
-              key={page}
-              onClick={() => onPageChange(Number(page))}
+              key={key}
+              onClick={() => onPageChange(page as number)}
               className={`px-3 py-2 text-sm rounded font-medium transition ${
                 currentPage === page
                   ? "bg-gray-900 text-white border-2 border-gray-900"
-                  : "border-2 border-gray-400 text-gray-700 hover:bg-gray-100 cursor-pointer"
+                  : "border-2 border-gray-400 text-gray-700 hover:bg-gray-100"
               }`}
             >
               {page}
             </button>
-          )
-        )}
+          );
+        })}
 
         {/* NEXT */}
         <button
@@ -90,7 +132,7 @@ export const Pagination: React.FC<PaginationProps> = ({
           className={`px-3 py-2 text-sm rounded border-2 ${
             currentPage === totalPages
               ? "text-gray-400 border-gray-300 cursor-not-allowed opacity-60"
-              : "text-gray-700 border-gray-400 hover:bg-gray-100 cursor-pointer"
+              : "text-gray-700 border-gray-400 hover:bg-gray-100"
           }`}
         >
           {"Next >"}
@@ -103,7 +145,7 @@ export const Pagination: React.FC<PaginationProps> = ({
           className={`px-3 py-2 text-sm rounded border-2 ${
             currentPage === totalPages
               ? "text-gray-400 border-gray-300 cursor-not-allowed opacity-60"
-              : "text-gray-700 border-gray-400 hover:bg-gray-100 cursor-pointer"
+              : "text-gray-700 border-gray-400 hover:bg-gray-100"
           }`}
         >
           {"Last >>"}

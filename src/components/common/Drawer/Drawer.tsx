@@ -1,19 +1,18 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, type ReactNode } from "react";
 import { X } from "lucide-react";
-import { Button } from "../Button";
 
 interface DrawerProps {
   isOpen: boolean;
   onClose: () => void;
   title: string;
-  children: React.ReactNode;
+  children: ReactNode;
   size?: "sm" | "md" | "lg" | "xl";
-  footer?: React.ReactNode;
+  footer?: ReactNode;
 }
 
-const sizeClasses = {
+const sizeClasses: Record<NonNullable<DrawerProps["size"]>, string> = {
   sm: "max-w-md",
   md: "max-w-lg",
   lg: "max-w-2xl",
@@ -30,22 +29,19 @@ export function Drawer({
 }: DrawerProps) {
   // Prevent body scroll when drawer is open
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
-    }
+    if (!isOpen) return;
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
     return () => {
-      document.body.style.overflow = "unset";
+      document.body.style.overflow = originalOverflow;
     };
   }, [isOpen]);
 
   // Close on Escape key
   useEffect(() => {
+    if (!isOpen) return;
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && isOpen) {
-        onClose();
-      }
+      if (e.key === "Escape") onClose();
     };
     document.addEventListener("keydown", handleEscape);
     return () => document.removeEventListener("keydown", handleEscape);
@@ -57,16 +53,17 @@ export function Drawer({
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black bg-opacity-50 z-40 transition-opacity"
+        className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm transition-opacity duration-200"
         onClick={onClose}
         aria-hidden="true"
       />
 
       {/* Drawer */}
       <div
-        className={`fixed inset-y-0 right-0 z-50 ${sizeClasses[size]} w-full bg-white shadow-xl transform transition-transform duration-300 ease-in-out ${
-          isOpen ? "translate-x-0" : "translate-x-full"
-        }`}
+        className={`fixed inset-y-0 right-0 z-50 w-full bg-white shadow-xl transform transition-transform duration-300 ease-out ${sizeClasses[size]} translate-x-0`}
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
       >
         <div className="flex flex-col h-full">
           {/* Header */}
@@ -82,9 +79,7 @@ export function Drawer({
           </div>
 
           {/* Content */}
-          <div className="flex-1 overflow-y-auto px-6 py-6">
-            {children}
-          </div>
+          <div className="flex-1 overflow-y-auto px-6 py-6">{children}</div>
 
           {/* Footer */}
           {footer && (

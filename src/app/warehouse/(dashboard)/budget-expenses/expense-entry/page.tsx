@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import {
@@ -10,6 +10,7 @@ import {
   Label,
   Textarea,
   FileUpload,
+  SearchableSelect,
 } from "@/components";
 import { useMyWarehouse, useVendors, useFieldAgents } from "@/hooks/warehouse";
 import { warehouseAPI } from "@/services/warehouseAPI";
@@ -43,11 +44,9 @@ export default function ExpenseEntryForm() {
     description: "",
   });
 
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validation
     if (!formData.expenseCategory) {
       toast.error("Please select an expense category");
       return;
@@ -95,10 +94,12 @@ export default function ExpenseEntryForm() {
       if (response.data.success) {
         const expenseId = response.data.data._id;
 
-        // Upload bill if file is selected
         if (billFile) {
           try {
-            const uploadResponse = await warehouseAPI.uploadExpenseBill(expenseId, billFile);
+            const uploadResponse = await warehouseAPI.uploadExpenseBill(
+              expenseId,
+              billFile
+            );
             if (uploadResponse.data.success) {
               toast.success("Expense created and bill uploaded successfully");
             } else {
@@ -118,7 +119,10 @@ export default function ExpenseEntryForm() {
       }
     } catch (error: any) {
       console.error("Error creating expense:", error);
-      const errorMessage = error?.response?.data?.message || error?.message || "Failed to create expense";
+      const errorMessage =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Failed to create expense";
       toast.error(errorMessage);
     } finally {
       setSubmitting(false);
@@ -148,12 +152,12 @@ export default function ExpenseEntryForm() {
     );
   }
 
-  const vendorOptions = vendors.map(v => ({
+  const vendorOptions = vendors.map((v) => ({
     label: v.vendor_name,
     value: v._id,
   }));
 
-  const agentOptions = fieldAgents.map(a => ({
+  const agentOptions = fieldAgents.map((a) => ({
     label: a.name,
     value: a._id,
   }));
@@ -189,15 +193,19 @@ export default function ExpenseEntryForm() {
             </svg>
           </div>
           <div>
-            <p className="text-sm font-medium text-orange-900">Adding expense for:</p>
-            <p className="text-lg font-bold text-orange-950">{warehouse.name}</p>
+            <p className="text-sm font-medium text-orange-900">
+              Adding expense for:
+            </p>
+            <p className="text-lg font-bold text-orange-950">
+              {warehouse.name}
+            </p>
             <p className="text-xs text-orange-700">Code: {warehouse.code}</p>
           </div>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-8">
-        {/* Expense Category */}
+        {/* Expense Category & Amount */}
         <div className="grid grid-cols-2 gap-10 mb-8">
           <div>
             <Label className="text-lg font-medium text-gray-700 mb-2 block">
@@ -214,7 +222,6 @@ export default function ExpenseEntryForm() {
               }
             />
           </div>
-          {/* Amount*/}
           <div>
             <Label className="text-lg font-medium text-gray-700 mb-2 block">
               Amount *
@@ -231,22 +238,27 @@ export default function ExpenseEntryForm() {
           </div>
         </div>
 
+        {/* Vendor & Date */}
         <div className="grid grid-cols-2 gap-10 mb-8">
-          {/* Vendor */}
           <div>
             <Label className="text-lg font-medium text-gray-700 mb-2 block">
               Vendor *
             </Label>
-            <Select
+            <SearchableSelect
               id="vendor"
               options={vendorOptions}
               value={formData.vendor}
-              placeholder="Select Vendor"
+              placeholder="Search or select vendor"
+              onChange={(val) =>
+                setFormData({
+                  ...formData,
+                  vendor: val,
+                })
+              }
               selectClassName="py-4 px-4 border-2 border-orange-300"
-              onChange={(val) => setFormData({ ...formData, vendor: val })}
+              variant="orange"
             />
           </div>
-          {/* Date */}
           <div>
             <Label className="text-lg font-medium text-gray-700 mb-2 block">
               Date *
@@ -268,18 +280,22 @@ export default function ExpenseEntryForm() {
             <Label className="text-lg font-medium text-gray-700 mb-2 block">
               Assigned Agent *
             </Label>
-            <Select
+            <SearchableSelect
               id="assignedAgent"
               options={agentOptions}
               value={formData.assignedAgent}
-              placeholder="Select Agent"
-              selectClassName="py-4 px-4 border-2 border-orange-300"
+              placeholder="Search or select agent"
               onChange={(val) =>
-                setFormData({ ...formData, assignedAgent: val })
+                setFormData({
+                  ...formData,
+                  assignedAgent: val,
+                })
               }
+              selectClassName="py-4 px-4 border-2 border-orange-300"
+              variant="orange"
             />
 
-            {/* Description  */}
+            {/* Description */}
             <div className="mt-8">
               <Label className="text-lg font-medium text-gray-700 mb-2 block">
                 Description *
@@ -297,7 +313,7 @@ export default function ExpenseEntryForm() {
             </div>
           </div>
 
-          {/*  Upload Bill */}
+          {/* Upload Bill */}
           <div>
             <Label className="text-lg font-medium text-gray-700 mb-2 block">
               Upload Bill (Optional)

@@ -21,3 +21,4 @@ export { default as BackHeader } from "./BackHeader";
 export { default as Radio } from "./Radio";
 export { default as ConfirmDialog } from "./ConfirmDialog";
 export { Drawer } from "./Drawer";
+export { default as SearchableSelect } from "./SearchableSelect";

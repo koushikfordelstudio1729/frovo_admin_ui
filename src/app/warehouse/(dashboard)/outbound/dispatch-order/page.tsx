@@ -3,10 +3,15 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Plus, Trash2 } from "lucide-react";
-import { Input, Select, Button, Label, Textarea } from "@/components";
+import { Input, Button, Label, Textarea, SearchableSelect } from "@/components";
 import { warehouseAPI } from "@/services/warehouseAPI";
 import { useMyWarehouse } from "@/hooks/warehouse";
-import type { FieldAgent, CreateDispatchOrderPayload, PurchaseOrder, GRN } from "@/types";
+import type {
+  FieldAgent,
+  CreateDispatchOrderPayload,
+  PurchaseOrder,
+  GRN,
+} from "@/types";
 import { toast } from "react-hot-toast";
 
 interface ProductItem {
@@ -89,14 +94,16 @@ export default function DispatchOrderPage() {
           });
 
           // Create options with available stock
-          const options: SKUOption[] = Array.from(productInfo.entries()).map(([sku, productName]) => {
-            const availableQty = stockMap.get(sku) || 0;
-            return {
-              label: `${sku} - ${productName} (Available: ${availableQty})`,
-              value: sku,
-              availableQuantity: availableQty,
-            };
-          });
+          const options: SKUOption[] = Array.from(productInfo.entries()).map(
+            ([sku, productName]) => {
+              const availableQty = stockMap.get(sku) || 0;
+              return {
+                label: `${sku} - ${productName} (Available: ${availableQty})`,
+                value: sku,
+                availableQuantity: availableQty,
+              };
+            }
+          );
 
           // Sort by SKU
           options.sort((a, b) => a.value.localeCompare(b.value));
@@ -160,7 +167,9 @@ export default function DispatchOrderPage() {
       return;
     }
 
-    const validProducts = products.filter(p => p.sku.trim() && p.quantity.trim());
+    const validProducts = products.filter(
+      (p) => p.sku.trim() && p.quantity.trim()
+    );
     if (validProducts.length === 0) {
       toast.error("Please add at least one product with SKU and quantity");
       return;
@@ -168,7 +177,7 @@ export default function DispatchOrderPage() {
 
     // Validate stock availability
     for (const product of validProducts) {
-      const skuOption = skuOptions.find(opt => opt.value === product.sku);
+      const skuOption = skuOptions.find((opt) => opt.value === product.sku);
       const requestedQty = parseInt(product.quantity, 10);
       const availableQty = skuOption?.availableQuantity || 0;
 
@@ -186,7 +195,7 @@ export default function DispatchOrderPage() {
       const payload: CreateDispatchOrderPayload = {
         dispatchId: formData.dispatchId,
         destination: formData.destination,
-        products: validProducts.map(p => ({
+        products: validProducts.map((p) => ({
           sku: p.sku,
           quantity: parseInt(p.quantity, 10),
         })),
@@ -211,11 +220,14 @@ export default function DispatchOrderPage() {
         setProducts([{ sku: "", quantity: "" }]);
 
         // Optionally navigate back or to dispatch list
-        // router.push('/warehouse/outbound/dispatches');
+        router.push("/warehouse/outbound/dispatch-summary");
       }
     } catch (error) {
       console.error("Error creating dispatch order:", error);
-      const errorMessage = error instanceof Error ? error.message : "Failed to create dispatch order";
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Failed to create dispatch order";
       toast.error(errorMessage);
     } finally {
       setLoading(false);
@@ -223,16 +235,20 @@ export default function DispatchOrderPage() {
   };
 
   const handlePreview = () => {
-    const validProducts = products.filter(p => p.sku.trim() && p.quantity.trim());
+    const validProducts = products.filter(
+      (p) => p.sku.trim() && p.quantity.trim()
+    );
 
     const previewData = {
       dispatchId: formData.dispatchId,
       destination: formData.destination,
-      products: validProducts.map(p => ({
+      products: validProducts.map((p) => ({
         sku: p.sku,
         quantity: parseInt(p.quantity, 10),
       })),
-      assignedAgent: fieldAgents.find(a => a._id === formData.assignedAgent)?.name || formData.assignedAgent,
+      assignedAgent:
+        fieldAgents.find((a) => a._id === formData.assignedAgent)?.name ||
+        formData.assignedAgent,
       warehouse: warehouse?._id || "",
       notes: formData.notes,
       status: "pending",
@@ -300,122 +316,124 @@ export default function DispatchOrderPage() {
             </svg>
           </div>
           <div>
-            <p className="text-sm font-medium text-orange-900">Creating dispatch order for:</p>
-            <p className="text-lg font-bold text-orange-950">{warehouse.name}</p>
+            <p className="text-sm font-medium text-orange-900">
+              Creating dispatch order for:
+            </p>
+            <p className="text-lg font-bold text-orange-950">
+              {warehouse.name}
+            </p>
             <p className="text-xs text-orange-700">Code: {warehouse.code}</p>
           </div>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="max-w-full bg-white rounded-2xl p-8">
-        {/* Dispatch ID */}
-        <div className="mb-6">
-          <Label className="text-lg font-medium text-gray-700 mb-2 block">
-            Dispatch ID *
-          </Label>
-          <Input
-            id="dispatchId"
-            variant="orange"
-            value={formData.dispatchId}
-            onChange={(e) =>
-              setFormData({ ...formData, dispatchId: e.target.value })
-            }
-            placeholder="e.g., DO-0001"
-          />
-        </div>
+      <form
+        onSubmit={handleSubmit}
+        className="max-w-full bg-white rounded-2xl p-8"
+      >
+        <div className="grid grid-cols-2 gap-8">
+          {/* Dispatch ID */}
+          <div className="mb-6">
+            <Label className="text-lg font-medium text-gray-700 mb-2 block">
+              Dispatch ID *
+            </Label>
+            <Input
+              id="dispatchId"
+              variant="orange"
+              value={formData.dispatchId}
+              onChange={(e) =>
+                setFormData({ ...formData, dispatchId: e.target.value })
+              }
+              placeholder="e.g., DO-0001"
+            />
+          </div>
 
-        {/* Destination */}
-        <div className="mb-6">
-          <Label className="text-lg font-medium text-gray-700 mb-2 block">
-            Destination Address *
-          </Label>
-          <Textarea
-            id="destination"
-            variant="orange"
-            value={formData.destination}
-            onChange={(e) =>
-              setFormData({ ...formData, destination: e.target.value })
-            }
-            placeholder="Enter complete destination address"
-            rows={3}
-            textareaClassName="w-full"
-          />
+          {/* Destination */}
+          <div className="mb-6">
+            <Label className="text-lg font-medium text-gray-700 mb-2 block">
+              Destination Address *
+            </Label>
+            <Textarea
+              id="destination"
+              variant="orange"
+              value={formData.destination}
+              onChange={(e) =>
+                setFormData({ ...formData, destination: e.target.value })
+              }
+              placeholder="Enter complete destination address"
+              rows={3}
+              textareaClassName="w-full"
+            />
+          </div>
         </div>
 
         {/* Products Section */}
         <div className="mb-6">
-          <div className="flex justify-between items-center mb-4">
-            <Label className="text-lg font-medium text-gray-700">
-              Products *
-            </Label>
-            <Button
-              type="button"
-              variant="secondary"
-              size="sm"
-              onClick={handleAddProduct}
-              className="flex items-center gap-2"
-            >
-              <Plus className="w-4 h-4" />
-              Add Product
-            </Button>
-          </div>
-
           <div className="space-y-4">
             {products.map((product, index) => (
-              <div
-                key={index}
-                className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border border-gray-200 rounded-lg"
-              >
+              <div key={index} className="grid grid-cols-2 gap-8 rounded-lg">
                 <div>
-                  <Label className="text-sm font-medium text-gray-700 mb-2 block">
-                    Product SKU
-                  </Label>
                   {loadingSKUs ? (
                     <div className="text-sm text-gray-500">Loading SKUs...</div>
                   ) : (
-                    <Select
+                    <SearchableSelect
+                      label="Product SKU"
                       id={`sku-${index}`}
                       options={skuOptions}
                       value={product.sku}
-                      placeholder="Select Product SKU"
-                      selectClassName="py-4 px-4 border-2 border-orange-300"
+                      placeholder="Search or select Product SKU"
+                      variant="orange"
+                      fullWidth
+                      selectClassName="px-4 py-3 border-2 border-orange-300"
                       onChange={(val) => handleProductChange(index, "sku", val)}
                     />
                   )}
-                </div>
 
-                <div className="flex gap-2 items-end">
-                  <div className="flex-1">
-                    <Label className="text-sm font-medium text-gray-700 mb-2 block">
-                      Quantity
-                    </Label>
-                    <Input
-                      id={`quantity-${index}`}
-                      type="number"
-                      variant="orange"
-                      value={product.quantity}
-                      onChange={(e) =>
-                        handleProductChange(index, "quantity", e.target.value)
-                      }
-                      placeholder="Enter quantity"
-                      min="1"
-                    />
-                    {product.sku && (
-                      <p className="text-xs text-gray-500 mt-1">
-                        Available: {skuOptions.find(opt => opt.value === product.sku)?.availableQuantity || 0}
-                      </p>
-                    )}
-                  </div>
-                  {products.length > 1 && (
+                  <div className="mt-4 flex items-center gap-2">
                     <Button
                       type="button"
                       variant="secondary"
                       size="sm"
-                      onClick={() => handleRemoveProduct(index)}
-                      className="mb-0"
+                      onClick={handleAddProduct}
+                      className="flex py-2 rounded-lg items-center gap-2"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Plus className="w-4 h-4" />
+                      Add Product
                     </Button>
+
+                    {products.length > 1 && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleRemoveProduct(index)}
+                        className="hover:bg-red-200 py-2 mx-4"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex-1">
+                  <Input
+                    label="Quantity"
+                    id={`quantity-${index}`}
+                    type="number"
+                    variant="orange"
+                    value={product.quantity}
+                    onChange={(e) =>
+                      handleProductChange(index, "quantity", e.target.value)
+                    }
+                    placeholder="Enter quantity"
+                    min="1"
+                  />
+                  {product.sku && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      Available:{" "}
+                      {skuOptions.find((opt) => opt.value === product.sku)
+                        ?.availableQuantity || 0}
+                    </p>
                   )}
                 </div>
               </div>
@@ -425,57 +443,71 @@ export default function DispatchOrderPage() {
 
         {/* Assigned Agent */}
         <div className="mb-6">
-          <Label className="text-lg font-medium text-gray-700 mb-2 block">
-            Assigned Agent *
-          </Label>
-          {loadingAgents ? (
-            <div className="text-gray-500">Loading agents...</div>
-          ) : (
-            <Select
-              id="assignedAgent"
-              options={agentOptions}
-              value={formData.assignedAgent}
-              placeholder="Select agent name"
-              className="w-lg"
-              selectClassName="py-4 px-4 border-2 border-orange-300"
-              onChange={(val) => setFormData({ ...formData, assignedAgent: val })}
-            />
-          )}
-        </div>
+          <div className="grid grid-cols-2 gap-12">
+            <div>
+              <Label className="text-lg font-medium text-gray-700 mb-2 block">
+                Assigned Agent *
+              </Label>
+              {loadingAgents ? (
+                <div className="text-gray-500">Loading agents...</div>
+              ) : (
+                <SearchableSelect
+                  id="assignedAgent"
+                  label={undefined}
+                  options={agentOptions}
+                  value={formData.assignedAgent}
+                  placeholder="Search or select agent"
+                  variant="orange"
+                  fullWidth
+                  className="w-lg"
+                  selectClassName="border-2 border-orange-300"
+                  onChange={(val) =>
+                    setFormData({ ...formData, assignedAgent: val })
+                  }
+                />
+              )}
+            </div>
 
-        {/* Dispatch Notes */}
-        <div className="mb-8">
-          <Label
-            htmlFor="notes"
-            className="text-lg font-medium text-gray-700 mb-2 block"
-          >
-            Dispatch Notes
-          </Label>
-          <Textarea
-            id="notes"
-            label={undefined}
-            variant="orange"
-            value={formData.notes}
-            onChange={(e) =>
-              setFormData({ ...formData, notes: e.target.value })
-            }
-            placeholder="Enter any additional notes..."
-            rows={5}
-            textareaClassName="w-lg"
-          />
+            {/* Dispatch Notes */}
+            <div>
+              <Label
+                htmlFor="notes"
+                className="text-lg font-medium text-gray-700 mb-2 block"
+              >
+                Dispatch Notes
+              </Label>
+              <Textarea
+                id="notes"
+                label={undefined}
+                variant="orange"
+                value={formData.notes}
+                onChange={(e) =>
+                  setFormData({ ...formData, notes: e.target.value })
+                }
+                placeholder="Enter any additional notes..."
+                rows={5}
+                textareaClassName="w-lg"
+              />
+            </div>
+          </div>
         </div>
 
         {/* Action Buttons */}
-        <div className="flex justify-center gap-4">
+        <div className="mt-12 flex justify-center gap-4">
           <Button
             className="rounded-lg"
             type="submit"
             variant="primary"
             size="lg"
             disabled={loading}
+            onClick={(e) => {
+              e.preventDefault();
+              handleSubmit(e);
+            }}
           >
             {loading ? "Creating..." : "Create Dispatch"}
           </Button>
+
           <Button
             className="rounded-lg"
             type="button"

@@ -10,7 +10,8 @@ import {
   Button,
   Table,
   Badge,
-  Drawer
+  Drawer,
+  Pagination,
 } from "@/components";
 import { useFieldAgents } from "@/hooks/warehouse";
 import type { FieldAgent, CreateFieldAgentPayload } from "@/types";
@@ -33,15 +34,8 @@ const statusOptions = [
 export default function AssignFieldAgentPage() {
   const router = useRouter();
 
-  // Fetch field agents
-  const {
-    fieldAgents,
-    loading,
-    error,
-    refetch,
-    createFieldAgent,
-    creating
-  } = useFieldAgents();
+  const { fieldAgents, loading, error, refetch, createFieldAgent, creating } =
+    useFieldAgents();
 
   // Form state
   const [isFormVisible, setIsFormVisible] = useState(false);
@@ -59,9 +53,13 @@ export default function AssignFieldAgentPage() {
     agent: null,
   });
 
-  // Filter state
+  // Filters (auto-applied)
   const [statusFilter, setStatusFilter] = useState("");
-  const [appliedStatusFilter, setAppliedStatusFilter] = useState("");
+  const hasActiveFilters = !!statusFilter;
+
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
 
   // Reset form
   const resetForm = () => {
@@ -100,12 +98,11 @@ export default function AssignFieldAgentPage() {
 
   // Create field agent
   const handleCreateFieldAgent = async () => {
-    // Validation
     if (!formData.name.trim()) {
       toast.error("Please enter agent name");
       return;
     }
-    if (formData.routes.some(route => !route.trim())) {
+    if (formData.routes.some((route) => !route.trim())) {
       toast.error("Please fill in all route fields or remove empty ones");
       return;
     }
@@ -116,26 +113,27 @@ export default function AssignFieldAgentPage() {
 
     const payload: CreateFieldAgentPayload = {
       name: formData.name,
-      assignedRoutes: formData.routes.filter(route => route.trim()),
+      assignedRoutes: formData.routes.filter((route) => route.trim()),
     };
 
     const success = await createFieldAgent(payload);
-    if (success) {
-      resetForm();
-    }
+    if (success) resetForm();
   };
 
-  // Apply filters
-  const handleApplyFilters = () => {
-    setAppliedStatusFilter(statusFilter);
-    const isActive = statusFilter === "true" ? true : statusFilter === "false" ? false : undefined;
+  // Auto-apply filter
+  const handleStatusFilterChange = (val: string) => {
+    setStatusFilter(val);
+    setCurrentPage(1);
+
+    const isActive =
+      val === "true" ? true : val === "false" ? false : undefined;
     refetch({ isActive });
   };
 
   // Clear filters
   const clearFilters = () => {
     setStatusFilter("");
-    setAppliedStatusFilter("");
+    setCurrentPage(1);
     refetch({});
   };
 
@@ -154,21 +152,32 @@ export default function AssignFieldAgentPage() {
 
   // Get status label
   const getStatusLabel = (value: string) => {
-    const option = statusOptions.find(opt => opt.value === value);
+    const option = statusOptions.find((opt) => opt.value === value);
     return option?.label || value;
   };
 
   // Transform data for table
-  const tableData = useMemo(() => {
-    return fieldAgents.map((agent) => ({
-      name: agent.name,
-      assignedRoutes: agent.assignedRoutes.join(", "),
-      created_by: agent.createdBy?.name || "N/A",
-      status: agent.isActive ? "active" : "inactive",
-      _id: agent._id,
-      _rawData: agent,
-    }));
-  }, [fieldAgents]);
+  const tableData = useMemo(
+    () =>
+      fieldAgents.map((agent) => ({
+        name: agent.name,
+        assignedRoutes: agent.assignedRoutes.join(", "),
+        created_by: agent.createdBy?.name || "N/A",
+        status: agent.isActive ? "active" : "inactive",
+        _id: agent._id,
+        _rawData: agent,
+      })),
+    [fieldAgents]
+  );
+
+  // Pagination
+  const totalPages = Math.max(1, Math.ceil(tableData.length / pageSize));
+  const paginatedData = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return tableData.slice(startIndex, startIndex + pageSize);
+  }, [tableData, currentPage, pageSize]);
+
+  const handlePageChange = (page: number) => setCurrentPage(page);
 
   // Render cell
   const renderCell = (key: string, value: any, row?: Record<string, any>) => {
@@ -209,8 +218,6 @@ export default function AssignFieldAgentPage() {
 
     return value;
   };
-
-  const hasActiveFilters = appliedStatusFilter;
 
   return (
     <div className="min-h-screen bg-gray-50 p-4">
@@ -298,7 +305,11 @@ export default function AssignFieldAgentPage() {
                   onChange={(e) => updateRoute(index, e.target.value)}
                 />
               </div>
-              <div className={`col-span-2 flex items-${index === 0 ? 'end' : 'center'}`}>
+              <div
+                className={`col-span-2 flex items-${
+                  index === 0 ? "end" : "center"
+                }`}
+              >
                 <Button
                   variant="danger"
                   size="sm"
@@ -324,25 +335,28 @@ export default function AssignFieldAgentPage() {
       </Drawer>
 
       {/* Filter Section */}
-      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Filters</h3>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="pt-6 mb-6">
+        <div className="grid grid-cols-5 gap-8">
           <Select
             id="status-filter"
             label="Status"
             options={statusOptions}
             value={statusFilter}
-            onChange={setStatusFilter}
-            selectClassName="px-4 py-2"
+            onChange={handleStatusFilterChange}
+            selectClassName="px-4 py-2 border-2 border-orange-300"
           />
           <div className="flex items-end">
-            <Button
-              onClick={handleApplyFilters}
-              variant="primary"
-              className="rounded-lg w-full"
-            >
-              Apply Filters
-            </Button>
+            {hasActiveFilters && (
+              <div>
+                <Button
+                  onClick={clearFilters}
+                  variant="secondary"
+                  className="rounded-lg w-full"
+                >
+                  Clear Filters
+                </Button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -350,11 +364,15 @@ export default function AssignFieldAgentPage() {
         {hasActiveFilters && (
           <div className="mt-4 pt-4 border-t border-gray-200">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-sm font-semibold text-gray-700">Active Filters:</span>
+              <span className="text-sm font-semibold text-gray-700">
+                Active Filters:
+              </span>
 
-              {appliedStatusFilter && (
+              {statusFilter && (
                 <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-800 px-4 py-2 rounded-full">
-                  <span className="font-medium text-sm">Status: {getStatusLabel(appliedStatusFilter)}</span>
+                  <span className="font-medium text-sm">
+                    Status: {getStatusLabel(statusFilter)}
+                  </span>
                   <button
                     onClick={clearFilters}
                     className="ml-1 hover:bg-blue-200 rounded-full p-1 transition-colors"
@@ -365,13 +383,6 @@ export default function AssignFieldAgentPage() {
                   </button>
                 </div>
               )}
-
-              <button
-                onClick={clearFilters}
-                className="ml-2 text-sm text-red-600 hover:text-red-700 font-semibold underline"
-              >
-                Clear All
-              </button>
             </div>
           </div>
         )}
@@ -394,30 +405,43 @@ export default function AssignFieldAgentPage() {
         </div>
       )}
 
-      {/* Table */}
+      {/* Table + Pagination */}
       {!loading && !error && (
         <>
           <div className="mt-6">
             <Table
               columns={fieldAgentColumns}
-              data={tableData}
+              data={paginatedData}
               renderCell={renderCell}
             />
           </div>
 
-          {/* Empty State */}
           {tableData.length === 0 && (
             <div className="text-center py-12 bg-gray-50 rounded-lg mt-6">
               <p className="text-gray-500">No field agents found</p>
             </div>
           )}
+
+          <div className="mt-6 flex justify-end">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
+          </div>
         </>
       )}
 
       {/* View Field Agent Dialog */}
       {viewDialog.isOpen && viewDialog.agent && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          onClick={closeViewDialog}
+        >
+          <div
+            className="bg-white rounded-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold text-gray-900">
                 Field Agent Details
@@ -433,7 +457,9 @@ export default function AssignFieldAgentPage() {
 
             <div className="space-y-4">
               <div>
-                <Label className="text-sm font-semibold text-gray-600">Agent Name</Label>
+                <Label className="text-sm font-semibold text-gray-600">
+                  Agent Name
+                </Label>
                 <p className="text-lg text-gray-900">{viewDialog.agent.name}</p>
               </div>
 
@@ -454,26 +480,36 @@ export default function AssignFieldAgentPage() {
               </div>
 
               <div>
-                <Label className="text-sm font-semibold text-gray-600">Status</Label>
+                <Label className="text-sm font-semibold text-gray-600">
+                  Status:
+                </Label>
                 <Badge
                   variant={viewDialog.agent.isActive ? "approved" : "inactive"}
                   label={viewDialog.agent.isActive ? "Active" : "Inactive"}
                   size="md"
                   showDot={true}
-                  className="px-3 py-1 text-sm rounded-full"
+                  className="px-3 mx-4 py-1 text-sm rounded-full"
                 />
               </div>
 
               <div className="pt-4 border-t border-gray-200">
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <Label className="text-xs font-semibold text-gray-600">Created By</Label>
-                    <p className="text-gray-900">{viewDialog.agent.createdBy?.name || "N/A"}</p>
+                    <Label className="text-xs font-semibold text-gray-600">
+                      Created By
+                    </Label>
+                    <p className="text-gray-900">
+                      {viewDialog.agent.createdBy?.name || "N/A"}
+                    </p>
                   </div>
                   <div>
-                    <Label className="text-xs font-semibold text-gray-600">Created At</Label>
+                    <Label className="text-xs font-semibold text-gray-600">
+                      Created At
+                    </Label>
                     <p className="text-gray-900">
-                      {new Date(viewDialog.agent.createdAt).toLocaleDateString()}
+                      {new Date(
+                        viewDialog.agent.createdAt
+                      ).toLocaleDateString()}
                     </p>
                   </div>
                 </div>

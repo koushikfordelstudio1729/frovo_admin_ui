@@ -133,7 +133,7 @@ export const WarehouseSidebar: React.FC = () => {
 
   return (
     <aside className="w-64 bg-white h-screen fixed left-0 top-0 flex flex-col">
-      <div className="p-6 pb-4 flex-shrink-0">
+      <div className="p-6 pb-4 shrink-0">
         <div className="flex justify-center">
           <Image
             src="/images/logo.svg"
@@ -144,7 +144,10 @@ export const WarehouseSidebar: React.FC = () => {
           />
         </div>
       </div>
-      <nav className="flex-1 overflow-y-auto px-6 pb-6 space-y-5" style={{ scrollbarWidth: 'thin', scrollbarColor: '#fb923c #f3f4f6' }}>
+      <nav
+        className="flex-1 overflow-y-auto px-6 pb-6 space-y-5"
+        style={{ scrollbarWidth: "thin", scrollbarColor: "#fb923c #f3f4f6" }}
+      >
         <div className="bg-[#FFEAE4] rounded-2xl py-3 space-y-1">
           {group1.map(TopLevelSidebar)}
         </div>

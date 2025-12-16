@@ -10,6 +10,7 @@ import {
   Label,
   Textarea,
   FileUpload,
+  SearchableSelect,
 } from "@/components";
 import { useMyWarehouse, useVendors, useFieldAgents } from "@/hooks/warehouse";
 import { warehouseAPI } from "@/services/warehouseAPI";
@@ -81,8 +82,11 @@ export default function ExpenseEditPage() {
             expenseCategory: expense.category || "",
             amount: expense.amount?.toString() || "",
             vendor: expense.vendor?._id || expense.vendor || "",
-            date: expense.date ? new Date(expense.date).toISOString().split('T')[0] : "",
-            assignedAgent: expense.assignedAgent?._id || expense.assignedAgent || "",
+            date: expense.date
+              ? new Date(expense.date).toISOString().split("T")[0]
+              : "",
+            assignedAgent:
+              expense.assignedAgent?._id || expense.assignedAgent || "",
             description: expense.description || "",
             status: expense.status || "pending",
             paymentStatus: expense.paymentStatus || "unpaid",
@@ -113,7 +117,9 @@ export default function ExpenseEditPage() {
     if (!expenseId) return;
 
     try {
-      const response = await warehouseAPI.updateExpenseStatus(expenseId, { status: newStatus });
+      const response = await warehouseAPI.updateExpenseStatus(expenseId, {
+        status: newStatus,
+      });
       if (response.data.success) {
         setFormData({ ...formData, status: newStatus });
         toast.success("Status updated successfully");
@@ -131,7 +137,10 @@ export default function ExpenseEditPage() {
     if (!expenseId) return;
 
     try {
-      const response = await warehouseAPI.updateExpensePaymentStatus(expenseId, { paymentStatus: newPaymentStatus });
+      const response = await warehouseAPI.updateExpensePaymentStatus(
+        expenseId,
+        { paymentStatus: newPaymentStatus }
+      );
       if (response.data.success) {
         setFormData({ ...formData, paymentStatus: newPaymentStatus });
         toast.success("Payment status updated successfully");
@@ -140,7 +149,9 @@ export default function ExpenseEditPage() {
       }
     } catch (error: any) {
       console.error("Error updating payment status:", error);
-      toast.error(error?.response?.data?.message || "Failed to update payment status");
+      toast.error(
+        error?.response?.data?.message || "Failed to update payment status"
+      );
     }
   };
 
@@ -201,7 +212,10 @@ export default function ExpenseEditPage() {
         // Upload bill if file is selected
         if (billFile) {
           try {
-            const uploadResponse = await warehouseAPI.uploadExpenseBill(expenseId, billFile);
+            const uploadResponse = await warehouseAPI.uploadExpenseBill(
+              expenseId,
+              billFile
+            );
             if (uploadResponse.data.success) {
               toast.success("Expense updated and bill uploaded successfully");
             } else {
@@ -221,7 +235,10 @@ export default function ExpenseEditPage() {
       }
     } catch (error: any) {
       console.error("Error updating expense:", error);
-      const errorMessage = error?.response?.data?.message || error?.message || "Failed to update expense";
+      const errorMessage =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Failed to update expense";
       toast.error(errorMessage);
     } finally {
       setSubmitting(false);
@@ -251,12 +268,12 @@ export default function ExpenseEditPage() {
     );
   }
 
-  const vendorOptions = vendors.map(v => ({
+  const vendorOptions = vendors.map((v) => ({
     label: v.vendor_name,
     value: v._id,
   }));
 
-  const agentOptions = fieldAgents.map(a => ({
+  const agentOptions = fieldAgents.map((a) => ({
     label: a.name,
     value: a._id,
   }));
@@ -268,9 +285,7 @@ export default function ExpenseEditPage() {
         <button onClick={() => router.back()} aria-label="Go back">
           <ArrowLeft className="w-6 h-6 text-gray-700" />
         </button>
-        <h1 className="text-2xl font-semibold text-gray-900">
-          Edit Expense
-        </h1>
+        <h1 className="text-2xl font-semibold text-gray-900">Edit Expense</h1>
       </div>
 
       {/* Warehouse Info Card */}
@@ -292,8 +307,12 @@ export default function ExpenseEditPage() {
             </svg>
           </div>
           <div>
-            <p className="text-sm font-medium text-orange-900">Editing expense for:</p>
-            <p className="text-lg font-bold text-orange-950">{warehouse.name}</p>
+            <p className="text-sm font-medium text-orange-900">
+              Editing expense for:
+            </p>
+            <p className="text-lg font-bold text-orange-950">
+              {warehouse.name}
+            </p>
             <p className="text-xs text-orange-700">Code: {warehouse.code}</p>
           </div>
         </div>
@@ -339,13 +358,13 @@ export default function ExpenseEditPage() {
             <Label className="text-lg font-medium text-gray-700 mb-2 block">
               Vendor *
             </Label>
-            <Select
+            <SearchableSelect
               id="vendor"
               options={vendorOptions}
               value={formData.vendor}
-              placeholder="Select Vendor"
-              selectClassName="py-4 px-4 border-2 border-orange-300"
+              placeholder="Search or select vendor"
               onChange={(val) => setFormData({ ...formData, vendor: val })}
+              selectClassName="py-4 px-4 border-2 border-orange-300"
             />
           </div>
           <div>
@@ -369,15 +388,15 @@ export default function ExpenseEditPage() {
             <Label className="text-lg font-medium text-gray-700 mb-2 block">
               Assigned Agent *
             </Label>
-            <Select
+            <SearchableSelect
               id="assignedAgent"
               options={agentOptions}
               value={formData.assignedAgent}
-              placeholder="Select Agent"
-              selectClassName="py-4 px-4 border-2 border-orange-300"
+              placeholder="Search or select agent"
               onChange={(val) =>
                 setFormData({ ...formData, assignedAgent: val })
               }
+              selectClassName="py-4 px-4 border-2 border-orange-300"
             />
           </div>
           <div>

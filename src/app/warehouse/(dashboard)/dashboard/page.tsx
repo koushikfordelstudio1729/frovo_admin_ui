@@ -3,10 +3,7 @@ import { useState, useEffect } from "react";
 import { Button, Input, Label, Select, StatCard, Table } from "@/components";
 import StackedBarChart from "@/components/charts/StackedBarChart";
 import { useMyWarehouse, useDashboard } from "@/hooks/warehouse";
-import {
-  dispatchedOrderData,
-  lowStockData,
-} from "@/config/warehouse";
+import { dispatchedOrderData, lowStockData } from "@/config/warehouse";
 import {
   TriangleAlert,
   Eye,
@@ -42,13 +39,22 @@ const lowStockColumns = [
 ];
 
 export default function Dashboard() {
-  const { warehouse: myWarehouse, loading: warehouseLoading, error: warehouseError } = useMyWarehouse();
+  const {
+    warehouse: myWarehouse,
+    loading: warehouseLoading,
+    error: warehouseError,
+  } = useMyWarehouse();
   const [date, setDate] = useState("");
   const [category, setCategory] = useState("");
   const [partner, setPartner] = useState("");
 
   // Fetch dashboard data with filters
-  const { data: dashboardData, loading: dashboardLoading, error: dashboardError, refetch } = useDashboard();
+  const {
+    data: dashboardData,
+    loading: dashboardLoading,
+    error: dashboardError,
+    refetch,
+  } = useDashboard();
 
   // Refetch when filters change
   useEffect(() => {
@@ -64,23 +70,26 @@ export default function Dashboard() {
   }, [date, category, partner, refetch]);
 
   // Transform chart data from API response
-  const chartData = dashboardData?.pendingVsRefill?.days?.map((day, index) => ({
-    name: day,
-    pending: dashboardData.pendingVsRefill.pendingPercentages[index] || 0,
-    refill: dashboardData.pendingVsRefill.refillPercentages[index] || 0,
-  })) || [];
+  const chartData =
+    dashboardData?.pendingVsRefill?.days?.map((day, index) => ({
+      name: day,
+      pending: dashboardData.pendingVsRefill.pendingPercentages[index] || 0,
+      refill: dashboardData.pendingVsRefill.refillPercentages[index] || 0,
+    })) || [];
 
   // Category options from API
-  const categoryOptions = dashboardData?.filters?.categories?.map(cat => ({
-    value: cat,
-    label: cat,
-  })) || [];
+  const categoryOptions =
+    dashboardData?.filters?.categories?.map((cat) => ({
+      value: cat,
+      label: cat,
+    })) || [];
 
   // Partner options from API
-  const partnerOptions = dashboardData?.filters?.partners?.map(partner => ({
-    value: partner,
-    label: partner,
-  })) || [];
+  const partnerOptions =
+    dashboardData?.filters?.partners?.map((partner) => ({
+      value: partner,
+      label: partner,
+    })) || [];
 
   const handleView = (row: any) => {
     console.log("View", row);
@@ -145,40 +154,48 @@ export default function Dashboard() {
           </p>
         </div>
       ) : myWarehouse ? (
-        <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg shadow-lg p-6 mb-6 text-white">
+        <div className="bg-linear-to-r from-orange-600 to-orange-700 rounded-lg shadow-lg p-6 mb-6 text-white">
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-3">
                 <WarehouseIcon className="w-8 h-8" />
                 <div>
                   <h1 className="text-2xl font-bold">{myWarehouse.name}</h1>
-                  <p className="text-blue-100 text-sm">Code: {myWarehouse.code}</p>
+                  <p className="text-gray-200 text-sm">
+                    Code: {myWarehouse.code}
+                  </p>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                 <div className="flex items-center gap-2">
-                  <MapPin className="w-5 h-5 text-blue-200" />
+                  <MapPin className="w-6 h-6" />
                   <div>
-                    <p className="text-xs text-blue-200">Location</p>
-                    <p className="text-sm font-medium">{myWarehouse.location}</p>
+                    <p className="text-xs">Location</p>
+                    <p className="text-gray-200 text-sm font-medium">
+                      {myWarehouse.location}
+                    </p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <Package className="w-5 h-5 text-blue-200" />
+                  <Package className="w-6 h-6" />
                   <div>
-                    <p className="text-xs text-blue-200">Capacity</p>
-                    <p className="text-sm font-medium">{myWarehouse.capacity.toLocaleString()} units</p>
+                    <p className="text-xs">Capacity</p>
+                    <p className="text-gray-200 text-sm font-medium">
+                      {myWarehouse.capacity.toLocaleString()} units
+                    </p>
                   </div>
                 </div>
 
                 {myWarehouse.manager && (
                   <div className="flex items-center gap-2">
-                    <User className="w-5 h-5 text-blue-200" />
+                    <User className="w-6 h-6" />
                     <div>
-                      <p className="text-xs text-blue-200">Manager</p>
-                      <p className="text-sm font-medium">{myWarehouse.manager.name}</p>
+                      <p className="text-xs">Manager</p>
+                      <p className="text-gray-200 text-sm font-medium">
+                        {myWarehouse.manager.name}
+                      </p>
                     </div>
                   </div>
                 )}
@@ -186,12 +203,14 @@ export default function Dashboard() {
             </div>
 
             <div className="flex items-center gap-2">
-              <span className={`px-4 py-2 rounded-full text-sm font-semibold ${
-                myWarehouse.isActive
-                  ? 'bg-green-400 text-green-900'
-                  : 'bg-red-400 text-red-900'
-              }`}>
-                {myWarehouse.isActive ? 'Active' : 'Inactive'}
+              <span
+                className={`px-4 py-2 rounded-full text-sm font-semibold ${
+                  myWarehouse.isActive
+                    ? "bg-green-400 text-green-900"
+                    : "bg-red-400 text-red-900"
+                }`}
+              >
+                {myWarehouse.isActive ? "Active" : "Inactive"}
               </span>
             </div>
           </div>
@@ -258,7 +277,10 @@ export default function Dashboard() {
       {dashboardLoading ? (
         <div className="flex flex-row gap-6 mt-6">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="bg-white rounded-lg shadow-md p-8 w-sm animate-pulse">
+            <div
+              key={i}
+              className="bg-white rounded-lg shadow-md p-8 w-sm animate-pulse"
+            >
               <div className="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
               <div className="h-8 bg-gray-200 rounded w-3/4"></div>
             </div>
@@ -307,38 +329,51 @@ export default function Dashboard() {
       )}
 
       {/* Recent Activities */}
-      {dashboardData?.recentActivities && dashboardData.recentActivities.length > 0 && (
-        <div className="mt-8 bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-bold text-gray-800 mb-4">Recent Activities</h2>
-          <div className="space-y-3">
-            {dashboardData.recentActivities.map((activity, index) => (
-              <div
-                key={index}
-                className="flex items-start gap-3 p-4 border-l-4 border-blue-500 bg-blue-50 rounded-r-lg"
-              >
-                <div className={`p-2 rounded-full ${
-                  activity.type === 'inbound' ? 'bg-green-100' : 'bg-orange-100'
-                }`}>
-                  {activity.type === 'inbound' ? (
-                    <ArrowBigDown className="w-5 h-5 text-green-600" />
-                  ) : (
-                    <ArrowBigUp className="w-5 h-5 text-orange-600" />
-                  )}
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm text-gray-800 font-medium">{activity.message}</p>
-                  <div className="flex items-center gap-4 mt-1">
-                    <p className="text-xs text-gray-500">By: {activity.user}</p>
-                    <p className="text-xs text-gray-400">
-                      {formatDistanceToNow(new Date(activity.timestamp), { addSuffix: true })}
+      {dashboardData?.recentActivities &&
+        dashboardData.recentActivities.length > 0 && (
+          <div className="mt-8 bg-white rounded-lg shadow-md p-6">
+            <h2 className="text-xl font-bold text-gray-800 mb-4">
+              Recent Activities
+            </h2>
+            <div className="space-y-3">
+              {dashboardData.recentActivities.map((activity, index) => (
+                <div
+                  key={index}
+                  className="flex items-start gap-3 p-4 border-l-4 border-blue-500 bg-blue-50 rounded-r-lg"
+                >
+                  <div
+                    className={`p-2 rounded-full ${
+                      activity.type === "inbound"
+                        ? "bg-green-100"
+                        : "bg-orange-100"
+                    }`}
+                  >
+                    {activity.type === "inbound" ? (
+                      <ArrowBigDown className="w-5 h-5 text-green-600" />
+                    ) : (
+                      <ArrowBigUp className="w-5 h-5 text-orange-600" />
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm text-gray-800 font-medium">
+                      {activity.message}
                     </p>
+                    <div className="flex items-center gap-4 mt-1">
+                      <p className="text-xs text-gray-500">
+                        By: {activity.user}
+                      </p>
+                      <p className="text-xs text-gray-400">
+                        {formatDistanceToNow(new Date(activity.timestamp), {
+                          addSuffix: true,
+                        })}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
       {/* Tables */}
       <div className="space-y-10 mt-8">

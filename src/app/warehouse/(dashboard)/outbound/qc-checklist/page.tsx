@@ -11,7 +11,9 @@ import {
   Table,
   Badge,
   ConfirmDialog,
-  Drawer
+  Drawer,
+  Pagination,
+  SearchableSelect,
 } from "@/components";
 import { useQCTemplates, usePurchaseOrders } from "@/hooks/warehouse";
 import type { QCTemplate, CreateQCTemplatePayload } from "@/types";
@@ -40,7 +42,6 @@ const qcTemplateColumns = [
 export default function QCChecklistTemplatesPage() {
   const router = useRouter();
 
-  // Fetch QC templates and purchase orders
   const {
     qcTemplates,
     loading,
@@ -51,14 +52,16 @@ export default function QCChecklistTemplatesPage() {
     deleteTemplate,
     creating,
     updating,
-    deleting
+    deleting,
   } = useQCTemplates();
 
   const { purchaseOrders } = usePurchaseOrders();
 
   // Form state
   const [isFormVisible, setIsFormVisible] = useState(false);
-  const [editingTemplate, setEditingTemplate] = useState<QCTemplate | null>(null);
+  const [editingTemplate, setEditingTemplate] = useState<QCTemplate | null>(
+    null
+  );
   const [formData, setFormData] = useState<QCTemplateFormData>({
     title: "",
     sku: "",
@@ -82,22 +85,25 @@ export default function QCChecklistTemplatesPage() {
     onConfirm: () => {},
   });
 
-  // Filter state
+  // Filters
   const [skuFilter, setSkuFilter] = useState("");
-  const [appliedSkuFilter, setAppliedSkuFilter] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const hasActiveFilters = !!skuFilter || !!searchTerm;
+
+  // pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
 
   // Get unique SKUs from purchase orders
   const skuOptions = useMemo(() => {
     const uniqueSkus = new Set<string>();
-    purchaseOrders.forEach(po => {
-      po.po_line_items.forEach(item => {
-        if (item.sku) {
-          uniqueSkus.add(item.sku);
-        }
+    purchaseOrders.forEach((po) => {
+      po.po_line_items.forEach((item) => {
+        if (item.sku) uniqueSkus.add(item.sku);
       });
     });
 
-    return Array.from(uniqueSkus).map(sku => ({
+    return Array.from(uniqueSkus).map((sku) => ({
       label: sku,
       value: sku,
     }));
@@ -165,7 +171,6 @@ export default function QCChecklistTemplatesPage() {
 
   // Save template (create or update)
   const handleSaveTemplate = async () => {
-    // Validation
     if (!formData.title.trim()) {
       alert("Please enter a template title");
       return;
@@ -174,7 +179,7 @@ export default function QCChecklistTemplatesPage() {
       alert("Please select a SKU");
       return;
     }
-    if (formData.parameters.some(p => !p.name.trim() || !p.value.trim())) {
+    if (formData.parameters.some((p) => !p.name.trim() || !p.value.trim())) {
       alert("Please fill in all parameter names and values");
       return;
     }
@@ -182,7 +187,7 @@ export default function QCChecklistTemplatesPage() {
     const payload: CreateQCTemplatePayload = {
       title: formData.title,
       sku: formData.sku,
-      parameters: formData.parameters.map(p => ({
+      parameters: formData.parameters.map((p) => ({
         name: p.name,
         value: p.value,
       })),
@@ -197,15 +202,14 @@ export default function QCChecklistTemplatesPage() {
 
     if (success) {
       resetForm();
+      refetch();
     }
   };
 
-  // Handle edit
   const handleEdit = (template: QCTemplate) => {
     setEditingTemplate(template);
   };
 
-  // Handle delete
   const handleDelete = (template: QCTemplate) => {
     setConfirmDialog({
       isOpen: true,
@@ -213,63 +217,88 @@ export default function QCChecklistTemplatesPage() {
       message: `Are you sure you want to delete the template "${template.title}"? This action cannot be undone.`,
       onConfirm: async () => {
         await deleteTemplate(template._id);
-        setConfirmDialog({ ...confirmDialog, isOpen: false });
+        setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
       },
     });
   };
 
-  // Handle view
   const handleView = (template: QCTemplate) => {
-    setViewDialog({
-      isOpen: true,
-      template,
-    });
+    setViewDialog({ isOpen: true, template });
   };
 
-  // Close dialogs
   const closeConfirmDialog = () => {
-    setConfirmDialog({ ...confirmDialog, isOpen: false });
+    setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
   };
 
   const closeViewDialog = () => {
     setViewDialog({ isOpen: false, template: null });
   };
 
-  // Apply filters
-  const handleApplyFilters = () => {
-    setAppliedSkuFilter(skuFilter);
+  const handleSkuFilterChange = (val: string) => {
+    setSkuFilter(val);
+    setCurrentPage(1);
   };
 
-  // Clear individual filter
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+    setCurrentPage(1);
+  };
+
   const clearSkuFilter = () => {
     setSkuFilter("");
-    setAppliedSkuFilter("");
+    setCurrentPage(1);
   };
 
-  // Clear all filters
   const clearAllFilters = () => {
     setSkuFilter("");
-    setAppliedSkuFilter("");
+    setSearchTerm("");
+    setCurrentPage(1);
   };
 
-  // Filter templates by SKU
+  // Filter templates by SKU and search
   const filteredTemplates = useMemo(() => {
-    if (!appliedSkuFilter) return qcTemplates;
-    return qcTemplates.filter(template => template.sku === appliedSkuFilter);
-  }, [qcTemplates, appliedSkuFilter]);
+    let data = qcTemplates;
+
+    if (skuFilter) {
+      data = data.filter((template) => template.sku === skuFilter);
+    }
+
+    if (searchTerm.trim()) {
+      const term = searchTerm.toLowerCase();
+      data = data.filter(
+        (template) =>
+          template.title.toLowerCase().includes(term) ||
+          template.sku.toLowerCase().includes(term)
+      );
+    }
+
+    return data;
+  }, [qcTemplates, skuFilter, searchTerm]);
 
   // Transform data for table
-  const tableData = useMemo(() => {
-    return filteredTemplates.map((template) => ({
-      title: template.title,
-      sku: template.sku,
-      parameters_count: template.parameters.length,
-      created_by: template.createdBy?.name || "N/A",
-      status: template.isActive ? "active" : "inactive",
-      _id: template._id,
-      _rawData: template,
-    }));
-  }, [filteredTemplates]);
+  const tableData = useMemo(
+    () =>
+      filteredTemplates.map((template) => ({
+        title: template.title,
+        sku: template.sku,
+        parameters_count: template.parameters.length,
+        created_by: template.createdBy?.name || "N/A",
+        status: template.isActive ? "active" : "inactive",
+        _id: template._id,
+        _rawData: template,
+      })),
+    [filteredTemplates]
+  );
+
+  // Pagination
+  const totalPages = Math.max(1, Math.ceil(tableData.length / pageSize));
+  const paginatedData = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    return tableData.slice(startIndex, endIndex);
+  }, [tableData, currentPage, pageSize]);
+
+  const handlePageChange = (page: number) => setCurrentPage(page);
 
   // Render cell
   const renderCell = (key: string, value: any, row?: Record<string, any>) => {
@@ -374,7 +403,11 @@ export default function QCChecklistTemplatesPage() {
               onClick={handleSaveTemplate}
               disabled={creating || updating}
             >
-              {creating || updating ? "Saving..." : editingTemplate ? "Update Template" : "Save Template"}
+              {creating || updating
+                ? "Saving..."
+                : editingTemplate
+                ? "Update Template"
+                : "Save Template"}
             </Button>
           </div>
         }
@@ -387,9 +420,11 @@ export default function QCChecklistTemplatesPage() {
           <Input
             type="text"
             placeholder="e.g., Perishable Items QC"
-            variant="default"
+            variant="orange"
             value={formData.title}
-            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, title: e.target.value })
+            }
           />
         </div>
 
@@ -398,13 +433,16 @@ export default function QCChecklistTemplatesPage() {
           <Label className="text-lg font-semibold text-gray-700 mb-2 block">
             SKU
           </Label>
-          <Select
+          <SearchableSelect
             id="sku"
+            label={undefined}
             value={formData.sku}
             options={skuOptions}
-            placeholder="Select SKU"
-            onChange={(val) => setFormData({ ...formData, sku: val })}
+            placeholder="Search or select SKU"
+            variant="orange"
+            fullWidth
             selectClassName="w-full bg-gray-100 px-4 py-3 border border-gray-300 rounded-lg"
+            onChange={(val) => setFormData({ ...formData, sku: val })}
           />
         </div>
 
@@ -419,7 +457,7 @@ export default function QCChecklistTemplatesPage() {
                 <Input
                   type="text"
                   label={index === 0 ? "Parameter Name" : ""}
-                  variant="default"
+                  variant="orange"
                   placeholder="e.g., Packaging Intact"
                   value={param.name}
                   onChange={(e) =>
@@ -432,14 +470,18 @@ export default function QCChecklistTemplatesPage() {
                   type="text"
                   label={index === 0 ? "Expected Value" : ""}
                   placeholder="e.g., Yes"
-                  variant="default"
+                  variant="orange"
                   value={param.value}
                   onChange={(e) =>
                     updateParameter(param.id, "value", e.target.value)
                   }
                 />
               </div>
-              <div className={`col-span-2 flex items-${index === 0 ? 'end' : 'center'}`}>
+              <div
+                className={`col-span-2 flex items-${
+                  index === 0 ? "end" : "center"
+                }`}
+              >
                 <Button
                   variant="danger"
                   size="sm"
@@ -464,56 +506,72 @@ export default function QCChecklistTemplatesPage() {
         </div>
       </Drawer>
 
-      {/* Filter Section */}
-      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Filters</h3>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Select
-            id="sku-filter"
-            label="Filter by SKU"
-            options={[
-              { label: "All SKUs", value: "" },
-              ...skuOptions
-            ]}
-            value={skuFilter}
-            onChange={setSkuFilter}
-            selectClassName="px-4 py-2"
+      {/* Filter + Search Section */}
+      <div className="pt-6 mb-6">
+        <div className="grid grid-cols-3 gap-4">
+          <Input
+            id="search"
+            label="Search title & SKU"
+            placeholder="Search by template title or SKU"
+            value={searchTerm}
+            onChange={handleSearchChange}
+            variant="orange"
           />
           <div className="flex items-end">
-            <Button
-              onClick={handleApplyFilters}
-              variant="primary"
-              className="rounded-lg w-full"
-            >
-              Apply Filters
-            </Button>
+            {hasActiveFilters && (
+              <div>
+                <Button
+                  onClick={clearAllFilters}
+                  variant="secondary"
+                  className="rounded-lg w-full"
+                >
+                  Clear Search
+                </Button>
+              </div>
+            )}
           </div>
         </div>
 
         {/* Active Filters Badges */}
-        {appliedSkuFilter && (
+        {hasActiveFilters && (
           <div className="mt-4 pt-4 border-t border-gray-200">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-sm font-semibold text-gray-700">Active Filters:</span>
+              <span className="text-sm font-semibold text-gray-700">
+                Active Filters:
+              </span>
 
-              <div className="inline-flex items-center gap-2 bg-orange-100 text-orange-800 px-4 py-2 rounded-full">
-                <span className="font-medium text-sm">SKU: {appliedSkuFilter}</span>
-                <button
-                  onClick={clearSkuFilter}
-                  className="ml-1 hover:bg-orange-200 rounded-full p-1 transition-colors"
-                  title="Remove SKU filter"
-                  aria-label="Remove SKU filter"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
+              {skuFilter && (
+                <div className="inline-flex items-center gap-2 bg-orange-100 text-orange-800 px-4 py-2 rounded-full">
+                  <span className="font-medium text-sm">SKU: {skuFilter}</span>
+                  <button
+                    onClick={clearSkuFilter}
+                    className="ml-1 hover:bg-orange-200 rounded-full p-1 transition-colors"
+                    title="Remove SKU filter"
+                    aria-label="Remove SKU filter"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
 
-              <button
-                onClick={clearAllFilters}
-                className="ml-2 text-sm text-red-600 hover:text-red-700 font-semibold underline"
-              >
-                Clear All
-              </button>
+              {searchTerm && (
+                <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-800 px-4 py-2 rounded-full">
+                  <span className="font-medium text-sm">
+                    Search: {searchTerm}
+                  </span>
+                  <button
+                    onClick={() => {
+                      setSearchTerm("");
+                      setCurrentPage(1);
+                    }}
+                    className="ml-1 hover:bg-blue-200 rounded-full p-1 transition-colors"
+                    title="Clear search"
+                    aria-label="Clear search"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -536,32 +594,47 @@ export default function QCChecklistTemplatesPage() {
         </div>
       )}
 
-      {/* Table */}
+      {/* Table + Pagination */}
       {!loading && !error && (
         <>
           <div className="mt-6">
             <Table
               columns={qcTemplateColumns}
-              data={tableData}
+              data={paginatedData}
               renderCell={renderCell}
             />
           </div>
 
-          {/* Empty State */}
           {tableData.length === 0 && (
             <div className="text-center py-12 bg-gray-50 rounded-lg mt-6">
               <p className="text-gray-500">
-                {skuFilter ? "No templates found for this SKU" : "No QC templates found. Create your first template!"}
+                {skuFilter || searchTerm
+                  ? "No templates found for these filters"
+                  : "No QC templates found. Create your first template!"}
               </p>
             </div>
           )}
+
+          <div className="mt-6 flex justify-end">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
+          </div>
         </>
       )}
 
       {/* View Template Dialog */}
       {viewDialog.isOpen && viewDialog.template && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          onClick={closeViewDialog}
+        >
+          <div
+            className="bg-white rounded-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold text-gray-900">
                 Template Details
@@ -571,29 +644,41 @@ export default function QCChecklistTemplatesPage() {
                 className="p-2 hover:bg-gray-100 rounded-full"
                 aria-label="Close"
               >
-                <X className="w-6 h-6 text-gray-700" />
+                <X className="w-6 h-6 text-gray-700 cursor-pointer" />
               </button>
             </div>
 
             <div className="space-y-4">
               <div>
-                <Label className="text-sm font-semibold text-gray-600">Title</Label>
-                <p className="text-lg text-gray-900">{viewDialog.template.title}</p>
+                <Label className="text-sm font-semibold text-gray-600">
+                  Title
+                </Label>
+                <p className="text-lg text-gray-900">
+                  {viewDialog.template.title}
+                </p>
               </div>
 
               <div>
-                <Label className="text-sm font-semibold text-gray-600">SKU</Label>
-                <p className="text-lg text-gray-900">{viewDialog.template.sku}</p>
+                <Label className="text-sm font-semibold text-gray-600">
+                  SKU
+                </Label>
+                <p className="text-lg text-gray-900">
+                  {viewDialog.template.sku}
+                </p>
               </div>
 
               <div>
-                <Label className="text-sm font-semibold text-gray-600">Status</Label>
+                <Label className="text-sm font-semibold text-gray-600">
+                  Status:
+                </Label>
                 <Badge
-                  variant={viewDialog.template.isActive ? "approved" : "inactive"}
+                  variant={
+                    viewDialog.template.isActive ? "approved" : "inactive"
+                  }
                   label={viewDialog.template.isActive ? "Active" : "Inactive"}
                   size="md"
                   showDot={true}
-                  className="px-3 py-1 text-sm rounded-full"
+                  className="px-3 mx-4 py-1 text-sm rounded-full"
                 />
               </div>
 
@@ -609,11 +694,15 @@ export default function QCChecklistTemplatesPage() {
                     >
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <span className="text-xs font-semibold text-gray-600">Parameter</span>
+                          <span className="text-xs font-semibold text-gray-600">
+                            Parameter
+                          </span>
                           <p className="text-sm text-gray-900">{param.name}</p>
                         </div>
                         <div>
-                          <span className="text-xs font-semibold text-gray-600">Expected Value</span>
+                          <span className="text-xs font-semibold text-gray-600">
+                            Expected Value
+                          </span>
                           <p className="text-sm text-gray-900">{param.value}</p>
                         </div>
                       </div>
@@ -625,13 +714,21 @@ export default function QCChecklistTemplatesPage() {
               <div className="pt-4 border-t border-gray-200">
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <Label className="text-xs font-semibold text-gray-600">Created By</Label>
-                    <p className="text-gray-900">{viewDialog.template.createdBy?.name || "N/A"}</p>
+                    <Label className="text-xs font-semibold text-gray-600">
+                      Created By
+                    </Label>
+                    <p className="text-gray-900">
+                      {viewDialog.template.createdBy?.name || "N/A"}
+                    </p>
                   </div>
                   <div>
-                    <Label className="text-xs font-semibold text-gray-600">Created At</Label>
+                    <Label className="text-xs font-semibold text-gray-600">
+                      Created At
+                    </Label>
                     <p className="text-gray-900">
-                      {new Date(viewDialog.template.createdAt).toLocaleDateString()}
+                      {new Date(
+                        viewDialog.template.createdAt
+                      ).toLocaleDateString()}
                     </p>
                   </div>
                 </div>
@@ -652,8 +749,9 @@ export default function QCChecklistTemplatesPage() {
                 size="md"
                 className="rounded-lg"
                 onClick={() => {
+                  const tmpl = viewDialog.template!;
                   closeViewDialog();
-                  handleEdit(viewDialog.template!);
+                  handleEdit(tmpl);
                 }}
               >
                 Edit Template

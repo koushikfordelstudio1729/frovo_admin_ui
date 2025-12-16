@@ -27,13 +27,15 @@ export const warehouseNavigation: WarehouseMenuItem[] = [
     href: "/warehouse/grn-summary",
     icon: "clipboard",
   },
-  { label: "Inbound", href: "/warehouse/inbound", icon: "arrowUpRight" },
   {
     label: "Outbound",
     icon: "arrowDownLeft",
     children: [
       { label: "Dispatch Order", href: "/warehouse/outbound/dispatch-order" },
-      { label: "Dispatch Summary", href: "/warehouse/outbound/dispatch-summary" },
+      {
+        label: "Dispatch Summary",
+        href: "/warehouse/outbound/dispatch-summary",
+      },
       {
         label: "QC Checklist Templates",
         href: "/warehouse/outbound/qc-checklist",
