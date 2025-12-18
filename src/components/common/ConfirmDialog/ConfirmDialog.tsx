@@ -2,11 +2,12 @@
 
 import { X } from "lucide-react";
 import Button from "../Button";
+import type { ReactNode } from "react";
 
 interface ConfirmDialogProps {
   isOpen: boolean;
   title: string;
-  message: string;
+  message: ReactNode;
   confirmText?: string;
   cancelText?: string;
   confirmVariant?: "primary" | "danger";
