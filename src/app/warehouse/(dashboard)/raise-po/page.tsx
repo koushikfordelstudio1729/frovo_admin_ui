@@ -8,8 +8,8 @@ import {
   Textarea,
   SearchableSelect,
 } from "@/components";
-import { usePurchaseOrder, useVendors } from "@/hooks/warehouse";
-import { useState, useEffect, useMemo } from "react";
+import { usePurchaseOrder, useVendors, useMyWarehouse } from "@/hooks/warehouse";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Plus, Trash2 } from "lucide-react";
 import type { POLineItem } from "@/types";
@@ -45,6 +45,7 @@ const RaisePO = () => {
   } = usePurchaseOrder();
 
   const { vendors, loading: vendorsLoading } = useVendors();
+  const { warehouse } = useMyWarehouse();
 
   const [formData, setFormData] = useState({
     vendor: "",
@@ -70,13 +71,15 @@ const RaisePO = () => {
 
   const [successMessage, setSuccessMessage] = useState("");
   const [validationError, setValidationError] = useState("");
-  const [isEditMode, setIsEditMode] = useState(false);
   const [lineItemImages, setLineItemImages] = useState<{
     [key: number]: File[];
   }>({});
-  const [existingLineItemImages, setExistingLineItemImages] = useState<{
-    [key: number]: any[];
-  }>({});
+
+  // Derive isEditMode from editId instead of using state
+  const isEditMode = useMemo(() => !!editId, [editId]);
+
+  // Track if form data has been initialized to prevent cascading renders
+  const hasInitializedFormData = useRef(false);
 
   // Debug: Monitor lineItemImages state changes
   useEffect(() => {
@@ -97,14 +100,18 @@ const RaisePO = () => {
   // Fetch PO data when in edit mode
   useEffect(() => {
     if (editId) {
-      setIsEditMode(true);
+      hasInitializedFormData.current = false; // Reset when editId changes
       getPurchaseOrder(editId);
     }
-  }, [editId]);
+  }, [editId, getPurchaseOrder]);
 
   // Pre-fill form when PO data is loaded
+  // Safe: Only runs once per PO load, tracked by hasInitializedFormData ref to prevent cascading renders
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
-    if (purchaseOrder && isEditMode) {
+    if (purchaseOrder && isEditMode && !hasInitializedFormData.current) {
+      hasInitializedFormData.current = true; // Mark as initialized
+
       setFormData({
         vendor: purchaseOrder.vendor?._id || "",
         // po_status: purchaseOrder.po_status,
@@ -126,17 +133,9 @@ const RaisePO = () => {
           location: item.location,
         }))
       );
-
-      // Load existing images
-      const existingImages: { [key: number]: any[] } = {};
-      purchaseOrder.po_line_items.forEach((item, index) => {
-        if (item.images && item.images.length > 0) {
-          existingImages[index] = item.images;
-        }
-      });
-      setExistingLineItemImages(existingImages);
     }
   }, [purchaseOrder, isEditMode]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const addLineItem = () => {
     setLineItems([
@@ -180,7 +179,7 @@ const RaisePO = () => {
     }
   };
 
-  const updateLineItem = (index: number, field: string, value: any) => {
+  const updateLineItem = (index: number, field: string, value: string | number) => {
     const newItems = [...lineItems];
     newItems[index] = {
       ...newItems[index],
@@ -232,9 +231,9 @@ const RaisePO = () => {
       "application/pdf",
     ];
 
-    for (let index in lineItemImages) {
+    for (const index in lineItemImages) {
       const files = lineItemImages[index];
-      for (let file of files) {
+      for (const file of files) {
         if (!allowedTypes.includes(file.type)) {
           setValidationError(
             `File ${file.name} in line item ${
@@ -254,18 +253,6 @@ const RaisePO = () => {
       }
     }
     return true;
-  };
-
-  const updateLineItemImages = (index: number, files: File[]) => {
-    console.log(`updateLineItemImages called for index ${index}:`, files);
-    setLineItemImages((prev) => {
-      const updated = {
-        ...prev,
-        [index]: files,
-      };
-      console.log("Updated lineItemImages state:", updated);
-      return updated;
-    });
   };
 
   const handleSubmit = async (status: "draft" | "approved") => {
@@ -299,6 +286,7 @@ const RaisePO = () => {
       // Build FormData for file upload support
       const formDataPayload = new FormData();
       formDataPayload.append("vendor", formData.vendor);
+      formDataPayload.append("warehouse", warehouse?._id || "");
       formDataPayload.append(
         "po_raised_date",
         new Date(formData.po_raised_date).toISOString()
@@ -326,7 +314,7 @@ const RaisePO = () => {
 
       // Debug: Log FormData contents
       console.log("FormData entries:");
-      for (let [key, value] of formDataPayload.entries()) {
+      for (const [key, value] of formDataPayload.entries()) {
         console.log(key, value);
       }
 
@@ -335,6 +323,7 @@ const RaisePO = () => {
       // Use original JSON format when no images
       const payload = {
         vendor: formData.vendor,
+        warehouse: warehouse?._id || "",
         po_raised_date: new Date(formData.po_raised_date).toISOString(),
         po_status: status,
         remarks: formData.remarks,

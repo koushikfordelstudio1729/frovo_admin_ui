@@ -13,6 +13,7 @@ import {
   AlertCircle,
   Package,
   TrendingDown,
+  Eye,
 } from "lucide-react";
 import {
   Button,
@@ -107,6 +108,15 @@ export default function InventoryLayoutPage() {
     item: null,
   });
 
+  // View modal state
+  const [viewModal, setViewModal] = useState<{
+    isOpen: boolean;
+    item: InventoryItem | null;
+  }>({
+    isOpen: false,
+    item: null,
+  });
+
   const [editFormData, setEditFormData] = useState({
     quantity: 0,
     minStockLevel: 0,
@@ -186,6 +196,16 @@ export default function InventoryLayoutPage() {
   const isAllSelected =
     inventory.length > 0 && selectedItems.length === inventory.length;
   const isSomeSelected = selectedItems.length > 0 && !isAllSelected;
+
+  // Open view modal
+  const handleView = (item: InventoryItem) => {
+    setViewModal({ isOpen: true, item });
+  };
+
+  // Close view modal
+  const closeViewModal = () => {
+    setViewModal({ isOpen: false, item: null });
+  };
 
   // Open edit drawer
   const handleEdit = (item: InventoryItem) => {
@@ -369,6 +389,14 @@ export default function InventoryLayoutPage() {
       const item = row?._rawData as InventoryItem;
       return (
         <div className="flex items-center gap-2">
+          <Button
+            title="View Details"
+            size="sm"
+            className="bg-transparent shadow-none hover:bg-gray-100 p-2"
+            onClick={() => handleView(item)}
+          >
+            <Eye className="text-purple-500 w-5 h-5" />
+          </Button>
           <Button
             title="Edit"
             size="sm"
@@ -983,6 +1011,288 @@ export default function InventoryLayoutPage() {
                     : "Unarchive"}
                 </Button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* View Details Modal */}
+      {viewModal.isOpen && viewModal.item && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ backgroundColor: 'rgba(0, 0, 0, 0.15)', backdropFilter: 'blur(4px)' }}
+        >
+          <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col">
+            {/* Header - Fixed */}
+            <div className="flex items-center justify-between px-8 pt-8 pb-4 border-b flex-shrink-0">
+              <h3 className="text-2xl font-bold text-gray-900">
+                Inventory Item Details
+              </h3>
+              <button
+                onClick={closeViewModal}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            {/* Scrollable Content */}
+            <div className="overflow-y-auto px-8 py-6 flex-1">
+              <div className="space-y-6">
+              {/* Basic Information */}
+              <div>
+                <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  <Package className="w-5 h-5 text-blue-600" />
+                  Basic Information
+                </h4>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-6 bg-gray-50 p-6 rounded-lg">
+                  <div>
+                    <Label className="text-sm font-semibold text-gray-600">SKU</Label>
+                    <p className="text-base text-gray-900 mt-1">{viewModal.item.sku}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-semibold text-gray-600">
+                      Product Name
+                    </Label>
+                    <p className="text-base text-gray-900 mt-1">
+                      {viewModal.item.productName}
+                    </p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-semibold text-gray-600">
+                      Batch ID
+                    </Label>
+                    <p className="text-base text-gray-900 mt-1">
+                      {viewModal.item.batchId}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Warehouse & Status */}
+              <div>
+                <h4 className="text-lg font-semibold text-gray-900 mb-4">
+                  Warehouse & Status
+                </h4>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-6 bg-gray-50 p-6 rounded-lg">
+                  <div>
+                    <Label className="text-sm font-semibold text-gray-600">
+                      Warehouse Name
+                    </Label>
+                    <p className="text-base text-gray-900 mt-1">
+                      {viewModal.item.warehouse.name}
+                    </p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-semibold text-gray-600">
+                      Warehouse Code
+                    </Label>
+                    <p className="text-base text-gray-900 mt-1">
+                      {viewModal.item.warehouse.code}
+                    </p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-semibold text-gray-600">Status</Label>
+                    <div className="mt-1">
+                      <Badge
+                        variant={
+                          viewModal.item.status === "active"
+                            ? "approved"
+                            : viewModal.item.status === "low_stock"
+                            ? "warning"
+                            : "rejected"
+                        }
+                        label={viewModal.item.status.replace("_", " ").toUpperCase()}
+                        size="md"
+                        showDot={true}
+                        className="px-3 py-1 text-sm rounded-full"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-semibold text-gray-600">
+                      Archived Status
+                    </Label>
+                    <p className="text-base text-gray-900 mt-1">
+                      {viewModal.item.isArchived ? "Archived" : "Active"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Quantity Information */}
+              <div>
+                <h4 className="text-lg font-semibold text-gray-900 mb-4">
+                  Quantity Information
+                </h4>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-6 bg-gray-50 p-6 rounded-lg">
+                  <div>
+                    <Label className="text-sm font-semibold text-gray-600">
+                      Current Quantity
+                    </Label>
+                    <p className="text-2xl font-bold text-blue-600 mt-1">
+                      {viewModal.item.quantity}
+                    </p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-semibold text-gray-600">
+                      Min Stock Level
+                    </Label>
+                    <p className="text-2xl font-bold text-orange-600 mt-1">
+                      {viewModal.item.minStockLevel}
+                    </p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-semibold text-gray-600">
+                      Max Stock Level
+                    </Label>
+                    <p className="text-2xl font-bold text-green-600 mt-1">
+                      {viewModal.item.maxStockLevel}
+                    </p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-semibold text-gray-600">Age</Label>
+                    <p className="text-2xl font-bold text-gray-900 mt-1">
+                      {viewModal.item.age} days
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Location Details */}
+              <div>
+                <h4 className="text-lg font-semibold text-gray-900 mb-4">
+                  Location Details
+                </h4>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-6 bg-gray-50 p-6 rounded-lg">
+                  <div>
+                    <Label className="text-sm font-semibold text-gray-600">Zone</Label>
+                    <p className="text-base text-gray-900 mt-1">
+                      {viewModal.item.location.zone}
+                    </p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-semibold text-gray-600">Aisle</Label>
+                    <p className="text-base text-gray-900 mt-1">
+                      {viewModal.item.location.aisle}
+                    </p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-semibold text-gray-600">Rack</Label>
+                    <p className="text-base text-gray-900 mt-1">
+                      {viewModal.item.location.rack}
+                    </p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-semibold text-gray-600">Bin</Label>
+                    <p className="text-base text-gray-900 mt-1">
+                      {viewModal.item.location.bin}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Dates & Expiry */}
+              <div>
+                <h4 className="text-lg font-semibold text-gray-900 mb-4">
+                  Dates & Expiry
+                </h4>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-6 bg-gray-50 p-6 rounded-lg">
+                  <div>
+                    <Label className="text-sm font-semibold text-gray-600">
+                      Expiry Date
+                    </Label>
+                    <p className="text-base text-gray-900 mt-1">
+                      {viewModal.item.expiryDate
+                        ? new Date(viewModal.item.expiryDate).toLocaleDateString()
+                        : "N/A"}
+                    </p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-semibold text-gray-600">
+                      Created At
+                    </Label>
+                    <p className="text-base text-gray-900 mt-1">
+                      {new Date(viewModal.item.createdAt).toLocaleString()}
+                    </p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-semibold text-gray-600">
+                      Last Updated
+                    </Label>
+                    <p className="text-base text-gray-900 mt-1">
+                      {new Date(viewModal.item.updatedAt).toLocaleString()}
+                    </p>
+                  </div>
+                  {viewModal.item.archivedAt && (
+                    <div>
+                      <Label className="text-sm font-semibold text-gray-600">
+                        Archived At
+                      </Label>
+                      <p className="text-base text-gray-900 mt-1">
+                        {new Date(viewModal.item.archivedAt).toLocaleString()}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Created By Information */}
+              <div>
+                <h4 className="text-lg font-semibold text-gray-900 mb-4">
+                  Created By
+                </h4>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-6 bg-gray-50 p-6 rounded-lg">
+                  <div>
+                    <Label className="text-sm font-semibold text-gray-600">Name</Label>
+                    <p className="text-base text-gray-900 mt-1">
+                      {viewModal.item.createdBy.name}
+                    </p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-semibold text-gray-600">Email</Label>
+                    <p className="text-base text-gray-900 mt-1">
+                      {viewModal.item.createdBy.email}
+                    </p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-semibold text-gray-600">User ID</Label>
+                    <p className="text-base text-gray-900 mt-1 font-mono text-sm">
+                      {viewModal.item.createdBy.id}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* System Information */}
+              <div>
+                <h4 className="text-lg font-semibold text-gray-900 mb-4">
+                  System Information
+                </h4>
+                <div className="grid grid-cols-1 gap-6 bg-gray-50 p-6 rounded-lg">
+                  <div>
+                    <Label className="text-sm font-semibold text-gray-600">
+                      Inventory ID
+                    </Label>
+                    <p className="text-base text-gray-900 mt-1 font-mono text-sm">
+                      {viewModal.item._id}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              </div>
+            </div>
+
+            {/* Footer - Fixed */}
+            <div className="px-8 py-6 border-t flex justify-end flex-shrink-0">
+              <Button
+                variant="secondary"
+                size="lg"
+                className="rounded-lg"
+                onClick={closeViewModal}
+              >
+                Close
+              </Button>
             </div>
           </div>
         </div>

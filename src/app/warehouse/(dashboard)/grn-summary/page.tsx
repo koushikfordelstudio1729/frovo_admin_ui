@@ -10,7 +10,7 @@ import {
   Textarea,
   Pagination,
 } from "@/components";
-import { useGRNs, useGRN } from "@/hooks/warehouse";
+import { useGRNs, useGRN, useMyWarehouse } from "@/hooks/warehouse";
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
@@ -44,7 +44,12 @@ const GRNSummary = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
 
-  const { grns, loading, error, refetch } = useGRNs();
+  // Get warehouse ID
+  const { warehouse } = useMyWarehouse();
+
+  const { grns, loading, error, refetch } = useGRNs({
+    warehouse: warehouse?._id,
+  });
 
   const { updateGRNStatus, updating } = useGRN();
   const [updateDialog, setUpdateDialog] = useState<{

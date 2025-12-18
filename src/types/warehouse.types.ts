@@ -92,7 +92,7 @@ export interface WarehouseSearchParams {
   search?: string;
   isActive?: boolean;
   sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
+  sortOrder?: "asc" | "desc";
 }
 
 // Dashboard Types
@@ -110,7 +110,7 @@ export interface DashboardAlert {
 }
 
 export interface RecentActivity {
-  type: 'inbound' | 'outbound';
+  type: "inbound" | "outbound";
   message: string;
   timestamp: string;
   user: string;
@@ -245,7 +245,12 @@ export interface CreatedByInfo {
   id: string;
 }
 
-export type POStatus = 'draft' | 'approved' | 'received' | 'delivered' | 'cancelled';
+export type POStatus =
+  | "draft"
+  | "approved"
+  | "received"
+  | "delivered"
+  | "cancelled";
 
 export interface AttachmentFile {
   _id: string;
@@ -277,10 +282,11 @@ export interface PurchaseOrder {
 
 export interface CreatePurchaseOrderPayload {
   vendor: string;
+  warehouse: string;
   po_raised_date: string;
   po_status: POStatus;
   remarks: string;
-  po_line_items: Omit<POLineItem, '_id'>[];
+  po_line_items: Omit<POLineItem, "_id">[];
   attachments?: File[];
 }
 
@@ -308,10 +314,11 @@ export interface PurchaseOrderParams {
   startDate?: string;
   endDate?: string;
   vendor?: string;
+  warehouseId?: string;
 }
 
 // GRN (Goods Receipt Note) Types
-export type QCStatus = 'excellent' | 'moderate' | 'bad';
+export type QCStatus = "excellent" | "moderate" | "bad";
 
 export interface GRNLineItem {
   _id?: string;
@@ -359,14 +366,14 @@ export interface GRN {
 }
 
 export interface CreateGRNPayload {
-  document: File;                    // File upload for scanned challan
+  document: File; // File upload for scanned challan
   delivery_challan: string;
   transporter_name: string;
   vehicle_number: string;
   qc_status: QCStatus;
-  received_date?: string;            // Optional
-  remarks?: string;                  // Optional
-  quantities?: GRNQuantityItem[];    // Optional - for future enhancement
+  received_date?: string; // Optional
+  remarks?: string; // Optional
+  quantities?: GRNQuantityItem[]; // Optional - for future enhancement
 }
 
 export interface UpdateGRNStatusPayload {
@@ -392,10 +399,15 @@ export interface GRNParams {
   qc_status?: QCStatus;
   startDate?: string;
   endDate?: string;
+  warehouse?: string;
 }
 
 // Dispatch Order Types
-export type DispatchStatus = 'pending' | 'in_transit' | 'delivered' | 'cancelled';
+export type DispatchStatus =
+  | "pending"
+  | "in_transit"
+  | "delivered"
+  | "cancelled";
 
 export interface DispatchProduct {
   _id?: string;
@@ -513,13 +525,13 @@ export interface QCTemplate {
 export interface CreateQCTemplatePayload {
   title: string;
   sku: string;
-  parameters: Omit<QCParameter, '_id'>[];
+  parameters: Omit<QCParameter, "_id">[];
 }
 
 export interface UpdateQCTemplatePayload {
   title?: string;
   sku?: string;
-  parameters?: Omit<QCParameter, '_id'>[];
+  parameters?: Omit<QCParameter, "_id">[];
 }
 
 export interface QCTemplateResponse {
@@ -541,8 +553,8 @@ export interface QCTemplateParams {
 }
 
 // Return Order Types
-export type ReturnStatus = 'pending' | 'approved' | 'rejected';
-export type ReturnType = 'damaged' | 'expired' | 'quality_issue' | 'other';
+export type ReturnStatus = "pending" | "approved" | "rejected";
+export type ReturnType = "damaged" | "expired" | "quality_issue" | "other";
 
 export interface ReturnOrderVendor {
   _id: string;
@@ -596,8 +608,12 @@ export interface ReturnQueueParams {
 }
 
 // Inventory Types
-export type InventoryStatus = 'active' | 'low_stock' | 'out_of_stock' | 'archived';
-export type ExpiryStatus = 'expiring_soon' | 'expired' | 'normal';
+export type InventoryStatus =
+  | "active"
+  | "low_stock"
+  | "out_of_stock"
+  | "archived";
+export type ExpiryStatus = "expiring_soon" | "expired" | "normal";
 
 export interface InventoryLocation {
   zone: string;
@@ -877,10 +893,10 @@ export interface EfficiencyResponse {
 
 // Stock Ageing Report
 export interface StockAgeingBuckets {
-  '0-30 days': number;
-  '31-60 days': number;
-  '61-90 days': number;
-  '90+ days': number;
+  "0-30 days": number;
+  "31-60 days": number;
+  "61-90 days": number;
+  "90+ days": number;
 }
 
 export interface StockAgeingReport {
@@ -908,14 +924,21 @@ export interface GenericReportResponse {
 // Export Report Params
 export interface ExportReportParams {
   type: string;
-  format: 'csv' | 'json';
+  format: "csv" | "json";
   warehouseId: string;
 }
 
 // Expense Types
-export type ExpenseCategory = 'transport' | 'supplies' | 'equipment' | 'staffing' | 'maintenance' | 'utilities' | 'other';
-export type ExpenseStatus = 'pending' | 'approved' | 'rejected';
-export type PaymentStatus = 'paid' | 'unpaid' | 'partially_paid';
+export type ExpenseCategory =
+  | "transport"
+  | "supplies"
+  | "equipment"
+  | "staffing"
+  | "maintenance"
+  | "utilities"
+  | "other";
+export type ExpenseStatus = "pending" | "approved" | "rejected";
+export type PaymentStatus = "paid" | "unpaid" | "partially_paid";
 
 export interface CreateExpensePayload {
   category: ExpenseCategory;

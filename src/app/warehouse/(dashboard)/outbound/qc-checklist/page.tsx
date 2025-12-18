@@ -15,7 +15,7 @@ import {
   Pagination,
   SearchableSelect,
 } from "@/components";
-import { useQCTemplates, usePurchaseOrders } from "@/hooks/warehouse";
+import { useQCTemplates, usePurchaseOrders, useMyWarehouse } from "@/hooks/warehouse";
 import type { QCTemplate, CreateQCTemplatePayload } from "@/types";
 
 interface Parameter {
@@ -42,6 +42,9 @@ const qcTemplateColumns = [
 export default function QCChecklistTemplatesPage() {
   const router = useRouter();
 
+  // Get warehouse ID
+  const { warehouse } = useMyWarehouse();
+
   const {
     qcTemplates,
     loading,
@@ -55,7 +58,9 @@ export default function QCChecklistTemplatesPage() {
     deleting,
   } = useQCTemplates();
 
-  const { purchaseOrders } = usePurchaseOrders();
+  const { purchaseOrders } = usePurchaseOrders({
+    warehouseId: warehouse?._id,
+  });
 
   // Form state
   const [isFormVisible, setIsFormVisible] = useState(false);

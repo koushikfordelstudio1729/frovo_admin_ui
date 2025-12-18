@@ -128,6 +128,7 @@ export const warehouseAPI = {
     if (params?.startDate) queryParams.append('startDate', params.startDate);
     if (params?.endDate) queryParams.append('endDate', params.endDate);
     if (params?.vendor) queryParams.append('vendor', params.vendor);
+    if (params?.warehouseId) queryParams.append('warehouseId', params.warehouseId);
 
     const url = `${apiConfig.endpoints.warehouse.purchaseOrders.list}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
     return api.get<PurchaseOrdersResponse>(url);
@@ -174,6 +175,7 @@ export const warehouseAPI = {
     if (params?.qc_status) queryParams.append('qc_status', params.qc_status);
     if (params?.startDate) queryParams.append('startDate', params.startDate);
     if (params?.endDate) queryParams.append('endDate', params.endDate);
+    if (params?.warehouse) queryParams.append('warehouse', params.warehouse);
 
     const url = `${apiConfig.endpoints.warehouse.grn.list}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
     return api.get<GRNsResponse>(url);

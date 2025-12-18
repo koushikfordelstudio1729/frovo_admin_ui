@@ -12,7 +12,7 @@ import {
   Label,
 } from "@/components";
 import { ViewPODialog } from "@/components/warehouse";
-import { usePurchaseOrders, usePurchaseOrder } from "@/hooks/warehouse";
+import { usePurchaseOrders, usePurchaseOrder, useMyWarehouse } from "@/hooks/warehouse";
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
@@ -47,8 +47,13 @@ const PoSummery = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
 
-  // Fetch purchase orders
-  const { purchaseOrders, loading, error, refetch } = usePurchaseOrders();
+  // Get warehouse ID
+  const { warehouse } = useMyWarehouse();
+
+  // Fetch purchase orders for this warehouse
+  const { purchaseOrders, loading, error, refetch } = usePurchaseOrders({
+    warehouseId: warehouse?._id,
+  });
   const { deletePurchaseOrder, deleting } = usePurchaseOrder();
 
   // View dialog state

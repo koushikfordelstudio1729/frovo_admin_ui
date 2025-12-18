@@ -9,7 +9,7 @@ import {
   Select,
   Textarea,
 } from "@/components";
-import { useGRN, usePurchaseOrders } from "@/hooks/warehouse";
+import { useGRN, usePurchaseOrders, useMyWarehouse } from "@/hooks/warehouse";
 import { useState, useEffect, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { format } from "date-fns";
@@ -26,8 +26,12 @@ const CreateGRN = () => {
   const searchParams = useSearchParams();
   const poIdFromUrl = searchParams.get("poId");
 
+  // Get warehouse ID
+  const { warehouse } = useMyWarehouse();
+
   const { purchaseOrders, loading: loadingPOs } = usePurchaseOrders({
     po_status: "approved",
+    warehouseId: warehouse?._id,
   });
   const { createGRN, creating, error, clearError } = useGRN();
 
@@ -240,6 +244,8 @@ const CreateGRN = () => {
         received_quantity: Number(qty.received_quantity),
         accepted_quantity: Number(qty.accepted_quantity),
         rejected_quantity: Number(qty.rejected_quantity),
+        expiry_date: qty.expiry_date,
+        item_remarks: qty.item_remarks || "",
       }));
       formDataPayload.append("quantities", JSON.stringify(quantitiesArray));
     }
