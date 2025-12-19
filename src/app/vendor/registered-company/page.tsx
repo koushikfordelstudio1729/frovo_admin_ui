@@ -12,7 +12,7 @@ import {
   Select,
   ConfirmDialog,
 } from "@/components";
-import { Eye, Edit2, Trash2 } from "lucide-react";
+import { Eye, Edit2, Trash2, UserPlus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { getCompanies, deleteCompany, updateCompany } from "@/services/vendor";
 import { toast } from "react-hot-toast";
@@ -158,6 +158,15 @@ export default function CompanyList() {
     }
   };
 
+  const handleAddVendor = (company: CompanyRow) => {
+    const params = new URLSearchParams({
+      cin: company.cin,
+      companyName: company.company,
+      gst: company.gstin !== "--" ? company.gstin : "",
+    });
+    router.push(`/vendor/vendor-onboard?tab=add&${params.toString()}`);
+  };
+
   const renderCell = (key: string, value: any, row?: Record<string, any>) => {
     const company = row as CompanyRow;
 
@@ -195,6 +204,12 @@ export default function CompanyList() {
       case "action":
         return (
           <div className="flex items-center gap-3">
+            <UserPlus
+              size={18}
+              className="text-blue-600 cursor-pointer hover:text-blue-700"
+              onClick={() => handleAddVendor(company)}
+              title="Add Vendor"
+            />
             <Eye
               size={18}
               className="text-green-600 cursor-pointer hover:text-green-700"
@@ -335,14 +350,16 @@ export default function CompanyList() {
       )}
 
       {/* Delete Confirmation Dialog */}
-      {deleteDialog.open && (
-        <ConfirmDialog
-          title="Delete Company"
-          message={`Are you sure you want to delete "${deleteDialog.name}"? This action cannot be undone.`}
-          onConfirm={handleDelete}
-          onCancel={() => setDeleteDialog({ open: false, cin: "", name: "" })}
-        />
-      )}
+      <ConfirmDialog
+        isOpen={deleteDialog.open}
+        title="Delete Company"
+        message={`Are you sure you want to delete "${deleteDialog.name}"? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        confirmVariant="danger"
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteDialog({ open: false, cin: "", name: "" })}
+      />
     </div>
   );
 }

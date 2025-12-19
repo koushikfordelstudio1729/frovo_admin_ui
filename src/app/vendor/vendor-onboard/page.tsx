@@ -1,56 +1,68 @@
 "use client";
 
-import { Button, Input, Label, Select, Textarea } from "@/components";
+import { useState, useEffect } from "react";
+import {
+  Button,
+  Input,
+  Label,
+  Select,
+  Textarea,
+  Table,
+  Badge,
+  Pagination,
+  Toggle,
+  ConfirmDialog,
+} from "@/components";
 import FileUpload from "@/components/common/FileUpload";
-import { createVendor } from "@/services/vendor";
-import { ArrowLeft } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import {
+  createVendor,
+  getVendors,
+  deleteVendor,
+  updateVendor,
+  getCompanies,
+} from "@/services/vendor";
+import { Eye, Edit2, Trash2, Upload, CheckCircle } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
+import { Vendor, VendorStatus } from "@/types/vendor-data.types";
 
 const vendorTypeOptions = [
   { label: "Snacks", value: "snacks" },
   { label: "Beverages", value: "beverages" },
-  { label: "Packaging", value: "packaging" },
-  { label: "Services", value: "services" },
-  { label: "Raw Materials", value: "raw_materials" },
-  { label: "Equipment", value: "equipment" },
-  { label: "Maintenance", value: "maintenance" },
+  { label: "Dairy", value: "dairy" },
+  { label: "Bakery", value: "bakery" },
+  { label: "Frozen", value: "frozen" },
+  { label: "Fresh", value: "fresh" },
 ];
 
 const vendorCategoryOptions = [
   { label: "Consumables", value: "consumables" },
+  { label: "Raw Materials", value: "raw_materials" },
   { label: "Packaging", value: "packaging" },
-  { label: "Logistics", value: "logistics" },
-  { label: "Maintenance", value: "maintenance" },
   { label: "Services", value: "services" },
-  { label: "Equipment", value: "equipment" },
 ];
 
 const paymentTermsOptions = [
-  { label: "Net 7", value: "net_7" },
-  { label: "Net 15", value: "net_15" },
   { label: "Net 30", value: "net_30" },
+  { label: "Net 60", value: "net_60" },
+  { label: "Net 90", value: "net_90" },
+  { label: "Advance", value: "advance" },
+  { label: "Cash on Delivery", value: "cod" },
+];
+
+const paymentMethodOptions = [
+  { label: "NEFT", value: "neft" },
+  { label: "RTGS", value: "rtgs" },
+  { label: "UPI", value: "upi" },
+  { label: "Cheque", value: "cheque" },
+  { label: "Cash", value: "cash" },
 ];
 
 const billingCycleOptions = [
   { label: "Weekly", value: "weekly" },
   { label: "Monthly", value: "monthly" },
-  { label: "Per PO", value: "per_po" },
-];
-
-const statusCycleOptions = [
-  { label: "Procurement", value: "procurement" },
-  { label: "Restocking", value: "restocking" },
-  { label: "Finance Reconciliation", value: "finance_reconciliation" },
-  { label: "Audit", value: "audit" },
-];
-
-const verificationStatusOptions = [
-  { label: "Pending Verification", value: "pending" },
-  { label: "Verified", value: "verified" },
-  { label: "Failed", value: "failed" },
-  { label: "Rejected", value: "rejected" },
+  { label: "Quarterly", value: "quarterly" },
+  { label: "Bi-weekly", value: "biweekly" },
 ];
 
 const riskRatingOptions = [
@@ -59,154 +71,232 @@ const riskRatingOptions = [
   { label: "High", value: "high" },
 ];
 
-const documentTypeOptions = [
-  { label: "Signed Contract", value: "signed_contract" },
-  { label: "GST", value: "gst" },
-  { label: "MSME", value: "msme" },
-  { label: "TDS Exemption", value: "tds_exemption" },
-];
-
-const paymentMethodOptions = [
-  { label: "NEFT", value: "neft" },
-  { label: "IMPS", value: "imps" },
-  { label: "UPI", value: "upi" },
-  { label: "Corp Wallet", value: "corp_wallet" },
-];
-
-type DocumentItem = {
-  documentType: string;
-  expiryDate: string;
-  file: File | null;
-};
-
-const blankDocument: DocumentItem = {
-  documentType: "",
-  expiryDate: "",
-  file: null,
-};
-
-const VendorRegistrationFull = () => {
+const VendorOnboardPage = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
-  // Vendor Details
+  // Check URL params for tab and prefill data
+  const urlTab = searchParams.get("tab");
+  const urlCin = searchParams.get("cin");
+  const urlCompanyName = searchParams.get("companyName");
+  const urlAddress = searchParams.get("address");
+  const urlEmail = searchParams.get("email");
+  const urlGst = searchParams.get("gst");
+
+  const [activeTab, setActiveTab] = useState<"list" | "add">(
+    urlTab === "add" ? "add" : "list"
+  );
+
+  // Form States
   const [cinNumber, setCinNumber] = useState("");
   const [vendorName, setVendorName] = useState("");
   const [vendorBillingName, setVendorBillingName] = useState("");
-  const [vendorId, setVendorId] = useState("");
   const [vendorType, setVendorType] = useState("");
   const [vendorCategory, setVendorCategory] = useState("");
   const [primaryContact, setPrimaryContact] = useState("");
   const [contactPhone, setContactPhone] = useState("");
   const [vendorEmail, setVendorEmail] = useState("");
   const [billingAddress, setBillingAddress] = useState("");
-
-  // Finance & Compliance
   const [baVendor, setBaVendor] = useState("");
   const [ifscCode, setIfscCode] = useState("");
   const [paymentTerms, setPaymentTerms] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("");
   const [gstDetails, setGstDetails] = useState("");
   const [panNumber, setPanNumber] = useState("");
   const [tdsRate, setTdsRate] = useState("");
   const [billingCycle, setBillingCycle] = useState("");
-
-  // Status
-  const [statusCycle, setStatusCycle] = useState("");
-  const [verificationStatus, setVerificationStatus] = useState("");
-  const [riskRating, setRiskRating] = useState("");
+  const [riskRating, setRiskRating] = useState("medium");
   const [riskNotes, setRiskNotes] = useState("");
-  const [verifiedBy, setVerifiedBy] = useState("");
-
-  // Documents & Contract
-  const [documents, setDocuments] = useState<DocumentItem[]>([
-    { ...blankDocument },
-  ]);
   const [contractTerms, setContractTerms] = useState("");
   const [contractExpiryDate, setContractExpiryDate] = useState("");
   const [contractRenewalDate, setContractRenewalDate] = useState("");
-
-  // System Access
-  const [paymentMethod, setPaymentMethod] = useState("");
-  const [operationsManager, setOperationsManager] = useState("");
   const [internalNotes, setInternalNotes] = useState("");
 
+  // List States
+  const [vendors, setVendors] = useState<Vendor[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pagination, setPagination] = useState({
+    totalPages: 1,
+    totalCount: 0,
+    page: 1,
+  });
+  const [search, setSearch] = useState("");
+  const [deleteDialog, setDeleteDialog] = useState<{
+    open: boolean;
+    id: string;
+    name: string;
+  }>({ open: false, id: "", name: "" });
+
+  // Company dropdown states
+  const [companies, setCompanies] = useState<any[]>([]);
+  const [companyOptions, setCompanyOptions] = useState<{ label: string; value: string }[]>([]);
+
+  const ITEMS_PER_PAGE = 10;
   const today = new Date().toISOString().split("T")[0];
 
-  // Document handlers
-  const handleDocumentChange = (
-    idx: number,
-    field: keyof DocumentItem,
-    value: string | File | null
-  ) => {
-    setDocuments((docs) => {
-      const updated = [...docs];
-      updated[idx] = { ...updated[idx], [field]: value } as DocumentItem;
-      return updated;
-    });
+  useEffect(() => {
+    if (activeTab === "list") {
+      fetchVendors();
+    }
+  }, [activeTab, currentPage]);
+
+  // Fetch companies for dropdown
+  useEffect(() => {
+    const fetchCompaniesForDropdown = async () => {
+      try {
+        const res = await getCompanies({ page: 1, limit: 1000 });
+        const companiesData = res.data.data;
+
+        // Filter out companies with empty/null CIN
+        const validCompanies = companiesData.filter(
+          (company: any) => company.cin && company.cin.trim() !== ""
+        );
+
+        setCompanies(validCompanies);
+
+        // Create options for dropdown: "CIN - Company Name"
+        // Use a Set to ensure unique CINs
+        const uniqueCompanies = validCompanies.reduce((acc: any[], company: any) => {
+          if (!acc.find((c) => c.cin === company.cin)) {
+            acc.push(company);
+          }
+          return acc;
+        }, []);
+
+        const options = uniqueCompanies.map((company: any) => ({
+          label: `${company.cin} - ${company.registered_company_name}`,
+          value: company.cin,
+        }));
+        setCompanyOptions(options);
+      } catch (error) {
+        console.error("Failed to fetch companies", error);
+      }
+    };
+
+    if (activeTab === "add") {
+      fetchCompaniesForDropdown();
+    }
+  }, [activeTab]);
+
+  // Prefill form from URL parameters
+  useEffect(() => {
+    if (urlCin) {
+      setCinNumber(urlCin);
+    }
+    if (urlCompanyName) {
+      setVendorBillingName(urlCompanyName);
+    }
+    if (urlAddress) {
+      setBillingAddress(urlAddress);
+    }
+    if (urlEmail) {
+      setVendorEmail(urlEmail);
+    }
+    if (urlGst) {
+      setGstDetails(urlGst);
+    }
+  }, [urlCin, urlCompanyName, urlAddress, urlEmail, urlGst]);
+
+  const fetchVendors = async () => {
+    try {
+      setLoading(true);
+      const res = await getVendors({
+        page: currentPage,
+        limit: ITEMS_PER_PAGE,
+        search,
+      });
+
+      setVendors(res.data.data.vendors);
+      setPagination({
+        totalPages: res.data.data.pages,
+        totalCount: res.data.data.total,
+        page: res.data.data.page,
+      });
+    } catch (error) {
+      toast.error("Failed to load vendors");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleAddMoreDocument = () => {
-    setDocuments((docs) => [...docs, { ...blankDocument }]);
+  const handleSearch = () => {
+    setCurrentPage(1);
+    fetchVendors();
   };
 
-  const handleDeleteDocument = (idx: number) => {
-    setDocuments((docs) => docs.filter((_, i) => i !== idx));
+  const handleCompanySelect = (selectedCin: string) => {
+    setCinNumber(selectedCin);
+
+    // Find the selected company and prefill related fields
+    const selectedCompany = companies.find((c: any) => c.cin === selectedCin);
+    if (selectedCompany) {
+      setVendorBillingName(selectedCompany.registered_company_name || "");
+      setBillingAddress(selectedCompany.company_address || "");
+      setVendorEmail(selectedCompany.office_email || "");
+      setGstDetails(selectedCompany.gst_number || "");
+    }
   };
 
-  const handleSave = () => {
-    console.log("Save draft payload", {
-      vendorName,
-      vendorBillingName,
-      vendorId,
-      vendorType,
-      vendorCategory,
-      primaryContact,
-      contactPhone,
-      vendorEmail,
-      billingAddress,
-      baVendor,
-      ifscCode,
-      paymentTerms,
-      gstDetails,
-      panNumber,
-      tdsRate,
-      billingCycle,
-      statusCycle,
-      verificationStatus,
-      riskRating,
-      riskNotes,
-      verifiedBy,
-      documents,
-      contractTerms,
-      contractExpiryDate,
-      contractRenewalDate,
-      paymentMethod,
-      operationsManager,
-      internalNotes,
-    });
+  const handleToggleStatus = async (id: string, currentEnabled: boolean) => {
+    try {
+      const newStatus: VendorStatus = currentEnabled ? "inactive" : "active";
+      await updateVendor(id, { vendor_status: newStatus });
+
+      setVendors((prev) =>
+        prev.map((v) =>
+          v._id === id ? { ...v, vendor_status: newStatus } : v
+        )
+      );
+
+      toast.success(
+        `Vendor ${currentEnabled ? "deactivated" : "activated"} successfully`
+      );
+    } catch (error: any) {
+      toast.error(
+        error?.response?.data?.message || "Failed to update vendor status"
+      );
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      await deleteVendor(deleteDialog.id);
+      toast.success("Vendor deleted successfully");
+      setDeleteDialog({ open: false, id: "", name: "" });
+      fetchVendors();
+    } catch (error: any) {
+      toast.error(
+        error?.response?.data?.message || "Failed to delete vendor"
+      );
+    }
   };
 
   const handleSubmit = async () => {
-    const payload = {
+    if (!vendorName || !vendorBillingName || !cinNumber) {
+      return toast.error("Please fill in all required fields");
+    }
+
+    const payload: any = {
       vendor_name: vendorName,
       vendor_billing_name: vendorBillingName,
       vendor_type: vendorType ? [vendorType] : [],
       vendor_category: vendorCategory,
+      material_categories_supplied: [],
       primary_contact_name: primaryContact,
       contact_phone: contactPhone,
       vendor_email: vendorEmail,
       vendor_address: billingAddress,
-      vendor_id: vendorId,
-      company_registration_number: cinNumber,
+      cin: cinNumber,
       bank_account_number: baVendor,
       ifsc_code: ifscCode,
       payment_terms: paymentTerms,
       payment_methods: paymentMethod,
       gst_number: gstDetails,
       pan_number: panNumber,
-      tds_rate: Number(tdsRate),
+      tds_rate: Number(tdsRate) || 1,
       billing_cycle: billingCycle,
-      vendor_status_cycle: statusCycle,
-      verification_status: verificationStatus,
       risk_rating: riskRating,
       risk_notes: riskNotes,
       contract_terms: contractTerms,
@@ -218,413 +308,535 @@ const VendorRegistrationFull = () => {
     try {
       await createVendor(payload);
       toast.success("Vendor Created Successfully!");
-      router.push("/vendor/dashboard");
+
+      // Reset form
+      setCinNumber("");
+      setVendorName("");
+      setVendorBillingName("");
+      setVendorType("");
+      setVendorCategory("");
+      setPrimaryContact("");
+      setContactPhone("");
+      setVendorEmail("");
+      setBillingAddress("");
+      setBaVendor("");
+      setIfscCode("");
+      setPaymentTerms("");
+      setPaymentMethod("");
+      setGstDetails("");
+      setPanNumber("");
+      setTdsRate("");
+      setBillingCycle("");
+      setRiskRating("medium");
+      setRiskNotes("");
+      setContractTerms("");
+      setContractExpiryDate("");
+      setContractRenewalDate("");
+      setInternalNotes("");
+
+      // Switch to list tab
+      setActiveTab("list");
+      fetchVendors();
     } catch (err: any) {
       toast.error(err?.response?.data?.message || "Failed to create vendor");
     }
   };
 
+  const vendorColumns = [
+    { key: "vendor_id", label: "Vendor ID" },
+    { key: "vendor_name", label: "Vendor Name" },
+    { key: "vendor_category", label: "Category" },
+    { key: "contact_phone", label: "Contact" },
+    { key: "vendor_email", label: "Email" },
+    { key: "verification_status", label: "Verification" },
+    { key: "action", label: "Action" },
+  ];
+
+  const renderCell = (key: string, value: any, row?: Record<string, any>) => {
+    const vendor = row as Vendor;
+
+    switch (key) {
+      case "vendor_name":
+        return (
+          <span
+            className="text-orange-500 font-medium cursor-pointer hover:underline"
+            onClick={() =>
+              router.push(`/vendor/vendor-management/view/${vendor._id}`)
+            }
+          >
+            {value}
+          </span>
+        );
+
+      case "vendor_category":
+        if (!value) return <span className="text-sm text-gray-400">-</span>;
+        const categoryLabel =
+          value === "raw_materials"
+            ? "Raw Materials"
+            : value.charAt(0).toUpperCase() + value.slice(1);
+        return <span className="text-sm">{categoryLabel}</span>;
+
+      case "verification_status":
+        if (!value) return <Badge label="PENDING" variant="warning" />;
+        const verifyVariant =
+          value === "verified" || value === "approved"
+            ? "active"
+            : value === "pending" || value === "in-review"
+            ? "warning"
+            : "rejected";
+        return <Badge label={value.toUpperCase()} variant={verifyVariant} />;
+
+      case "action":
+        return (
+          <div className="flex items-center gap-3">
+            <Eye
+              size={18}
+              className="text-green-600 cursor-pointer hover:text-green-700"
+              onClick={() =>
+                router.push(`/vendor/vendor-management/view/${vendor._id}`)
+              }
+              title="View Details"
+            />
+            <Edit2
+              size={18}
+              className="text-purple-600 cursor-pointer hover:text-purple-700"
+              onClick={() =>
+                router.push(`/vendor/vendor-management/edit/${vendor._id}`)
+              }
+              title="Edit Vendor"
+            />
+            <Trash2
+              size={18}
+              className="text-red-600 cursor-pointer hover:text-red-700"
+              onClick={() =>
+                setDeleteDialog({
+                  open: true,
+                  id: vendor._id,
+                  name: vendor.vendor_name,
+                })
+              }
+              title="Delete Vendor"
+            />
+            <Toggle
+              enabled={vendor.vendor_status === "active"}
+              onChange={() =>
+                handleToggleStatus(
+                  vendor._id,
+                  vendor.vendor_status === "active"
+                )
+              }
+            />
+          </div>
+        );
+
+      default:
+        return value || "-";
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen pt-10 px-4">
       {/* Header */}
-      <div className="flex items-center gap-3 mt-2">
-        <button
-          onClick={() => router.back()}
-          type="button"
-          className="cursor-pointer"
-        >
-          <ArrowLeft className="w-5 h-5 text-gray-800" />
-        </button>
-        <Label className="text-2xl font-semibold">Vendor Details</Label>
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <Label className="text-2xl font-semibold">Vendor Onboard</Label>
+          <p className="text-gray-500 text-sm mt-1">
+            {activeTab === "list"
+              ? `Total ${pagination.totalCount} vendors registered`
+              : "Add new vendor to the system"}
+          </p>
+        </div>
       </div>
 
-      <div className="mt-6 p-6 bg-white rounded-lg">
-        {/* Vendor Details */}
-        <Label className="text-orange-500 text-2xl font-semibold">
-          Vendor Details
-        </Label>
-
-        <div className="mt-6 grid grid-cols-2 gap-12">
-          <Input
-            label="CIN Number"
-            variant="orange"
-            placeholder="Enter CIN number"
-            value={cinNumber}
-            onChange={(e) => setCinNumber(e.target.value)}
-          />
-          <Input
-            label="Brand Name"
-            variant="orange"
-            placeholder="Enter brand name"
-            value={vendorName}
-            onChange={(e) => setVendorName(e.target.value)}
-          />
+      {/* Tabs */}
+      <div className="border-b border-gray-200 mb-6">
+        <div className="flex gap-8">
+          <button
+            onClick={() => setActiveTab("list")}
+            className={`pb-4 px-2 font-medium transition-colors relative ${
+              activeTab === "list"
+                ? "text-orange-600"
+                : "text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            Vendor List
+            {activeTab === "list" && (
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-600" />
+            )}
+          </button>
+          <button
+            onClick={() => setActiveTab("add")}
+            className={`pb-4 px-2 font-medium transition-colors relative ${
+              activeTab === "add"
+                ? "text-orange-600"
+                : "text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            Add Vendor
+            {activeTab === "add" && (
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-600" />
+            )}
+          </button>
         </div>
+      </div>
 
-        <div className="mt-6 grid grid-cols-2 gap-12">
-          <Input
-            label="Brand Billing Name"
-            variant="orange"
-            placeholder="Enter Billing Name"
-            value={vendorBillingName}
-            onChange={(e) => setVendorBillingName(e.target.value)}
-          />
-          <Input
-            label="Email ID of Brand"
-            variant="orange"
-            placeholder="Enter brand email ID"
-            value={vendorEmail}
-            onChange={(e) => setVendorEmail(e.target.value)}
-          />
-        </div>
-
-        <div className="mt-6 grid grid-cols-2 gap-12">
-          <Input
-            label="Brand ID"
-            variant="orange"
-            placeholder="Enter brand ID"
-            value={vendorId}
-            onChange={(e) => setVendorId(e.target.value)}
-          />
-          <Select
-            label="Brand Type"
-            variant="orange"
-            options={vendorTypeOptions}
-            value={vendorType}
-            onChange={setVendorType}
-            placeholder="Select brand type"
-            selectClassName="py-4 px-4"
-          />
-        </div>
-
-        <div className="mt-6 grid grid-cols-2 gap-12">
-          <Select
-            label="Brand Category"
-            variant="orange"
-            options={vendorCategoryOptions}
-            value={vendorCategory}
-            onChange={setVendorCategory}
-            placeholder="Select brand category"
-            selectClassName="py-4 px-4"
-          />
-          <Input
-            label="Primary Contact Name"
-            variant="orange"
-            placeholder="Enter primary contact name"
-            value={primaryContact}
-            onChange={(e) => setPrimaryContact(e.target.value)}
-          />
-        </div>
-
-        <div className="mt-6 grid grid-cols-2 gap-12">
-          <Input
-            label="Contact Phone"
-            variant="orange"
-            placeholder="Enter contact phone"
-            value={contactPhone}
-            onChange={(e) => setContactPhone(e.target.value)}
-          />
-          <Textarea
-            label="Address (Billing)"
-            variant="orange"
-            placeholder="Enter billing address"
-            value={billingAddress}
-            onChange={(e) => setBillingAddress(e.target.value)}
-          />
-        </div>
-
-        {/* Finance & Compliance */}
-        <div className="w-full border-2 my-12" />
-        <Label className="text-orange-500 text-2xl font-semibold">
-          Finance
-        </Label>
-
-        <div className="mt-6 grid grid-cols-2 gap-12">
-          <Input
-            label="Bank Account of Vendor"
-            variant="orange"
-            placeholder="Enter Bank Account of Vendor"
-            value={baVendor}
-            onChange={(e) => setBaVendor(e.target.value)}
-          />
-          <Input
-            label="IFSC Code"
-            variant="orange"
-            placeholder="Enter IFSC code"
-            value={ifscCode}
-            onChange={(e) => setIfscCode(e.target.value)}
-          />
-        </div>
-
-        <div className="mt-6 w-lg">
-          <Select
-            label="Payment Terms"
-            variant="orange"
-            options={paymentTermsOptions}
-            value={paymentTerms}
-            onChange={setPaymentTerms}
-            selectClassName="py-4 px-4"
-          />
-        </div>
-
-        <div className="w-full my-12" />
-        <Label className="text-orange-500 text-2xl font-semibold">
-          Compliance
-        </Label>
-
-        <div className="mt-6 grid grid-cols-2 gap-12">
-          <Input
-            label="GST Details"
-            variant="orange"
-            placeholder="Enter GST details"
-            value={gstDetails}
-            onChange={(e) => setGstDetails(e.target.value)}
-          />
-          <Input
-            label="PAN Number"
-            variant="orange"
-            placeholder="Enter PAN number"
-            value={panNumber}
-            onChange={(e) => setPanNumber(e.target.value)}
-          />
-        </div>
-
-        <div className="mt-6 grid grid-cols-2 gap-12">
-          <Input
-            label="TDS Rate (%)"
-            variant="orange"
-            placeholder="Enter TDS Rate"
-            value={tdsRate}
-            onChange={(e) => setTdsRate(e.target.value)}
-          />
-          <Select
-            label="Billing Cycle"
-            variant="orange"
-            options={billingCycleOptions}
-            value={billingCycle}
-            onChange={setBillingCycle}
-            placeholder="Select Billing Cycle"
-            selectClassName="py-4 px-4"
-          />
-        </div>
-
-        {/* Status */}
-        <div className="w-full border-2 my-12" />
-        <Label className="text-orange-500 text-2xl font-semibold">Status</Label>
-
-        <div className="mt-6 grid grid-cols-2 gap-12">
-          <Select
-            label="Brand Status Cycle"
-            variant="orange"
-            options={statusCycleOptions}
-            value={statusCycle}
-            onChange={setStatusCycle}
-            placeholder="Select brand status cycle"
-            selectClassName="py-4 px-4"
-          />
-          <Select
-            label="Verification Status"
-            variant="orange"
-            options={verificationStatusOptions}
-            value={verificationStatus}
-            onChange={setVerificationStatus}
-            placeholder="Select verification status"
-            selectClassName="py-4 px-4"
-          />
-        </div>
-
-        <div className="mt-6 grid grid-cols-2 gap-12">
-          <Select
-            label="Risk Rating"
-            variant="orange"
-            options={riskRatingOptions}
-            value={riskRating}
-            onChange={setRiskRating}
-            placeholder="Select risk rating"
-            selectClassName="py-4 px-4"
-          />
-          <Textarea
-            label="Risk Notes"
-            variant="orange"
-            placeholder="Enter risk notes"
-            value={riskNotes}
-            onChange={(e) => setRiskNotes(e.target.value)}
-            className="h-[120px]"
-            textareaClassName="h-44"
-          />
-        </div>
-
-        <div className="grid grid-cols-2 gap-12">
-          <Input
-            label="Verified By"
-            variant="orange"
-            placeholder="Enter name"
-            value={verifiedBy}
-            onChange={(e) => setVerifiedBy(e.target.value)}
-          />
-        </div>
-
-        {/* Documents */}
-        <div className="w-full border-2 my-12" />
-        <Label className="text-orange-500 text-2xl font-semibold">
-          Documents
-        </Label>
-
+      {/* Tab Content */}
+      {activeTab === "list" ? (
         <div>
-          {documents.map((doc, idx) => (
-            <div
-              key={idx}
-              className="grid grid-cols-2 items-end mt-6 gap-12 border-b border-orange-200 pb-6 mb-4"
-            >
-              <Select
-                label="Document Type"
-                variant="orange"
-                options={documentTypeOptions}
-                value={doc.documentType}
-                onChange={(val) =>
-                  handleDocumentChange(idx, "documentType", val)
-                }
-                placeholder="Select document type"
-                selectClassName="py-4 px-4"
-              />
+          {/* Actions */}
+          <div className="flex justify-between items-center mb-6">
+            <div className="flex gap-2">
               <Input
-                label="Expiry Date"
-                variant="orange"
-                value={doc.expiryDate}
-                type="date"
-                onChange={(e) =>
-                  handleDocumentChange(idx, "expiryDate", e.target.value)
-                }
-                placeholder="Select expiry date"
-                min={today}
+                label="Search Vendor"
+                placeholder="Search by name or vendor ID"
+                value={search}
+                inputClassName="py-3 px-4"
+                labelClassName="text-xl"
+                onChange={(e) => setSearch(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                variant="search"
               />
-              <div className="col-span-1 flex flex-col gap-1 mt-4">
-                <Label>File Upload</Label>
-                <FileUpload
-                  file={doc.file}
-                  onChange={(file) => handleDocumentChange(idx, "file", file)}
-                  accept=".jpg,.jpeg,.png,.pdf"
+              <Button
+                variant="primary"
+                className="mt-auto rounded-lg"
+                onClick={handleSearch}
+              >
+                Search
+              </Button>
+            </div>
+
+            <div className="flex gap-3">
+              <Button
+                variant="secondary"
+                className="rounded-lg flex items-center gap-2"
+                onClick={() =>
+                  router.push("/vendor/vendor-management/bulk-verify")
+                }
+              >
+                <CheckCircle size={18} />
+                Bulk Verify
+              </Button>
+              <Button
+                variant="secondary"
+                className="rounded-lg flex items-center gap-2"
+                onClick={() =>
+                  router.push("/vendor/vendor-management/bulk-upload")
+                }
+              >
+                <Upload size={18} />
+                Bulk Upload
+              </Button>
+            </div>
+          </div>
+
+          {/* Table */}
+          {loading ? (
+            <div className="text-center py-12 bg-white rounded-lg">
+              <p className="text-gray-500 text-lg">Loading vendors...</p>
+            </div>
+          ) : vendors.length === 0 ? (
+            <div className="text-center py-12 bg-white rounded-lg">
+              <p className="text-gray-500 text-lg">No vendors found</p>
+            </div>
+          ) : (
+            <>
+              <Table
+                columns={vendorColumns}
+                data={vendors}
+                renderCell={renderCell}
+              />
+
+              {/* Pagination */}
+              <div className="flex justify-between items-center mt-6">
+                <p className="text-gray-600">
+                  Showing page {pagination.page} of {pagination.totalPages}
+                </p>
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={pagination.totalPages}
+                  onPageChange={setCurrentPage}
                 />
               </div>
-              <div className="col-span-1 flex items-center mt-8">
-                {documents.length > 1 && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => handleDeleteDocument(idx)}
-                    className="ml-auto px-4 py-2 rounded bg-red-100 text-red-600 hover:bg-red-500 hover:text-white transition"
-                  >
-                    Delete
-                  </Button>
-                )}
-              </div>
-            </div>
-          ))}
+            </>
+          )}
         </div>
+      ) : (
+        <div className="bg-white rounded-xl p-8">
+          {/* Vendor Details Form */}
+          <Label className="text-orange-500 text-2xl font-semibold">
+            Vendor Details
+          </Label>
 
-        <Button
-          type="button"
-          variant="primary"
-          className="text-orange-500 mt-2 rounded-lg"
-          onClick={handleAddMoreDocument}
-        >
-          + Add More
-        </Button>
+          <div className="mt-6 grid grid-cols-2 gap-12">
+            <Select
+              label="Select Company (CIN) *"
+              variant="orange"
+              options={companyOptions}
+              value={cinNumber}
+              onChange={handleCompanySelect}
+              placeholder="Select company by CIN"
+              selectClassName="py-4 px-4"
+              disabled={!!urlCin}
+            />
+            <Input
+              label="Vendor Name *"
+              variant="orange"
+              placeholder="Enter vendor name"
+              value={vendorName}
+              onChange={(e) => setVendorName(e.target.value)}
+            />
+          </div>
 
-        {/* Contract Details */}
-        <div className="w-full  my-12" />
-        <Label className="text-orange-500 text-2xl font-semibold">
-          Contract Detail
-        </Label>
+          <div className="mt-6 grid grid-cols-2 gap-12">
+            <Input
+              label="Vendor Billing Name *"
+              variant="orange"
+              placeholder="Enter Billing Name"
+              value={vendorBillingName}
+              onChange={(e) => setVendorBillingName(e.target.value)}
+              disabled={!!urlCompanyName}
+            />
+            <Input
+              label="Email ID *"
+              variant="orange"
+              placeholder="Enter email ID"
+              value={vendorEmail}
+              onChange={(e) => setVendorEmail(e.target.value)}
+              disabled={!!urlEmail}
+            />
+          </div>
 
-        <div className="mt-6 grid grid-cols-2 gap-12">
-          <Input
-            label="Contract Terms"
-            variant="orange"
-            placeholder="Enter contract terms"
-            value={contractTerms}
-            onChange={(e) => setContractTerms(e.target.value)}
-          />
-          <Input
-            label="Contract Expiry Date"
-            variant="orange"
-            type="date"
-            value={contractExpiryDate}
-            onChange={(e) => setContractExpiryDate(e.target.value)}
-            min={today}
-          />
+          <div className="mt-6 grid grid-cols-2 gap-12">
+            <Select
+              label="Vendor Type"
+              variant="orange"
+              options={vendorTypeOptions}
+              value={vendorType}
+              onChange={setVendorType}
+              placeholder="Select vendor type"
+              selectClassName="py-4 px-4"
+            />
+            <Select
+              label="Vendor Category"
+              variant="orange"
+              options={vendorCategoryOptions}
+              value={vendorCategory}
+              onChange={setVendorCategory}
+              placeholder="Select vendor category"
+              selectClassName="py-4 px-4"
+            />
+          </div>
+
+          <div className="mt-6 grid grid-cols-2 gap-12">
+            <Input
+              label="Primary Contact Name"
+              variant="orange"
+              placeholder="Enter primary contact name"
+              value={primaryContact}
+              onChange={(e) => setPrimaryContact(e.target.value)}
+            />
+            <Input
+              label="Contact Phone"
+              variant="orange"
+              placeholder="Enter contact phone"
+              value={contactPhone}
+              onChange={(e) => setContactPhone(e.target.value)}
+            />
+          </div>
+
+          <div className="mt-6 grid grid-cols-2 gap-12">
+            <Textarea
+              label="Address (Billing)"
+              variant="orange"
+              placeholder="Enter billing address"
+              value={billingAddress}
+              onChange={(e) => setBillingAddress(e.target.value)}
+              rows={3}
+              disabled={!!urlAddress}
+            />
+          </div>
+
+          {/* Finance */}
+          <div className="w-full border-2 my-12" />
+          <Label className="text-orange-500 text-2xl font-semibold">
+            Finance & Compliance
+          </Label>
+
+          <div className="mt-6 grid grid-cols-2 gap-12">
+            <Input
+              label="Bank Account Number"
+              variant="orange"
+              placeholder="Enter Bank Account Number"
+              value={baVendor}
+              onChange={(e) => setBaVendor(e.target.value)}
+            />
+            <Input
+              label="IFSC Code"
+              variant="orange"
+              placeholder="Enter IFSC code"
+              value={ifscCode}
+              onChange={(e) => setIfscCode(e.target.value)}
+            />
+          </div>
+
+          <div className="mt-6 grid grid-cols-2 gap-12">
+            <Select
+              label="Payment Terms"
+              variant="orange"
+              options={paymentTermsOptions}
+              value={paymentTerms}
+              onChange={setPaymentTerms}
+              placeholder="Select payment terms"
+              selectClassName="py-4 px-4"
+            />
+            <Select
+              label="Payment Method"
+              variant="orange"
+              options={paymentMethodOptions}
+              value={paymentMethod}
+              onChange={setPaymentMethod}
+              placeholder="Select payment method"
+              selectClassName="py-4 px-4"
+            />
+          </div>
+
+          <div className="mt-6 grid grid-cols-2 gap-12">
+            <Input
+              label="GST Number"
+              variant="orange"
+              placeholder="Enter GST number"
+              value={gstDetails}
+              onChange={(e) => setGstDetails(e.target.value)}
+              disabled={!!urlGst}
+            />
+            <Input
+              label="PAN Number"
+              variant="orange"
+              placeholder="Enter PAN number"
+              value={panNumber}
+              onChange={(e) => setPanNumber(e.target.value)}
+            />
+          </div>
+
+          <div className="mt-6 grid grid-cols-2 gap-12">
+            <Input
+              label="TDS Rate (%)"
+              variant="orange"
+              type="number"
+              placeholder="Enter TDS Rate"
+              value={tdsRate}
+              onChange={(e) => setTdsRate(e.target.value)}
+            />
+            <Select
+              label="Billing Cycle"
+              variant="orange"
+              options={billingCycleOptions}
+              value={billingCycle}
+              onChange={setBillingCycle}
+              placeholder="Select Billing Cycle"
+              selectClassName="py-4 px-4"
+            />
+          </div>
+
+          {/* Risk & Contract */}
+          <div className="w-full border-2 my-12" />
+          <Label className="text-orange-500 text-2xl font-semibold">
+            Risk Assessment & Contract
+          </Label>
+
+          <div className="mt-6 grid grid-cols-2 gap-12">
+            <Select
+              label="Risk Rating"
+              variant="orange"
+              options={riskRatingOptions}
+              value={riskRating}
+              onChange={setRiskRating}
+              placeholder="Select risk rating"
+              selectClassName="py-4 px-4"
+            />
+            <Textarea
+              label="Risk Notes"
+              variant="orange"
+              placeholder="Enter risk notes"
+              value={riskNotes}
+              onChange={(e) => setRiskNotes(e.target.value)}
+              rows={3}
+            />
+          </div>
+
+          <div className="mt-6 grid grid-cols-2 gap-12">
+            <Input
+              label="Contract Expiry Date"
+              variant="orange"
+              type="date"
+              value={contractExpiryDate}
+              onChange={(e) => setContractExpiryDate(e.target.value)}
+              min={today}
+            />
+            <Input
+              label="Contract Renewal Date"
+              variant="orange"
+              type="date"
+              value={contractRenewalDate}
+              onChange={(e) => setContractRenewalDate(e.target.value)}
+              min={today}
+            />
+          </div>
+
+          <div className="mt-6 grid grid-cols-2 gap-12">
+            <Textarea
+              label="Contract Terms"
+              variant="orange"
+              placeholder="Enter contract terms"
+              value={contractTerms}
+              onChange={(e) => setContractTerms(e.target.value)}
+              rows={4}
+            />
+            <Textarea
+              label="Internal Notes"
+              variant="orange"
+              value={internalNotes}
+              onChange={(e) => setInternalNotes(e.target.value)}
+              placeholder="Enter internal notes"
+              rows={4}
+            />
+          </div>
+
+          {/* Footer Buttons */}
+          <div className="mt-12 flex justify-center gap-6">
+            <Button
+              className="px-10 rounded-lg"
+              variant="secondary"
+              type="button"
+              onClick={() => setActiveTab("list")}
+            >
+              Cancel
+            </Button>
+            <Button
+              className="px-10 rounded-lg"
+              variant="primary"
+              type="button"
+              onClick={handleSubmit}
+            >
+              Submit
+            </Button>
+          </div>
         </div>
+      )}
 
-        <div className="mt-6 grid grid-cols-2 gap-12">
-          <Input
-            label="Contract Renewal Date"
-            variant="orange"
-            type="date"
-            value={contractRenewalDate}
-            onChange={(e) => setContractRenewalDate(e.target.value)}
-            min={today}
-          />
-        </div>
-
-        {/* System Access */}
-        <div className="w-full border-2 my-12" />
-        <Label className="text-orange-500 text-2xl font-semibold">
-          System Access
-        </Label>
-
-        <div className="mt-6 grid grid-cols-2 gap-12">
-          <Select
-            label="Payment Method"
-            variant="orange"
-            options={paymentMethodOptions}
-            value={paymentMethod}
-            onChange={setPaymentMethod}
-            placeholder="Select payment method"
-            selectClassName="py-4 px-4"
-          />
-          <Input
-            label="Operations Manager"
-            variant="orange"
-            value={operationsManager}
-            onChange={(e) => setOperationsManager(e.target.value)}
-            placeholder="Enter Name"
-          />
-        </div>
-
-        <div className="mt-6 grid grid-cols-2 gap-12">
-          <Textarea
-            label="Internal Notes"
-            variant="orange"
-            value={internalNotes}
-            onChange={(e) => setInternalNotes(e.target.value)}
-            placeholder="Enter internal notes"
-            rows={5}
-            className="min-h-[120px]"
-          />
-        </div>
-
-        {/* Footer Buttons */}
-        <div className="mt-12 flex justify-center gap-6">
-          <Button
-            className="px-10 rounded-lg"
-            variant="secondary"
-            type="button"
-            onClick={handleSave}
-          >
-            Save
-          </Button>
-          <Button
-            className="px-10 rounded-lg"
-            variant="primary"
-            type="button"
-            onClick={handleSubmit}
-          >
-            Submit for approval
-          </Button>
-        </div>
-      </div>
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={deleteDialog.open}
+        title="Delete Vendor"
+        message={`Are you sure you want to delete "${deleteDialog.name}"? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        confirmVariant="danger"
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteDialog({ open: false, id: "", name: "" })}
+      />
     </div>
   );
 };
 
-export default VendorRegistrationFull;
+export default VendorOnboardPage;

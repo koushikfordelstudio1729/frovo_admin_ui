@@ -82,9 +82,38 @@ export default function CompanyDetailsPage() {
 
   const { company, statistics, recent_vendors } = data;
 
+  const handleAddVendor = () => {
+    const params = new URLSearchParams({
+      cin: company.cin,
+      companyName: company.registered_company_name,
+      address: company.company_address,
+      email: company.office_email || "",
+      gst: company.gst_number || "",
+    });
+    router.push(`/vendor/vendor-onboard?tab=add&${params.toString()}`);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <BackHeader title={company.registered_company_name} />
+
+      {/* Action Buttons */}
+      <div className="flex justify-end gap-3 mb-4">
+        <Button
+          variant="primary"
+          className="rounded-lg"
+          onClick={handleAddVendor}
+        >
+          + Add Vendor for this Company
+        </Button>
+        <Button
+          variant="secondary"
+          className="rounded-lg"
+          onClick={() => router.push(`/vendor/registered-company/edit/${company.cin}`)}
+        >
+          Edit Company
+        </Button>
+      </div>
 
       {/* Company Overview Card */}
       <div className="bg-white rounded-xl p-6 mb-6 shadow-sm">

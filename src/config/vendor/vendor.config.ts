@@ -22,11 +22,11 @@ export const vendorNavigation: VendorMenuItem[] = [
     href: "/vendor/vendor-onboard",
   },
 
-  {
-    label: "Audit Trails",
-    icon: "fileText",
-    href: "/vendor/audit-trails",
-  },
+  // {
+  //   label: "Audit Trails",
+  //   icon: "fileText",
+  //   href: "/vendor/audit-trails",
+  // },
   {
     label: "User Profile",
     icon: "user",
