@@ -1,6 +1,6 @@
 "use client";
 
-import { JSX, useState } from "react";
+import { JSX, useState, useEffect } from "react";
 import { Plus, Search, Edit3, Trash2, Eye } from "lucide-react";
 
 import {
@@ -17,159 +17,45 @@ import { api } from "@/services/api";
 import { apiConfig } from "@/config/admin/api.config";
 
 type Sku = {
-  id: string;
-  productName: string;
-  brand: string;
+  _id: string;
+  sku_id: string;
+  product_name: string;
+  brand_name: string;
   category: string;
-  storageType: string;
-  unitSize: string;
-  price: string;
-  isActive: boolean;
+  sub_category: string;
+  unit_size: string;
+  base_price: number;
+  final_price: number;
+  status: string;
   createdAt: string;
-  updatedAt: string;
+  updatedAt?: string;
 };
 
-const initialSkus: Sku[] = [
-  {
-    id: "SKU-001",
-    productName: "Amul Toned Milk",
-    brand: "Amul",
-    category: "Dairy",
-    storageType: "Refrigerated",
-    unitSize: "500ml",
-    price: "₹50",
-    isActive: true,
-    createdAt: "24-11-2025",
-    updatedAt: "18-11-2025",
-  },
-  {
-    id: "SKU-002",
-    productName: "Coca-Cola",
-    brand: "Coca-Cola",
-    category: "Beverages",
-    storageType: "Ambient",
-    unitSize: "1L",
-    price: "₹85",
-    isActive: true,
-    createdAt: "24-11-2025",
-    updatedAt: "18-11-2025",
-  },
-  {
-    id: "SKU-003",
-    productName: "Lay's Classic Salted",
-    brand: "Lay's",
-    category: "Snacks",
-    storageType: "Ambient",
-    unitSize: "52g",
-    price: "₹20",
-    isActive: true,
-    createdAt: "24-11-2025",
-    updatedAt: "18-11-2025",
-  },
-  {
-    id: "SKU-004",
-    productName: "Maggi 2-Minute Noodles",
-    brand: "Maggi",
-    category: "Instant Foods",
-    storageType: "Ambient",
-    unitSize: "70g",
-    price: "₹15",
-    isActive: false,
-    createdAt: "24-11-2025",
-    updatedAt: "18-11-2025",
-  },
-  {
-    id: "SKU-005",
-    productName: "Fortune Sunflower Oil",
-    brand: "Fortune",
-    category: "Cooking Essentials",
-    storageType: "Ambient",
-    unitSize: "1L",
-    price: "₹160",
-    isActive: true,
-    createdAt: "24-11-2025",
-    updatedAt: "18-11-2025",
-  },
-  {
-    id: "SKU-006",
-    productName: "Tata Salt",
-    brand: "Tata",
-    category: "Cooking Essentials",
-    storageType: "Ambient",
-    unitSize: "1kg",
-    price: "₹28",
-    isActive: true,
-    createdAt: "24-11-2025",
-    updatedAt: "18-11-2025",
-  },
-  {
-    id: "SKU-007",
-    productName: "Bournvita Health Drink",
-    brand: "Cadbury",
-    category: "Beverages",
-    storageType: "Ambient",
-    unitSize: "500g",
-    price: "₹230",
-    isActive: false,
-    createdAt: "24-11-2025",
-    updatedAt: "18-11-2025",
-  },
-  {
-    id: "SKU-008",
-    productName: "Britannia Marie Gold",
-    brand: "Britannia",
-    category: "Biscuits",
-    storageType: "Ambient",
-    unitSize: "200g",
-    price: "₹35",
-    isActive: true,
-    createdAt: "24-11-2025",
-    updatedAt: "18-11-2025",
-  },
-  {
-    id: "SKU-009",
-    productName: "Mother Dairy Curd",
-    brand: "Mother Dairy",
-    category: "Dairy",
-    storageType: "Refrigerated",
-    unitSize: "400g",
-    price: "₹60",
-    isActive: true,
-    createdAt: "24-11-2025",
-    updatedAt: "18-11-2025",
-  },
-  {
-    id: "SKU-010",
-    productName: "Paper Boat Aam Panna",
-    brand: "Paper Boat",
-    category: "Beverages",
-    storageType: "Ambient",
-    unitSize: "600ml",
-    price: "₹45",
-    isActive: true,
-    createdAt: "24-11-2025",
-    updatedAt: "18-11-2025",
-  },
-];
-
 const columns: Column[] = [
-  { key: "id", label: "SKU ID" },
-  { key: "productName", label: "Product Name" },
-  { key: "brand", label: "Brand" },
+  { key: "sku_id", label: "SKU ID" },
+  { key: "product_name", label: "Product Name" },
+  { key: "brand_name", label: "Brand" },
   { key: "category", label: "Category" },
-  { key: "storageType", label: "Storage Type" },
-  { key: "unitSize", label: "Unit size" },
+  { key: "sub_category", label: "Sub Category" },
+  { key: "unit_size", label: "Unit size" },
   { key: "price", label: "Price" },
   { key: "status", label: "Status" },
   { key: "createdAt", label: "Created at" },
-  { key: "updatedAt", label: "Last updated" },
   { key: "actions", label: "Actions" },
 ];
 
 const SkuMaster = () => {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
-  const [skus, setSkus] = useState<Sku[]>(initialSkus);
+  const [skus, setSkus] = useState<Sku[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Pagination state
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
+  const pageSize = 10;
 
   // confirm‑toggle state
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -183,17 +69,70 @@ const SkuMaster = () => {
 
   const router = useRouter();
 
+  // Fetch catalogues from API
+  const fetchCatalogues = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: pageSize.toString(),
+        sort_by: "product_name",
+        sort_order: "asc",
+      });
+
+      if (statusFilter) {
+        params.append("status", statusFilter);
+      }
+
+      const response = await api.get(
+        `${apiConfig.endpoints.catalogue.catalogues}?${params.toString()}`
+      );
+
+      if (response.data.success) {
+        setSkus(response.data.data.products);
+        setTotal(response.data.data.total);
+        setTotalPages(response.data.data.totalPages);
+      }
+    } catch (err: any) {
+      console.error("Error fetching catalogues:", err);
+      setError("Failed to load catalogues. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Fetch catalogues on mount and when filters change
+  useEffect(() => {
+    fetchCatalogues();
+  }, [page, statusFilter]);
+
   const handleAddSku = () => {
     router.push("/catalogue/sku-master/create-edit-sku");
   };
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (!deleteSkuId) return;
-    setDeleteLoading(true);
-    setSkus((prev) => prev.filter((s) => s.id !== deleteSkuId));
-    setDeleteLoading(false);
-    setDeleteOpen(false);
-    setDeleteSkuId(null);
+
+    try {
+      setDeleteLoading(true);
+
+      await api.delete(
+        apiConfig.endpoints.catalogue.deleteCatalogue(deleteSkuId)
+      );
+
+      // Refresh the list after successful deletion
+      await fetchCatalogues();
+
+      setDeleteOpen(false);
+      setDeleteSkuId(null);
+    } catch (err: any) {
+      console.error("Error deleting catalogue:", err);
+      setError("Failed to delete catalogue. Please try again.");
+    } finally {
+      setDeleteLoading(false);
+    }
   };
 
   const handleCancelDelete = () => {
@@ -202,11 +141,11 @@ const SkuMaster = () => {
   };
 
   const handleViewSku = (sku: Sku) => {
-    router.push(`/catalogue/sku-master/view-sku?id=${sku.id}`);
+    router.push(`/catalogue/sku-master/view-sku?id=${sku._id}`);
   };
 
   const handleEditSku = (sku: Sku) => {
-    router.push(`/catalogue/sku-master/create-edit-sku?id=${sku.id}`);
+    router.push(`/catalogue/sku-master/create-edit-sku?id=${sku._id}`);
   };
 
   const openConfirmForSku = (skuId: string, next: boolean) => {
@@ -229,15 +168,11 @@ const SkuMaster = () => {
         }
       );
 
-      // Update local state after successful API call
-      setSkus((prev) =>
-        prev.map((s) =>
-          s.id === pendingSkuId ? { ...s, isActive: pendingValue } : s
-        )
-      );
+      // Refresh the list after successful update
+      await fetchCatalogues();
     } catch (error) {
       console.error("Error updating catalogue status:", error);
-      // TODO: Show error message to user
+      setError("Failed to update catalogue status. Please try again.");
     }
 
     setConfirmLoading(false);
@@ -252,41 +187,37 @@ const SkuMaster = () => {
     setPendingValue(null);
   };
 
-  // filters
+  // Client-side search filter (applied after API data is fetched)
   const filteredSkus = skus.filter((sku) => {
+    if (!search) return true;
     const q = search.toLowerCase();
-
-    const matchesSearch =
-      !q ||
-      sku.id.toLowerCase().includes(q) ||
-      sku.productName.toLowerCase().includes(q) ||
-      sku.brand.toLowerCase().includes(q) ||
-      sku.category.toLowerCase().includes(q);
-
-    const matchesStatus =
-      !statusFilter ||
-      (statusFilter === "active" && sku.isActive) ||
-      (statusFilter === "inactive" && !sku.isActive);
-
-    return matchesSearch && matchesStatus;
+    return (
+      sku.sku_id.toLowerCase().includes(q) ||
+      sku.product_name.toLowerCase().includes(q) ||
+      sku.brand_name.toLowerCase().includes(q) ||
+      sku.category.toLowerCase().includes(q)
+    );
   });
-
-  const renderCell = {};
-
-  // simple pagination
-  const [page, setPage] = useState(1);
-  const pageSize = 10;
-  const totalPages = Math.max(1, Math.ceil(filteredSkus.length / pageSize));
-  const pageData = filteredSkus.slice((page - 1) * pageSize, page * pageSize);
 
   const openDeleteDialog = (skuId: string) => {
     setDeleteSkuId(skuId);
     setDeleteOpen(true);
   };
 
-  const tableData: Record<string, any>[] = pageData.map((sku) => ({
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+  };
+
+  const tableData: Record<string, any>[] = filteredSkus.map((sku) => ({
     ...sku,
-    status: sku.isActive,
+    price: `₹${sku.final_price}`,
+    createdAt: formatDate(sku.createdAt),
+    status: sku.status === "active",
     actions: "actions",
   }));
 
@@ -304,8 +235,8 @@ const SkuMaster = () => {
     if (key === "status") {
       return (
         <Toggle
-          enabled={sku.isActive}
-          onChange={(next) => openConfirmForSku(sku.id, next)}
+          enabled={sku.status === "active" || sku.status === true}
+          onChange={(next) => openConfirmForSku(sku._id, next)}
         />
       );
     }
@@ -335,7 +266,7 @@ const SkuMaster = () => {
           <button
             type="button"
             className="text-red-500 hover:text-red-600 cursor-pointer"
-            onClick={() => openDeleteDialog(sku.id)}
+            onClick={() => openDeleteDialog(sku._id)}
           >
             <Trash2 size={16} />
           </button>
@@ -348,18 +279,40 @@ const SkuMaster = () => {
 
   return (
     <div className="min-h-full pt-8 w-full overflow-x-auto">
+      {/* Error message */}
+      {error && (
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-600">
+          {error}
+        </div>
+      )}
+
       {/* top controls */}
       <div className="flex flex-wrap items-end justify-between gap-4 mb-8">
         <div className="flex gap-4 flex-wrap">
           <Input
             label="Search"
-            placeholder="Search Categories"
+            placeholder="Search SKUs"
             labelClassName="text-xl"
             variant="search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             startIcon={<Search size={16} />}
           />
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-medium text-gray-700">Status Filter</label>
+            <select
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+              value={statusFilter}
+              onChange={(e) => {
+                setStatusFilter(e.target.value);
+                setPage(1); // Reset to first page when filter changes
+              }}
+            >
+              <option value="">All</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -378,14 +331,24 @@ const SkuMaster = () => {
         </div>
 
         <div className="overflow-x-auto">
-          <div className="min-w-[1200px]">
-            <Table
-              columns={columns}
-              data={tableData}
-              renderCell={skuRenderCell}
-              minTableWidth="1600px"
-            />
-          </div>
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="text-xl text-gray-600">Loading catalogues...</div>
+            </div>
+          ) : tableData.length === 0 ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="text-xl text-gray-500">No catalogues found</div>
+            </div>
+          ) : (
+            <div className="min-w-[1200px]">
+              <Table
+                columns={columns}
+                data={tableData}
+                renderCell={skuRenderCell}
+                minTableWidth="1600px"
+              />
+            </div>
+          )}
         </div>
 
         <div className="p-4 flex justify-end border-t">
