@@ -50,7 +50,7 @@ export const CreateDepartmentForm = () => {
       const response = await api.get<{
         success: boolean;
         data: Role[];
-      }>(apiConfig.endpoints.roles);
+      }>(`${apiConfig.endpoints.roles}?limit=100`);
 
       if (response.data.success) {
         setRoles(response.data.data || []);
@@ -66,7 +66,7 @@ export const CreateDepartmentForm = () => {
       const response = await api.get<{
         success: boolean;
         data: User[];
-      }>(apiConfig.endpoints.users.list);
+      }>(`${apiConfig.endpoints.users.list}?limit=100`);
 
       if (response.data.success) {
         setUsers(response.data.data || []);

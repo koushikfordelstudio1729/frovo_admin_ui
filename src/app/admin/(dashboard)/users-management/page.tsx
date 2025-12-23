@@ -140,7 +140,7 @@ export default function UserManagementPage() {
       const response = await api.get<{
         success: boolean;
         data: Role[];
-      }>(apiConfig.endpoints.roles);
+      }>(`${apiConfig.endpoints.roles}?limit=100`);
 
       if (response.data.success) {
         setRoles(response.data.data || []);
@@ -155,7 +155,7 @@ export default function UserManagementPage() {
       const response = await api.get<{
         success: boolean;
         data: Department[];
-      }>(apiConfig.endpoints.departments);
+      }>(`${apiConfig.endpoints.departments}?limit=100`);
 
       if (response.data.success) {
         setDepartments(response.data.data || []);

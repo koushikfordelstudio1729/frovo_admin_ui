@@ -88,6 +88,22 @@ export const ROLE_ROUTES: Record<string, RoleRouteConfig> = {
     defaultRoute: "/warehouse/dashboard",
     description: "Warehouse operations with partner-level access",
   },
+
+  // Operations Manager - Operations and planogram management
+  ops_manager: {
+    systemRole: "ops_manager",
+    uiAccess: "Admin Panel",
+    defaultRoute: "/catalogue/sku-master",
+    description: "Operations management with partner-level access - handles machines, planogram, and refills",
+  },
+
+  // Custom Operations Manager role
+  operations_manager: {
+    systemRole: "operations_manager",
+    uiAccess: "Admin Panel",
+    defaultRoute: "/catalogue/sku-master",
+    description: "Custom operations manager role - handles machines and operations",
+  },
 };
 
 /**
