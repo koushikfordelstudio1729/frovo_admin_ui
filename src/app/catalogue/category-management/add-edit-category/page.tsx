@@ -9,7 +9,7 @@ import {
   Textarea,
   Toggle,
 } from "@/components";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -35,8 +35,10 @@ const AddEditCategory = () => {
   const isEdit = Boolean(categoryId);
 
   const [categoryImage, setCategoryImage] = useState<File | null>(null);
+  const [existingImageUrl, setExistingImageUrl] = useState<string>("");
   const [showSuccess, setShowSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isFetching, setIsFetching] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const form = useForm<CategoryFormValues>({
@@ -55,7 +57,61 @@ const AddEditCategory = () => {
     register,
     handleSubmit,
     formState: { errors },
+    reset,
   } = form;
+
+  // Fetch category data when editing
+  useEffect(() => {
+    const fetchCategory = async () => {
+      if (!categoryId) return;
+
+      try {
+        setIsFetching(true);
+        const response = await api.get<{
+          success: boolean;
+          data: {
+            id: string;
+            category_name: string;
+            description: string;
+            sub_details: {
+              sub_categories: string;
+              sub_categories_list: string[];
+              description_sub_category: string;
+            };
+            category_image: Array<{
+              file_url: string;
+            }>;
+            category_status: string;
+          };
+        }>(apiConfig.endpoints.catalogue.categoryById(categoryId));
+
+        if (response.data.success) {
+          const data = response.data.data;
+
+          // Populate form with fetched data
+          reset({
+            name: data.category_name,
+            description: data.description,
+            subCategories: data.sub_details.sub_categories,
+            subCategoryDescription: data.sub_details.description_sub_category,
+            active: data.category_status === "active",
+          });
+
+          // Set existing image URL if available
+          if (data.category_image && data.category_image.length > 0) {
+            setExistingImageUrl(data.category_image[0].file_url);
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching category:", err);
+        setError("Failed to load category data");
+      } finally {
+        setIsFetching(false);
+      }
+    };
+
+    fetchCategory();
+  }, [categoryId, reset]);
 
   const onCancel = () => {
     router.back();
@@ -88,17 +144,36 @@ const AddEditCategory = () => {
       // Add category_status
       formData.append("category_status", data.active ? "active" : "inactive");
 
-      // Add file upload
+      // Add file upload (only if a new file is selected)
       if (categoryImage) {
         formData.append("documents", categoryImage);
       }
 
-      // Make API call
-      const response = await api.post(apiConfig.endpoints.catalogue.category, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      // Make API call - POST for create, PUT for update
+      let response;
+      if (isEdit && categoryId) {
+        // Update existing category
+        response = await api.put(
+          apiConfig.endpoints.catalogue.categoryById(categoryId),
+          formData,
+          {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          }
+        );
+      } else {
+        // Create new category
+        response = await api.post(
+          apiConfig.endpoints.catalogue.category,
+          formData,
+          {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          }
+        );
+      }
 
       if (response.data.success) {
         setShowSuccess(true);
@@ -108,8 +183,11 @@ const AddEditCategory = () => {
         }, 2000);
       }
     } catch (err: any) {
-      console.error("Error creating category:", err);
-      setError(err.response?.data?.message || "Failed to create category. Please try again.");
+      console.error(`Error ${isEdit ? 'updating' : 'creating'} category:`, err);
+      setError(
+        err.response?.data?.message ||
+        `Failed to ${isEdit ? 'update' : 'create'} category. Please try again.`
+      );
     } finally {
       setIsLoading(false);
     }
@@ -123,23 +201,40 @@ const AddEditCategory = () => {
         />
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)}>
+      {isFetching ? (
         <div className="bg-white p-8">
-          {/* Error message */}
-          {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-600">
-              {error}
-            </div>
-          )}
-
-          {/* Category Image Upload */}
-          <div className="max-w-lg">
-            <FileUpload
-              label="Upload Category Image"
-              file={categoryImage}
-              onChange={(file) => setCategoryImage(file)}
-            />
+          <div className="text-center py-12">
+            <p className="text-gray-500">Loading category data...</p>
           </div>
+        </div>
+      ) : (
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div className="bg-white p-8">
+            {/* Error message */}
+            {error && (
+              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-600">
+                {error}
+              </div>
+            )}
+
+            {/* Category Image Upload */}
+            <div className="max-w-lg">
+              <FileUpload
+                label="Upload Category Image"
+                file={categoryImage}
+                onChange={(file) => setCategoryImage(file)}
+              />
+              {existingImageUrl && !categoryImage && (
+                <div className="mt-2">
+                  <p className="text-sm text-gray-600 mb-2">Current Image:</p>
+                  <img
+                    src={existingImageUrl}
+                    alt="Category"
+                    className="w-32 h-32 object-cover rounded-lg border"
+                  />
+                </div>
+              )}
+            </div>
 
           {/* Category Form */}
           <div className="mt-8 flex flex-col gap-4">
@@ -208,6 +303,7 @@ const AddEditCategory = () => {
           </div>
         </div>
       </form>
+      )}
 
       <SuccessDialog
         open={showSuccess}

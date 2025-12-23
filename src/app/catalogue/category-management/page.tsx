@@ -28,6 +28,9 @@ interface CategoryStats {
   total_categories: number;
   active_categories: number;
   inactive_categories: number;
+  total_sub_categories?: number;
+  active_sub_categories?: number;
+  inactive_sub_categories?: number;
 }
 
 const CategoryManagement = () => {
@@ -44,6 +47,21 @@ const CategoryManagement = () => {
   const [totalPages, setTotalPages] = useState(1);
 
   const router = useRouter();
+
+  const fetchDashboardStats = useCallback(async () => {
+    try {
+      const response = await api.get<{
+        success: boolean;
+        data: CategoryStats;
+      }>(apiConfig.endpoints.catalogue.categoryDashboardStats);
+
+      if (response.data.success) {
+        setStats(response.data.data);
+      }
+    } catch (err) {
+      console.error("Error fetching dashboard stats:", err);
+    }
+  }, []);
 
   const fetchCategories = useCallback(async () => {
     try {
@@ -90,7 +108,6 @@ const CategoryManagement = () => {
         }));
 
         setCategoriesData(transformedCategories);
-        setStats(response.data.data.stats);
         setTotalPages(response.data.data.totalPages);
       }
     } catch (err) {
@@ -102,7 +119,8 @@ const CategoryManagement = () => {
 
   useEffect(() => {
     fetchCategories();
-  }, [fetchCategories]);
+    fetchDashboardStats();
+  }, [fetchCategories, fetchDashboardStats]);
 
   const handleAddCategory = () => {
     router.push("/catalogue/category-management/add-edit-category");
@@ -150,10 +168,41 @@ const CategoryManagement = () => {
     setSearchQuery(e.target.value);
   };
 
-  const totalSubCategories = categoriesData.reduce(
-    (sum, cat) => sum + cat.subCategories.length,
-    0
-  );
+  // Delete category state and handlers
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteCategory, setDeleteCategory] = useState<Category | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
+  const handleDeleteCategory = (category: Category) => {
+    setDeleteCategory(category);
+    setDeleteOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteCategory) return;
+
+    setDeleteLoading(true);
+    try {
+      await api.delete(apiConfig.endpoints.catalogue.deleteCategory(deleteCategory.id));
+
+      // Refresh categories and stats after successful deletion
+      await fetchCategories();
+      await fetchDashboardStats();
+
+      setDeleteOpen(false);
+      setDeleteCategory(null);
+    } catch (error) {
+      console.error("Error deleting category:", error);
+      // TODO: Show error message to user
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setDeleteOpen(false);
+    setDeleteCategory(null);
+  };
 
   return (
     <div className="min-h-screen pt-12">
@@ -165,7 +214,7 @@ const CategoryManagement = () => {
         />
         <StatCard
           title="Total Sub Categories"
-          count={totalSubCategories}
+          count={stats.total_sub_categories || 0}
           icon={ClipboardCheck}
         />
         <StatCard
@@ -245,6 +294,7 @@ const CategoryManagement = () => {
                 onEdit={handleEditCategory}
                 onView={handleViewCategory}
                 onViewSub={handleViewSubCategory}
+                onDelete={handleDeleteCategory}
               />
             ))
         )}
@@ -266,6 +316,30 @@ const CategoryManagement = () => {
         onConfirm={handleConfirm}
         onCancel={handleCancel}
         isLoading={confirmLoading}
+      />
+
+      <ConfirmDialog
+        isOpen={deleteOpen}
+        title="Delete Category?"
+        message={
+          deleteCategory ? (
+            <span>
+              Are you sure you want to delete{" "}
+              <span className="font-semibold text-red-600">
+                {deleteCategory.name}
+              </span>
+              ? This action cannot be undone.
+            </span>
+          ) : (
+            ""
+          )
+        }
+        confirmText="Yes, delete"
+        cancelText="No"
+        confirmVariant="danger"
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+        isLoading={deleteLoading}
       />
     </div>
   );

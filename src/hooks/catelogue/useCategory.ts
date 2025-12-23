@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import type { Category } from "@/components/common/CategoryRow/CategoryRow";
+import { api } from "@/services/api";
+import { apiConfig } from "@/config/admin/api.config";
 
 type PendingType = "category" | "subcategory" | null;
 
@@ -80,12 +82,25 @@ export const useCategoryToggleWithConfirm = (initialCategories: Category[]) => {
     if (!pendingCategoryId || pendingValue === null || !pendingType) return;
     setConfirmLoading(true);
 
-    // optional: API calls here based on pendingType + ids
+    try {
+      if (pendingType === "category") {
+        // Call API to update category status
+        await api.patch(
+          apiConfig.endpoints.catalogue.updateCategoryStatus(pendingCategoryId),
+          {
+            status: pendingValue ? "active" : "inactive",
+          }
+        );
 
-    if (pendingType === "category") {
-      applyCategoryToggle(pendingCategoryId, pendingValue);
-    } else if (pendingType === "subcategory" && pendingSubName) {
-      applySubCategoryToggle(pendingCategoryId, pendingSubName, pendingValue);
+        // Update local state after successful API call
+        applyCategoryToggle(pendingCategoryId, pendingValue);
+      } else if (pendingType === "subcategory" && pendingSubName) {
+        // For subcategories, just update local state (no API endpoint for subcategory status)
+        applySubCategoryToggle(pendingCategoryId, pendingSubName, pendingValue);
+      }
+    } catch (error) {
+      console.error("Error updating category status:", error);
+      // TODO: Show error message to user
     }
 
     setConfirmLoading(false);

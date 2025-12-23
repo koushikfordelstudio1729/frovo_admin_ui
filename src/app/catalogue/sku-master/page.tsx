@@ -13,6 +13,8 @@ import {
 } from "@/components";
 import Table, { Column } from "@/components/name&table/Table";
 import { useRouter } from "next/navigation";
+import { api } from "@/services/api";
+import { apiConfig } from "@/config/admin/api.config";
 
 type Sku = {
   id: string;
@@ -218,11 +220,26 @@ const SkuMaster = () => {
 
     setConfirmLoading(true);
 
-    setSkus((prev) =>
-      prev.map((s) =>
-        s.id === pendingSkuId ? { ...s, isActive: pendingValue } : s
-      )
-    );
+    try {
+      // Call API to update catalogue status
+      await api.patch(
+        apiConfig.endpoints.catalogue.updateCatalogueStatus(pendingSkuId),
+        {
+          status: pendingValue ? "active" : "inactive",
+        }
+      );
+
+      // Update local state after successful API call
+      setSkus((prev) =>
+        prev.map((s) =>
+          s.id === pendingSkuId ? { ...s, isActive: pendingValue } : s
+        )
+      );
+    } catch (error) {
+      console.error("Error updating catalogue status:", error);
+      // TODO: Show error message to user
+    }
+
     setConfirmLoading(false);
     setConfirmOpen(false);
     setPendingSkuId(null);

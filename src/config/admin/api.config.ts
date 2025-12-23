@@ -60,8 +60,12 @@ export const apiConfig = {
     catalogue: {
       category: '/catalogue/category',
       categories: '/catalogue/categories',
-      categoryById: (id: string) => `/catalogue/category/${id}`,
+      categoryById: (id: string) => `/catalogue/categories/${id}`,
+      updateCategoryStatus: (id: string) => `/catalogue/categories/${id}/status`,
+      deleteCategory: (id: string) => `/catalogue/categories/${id}`,
+      categoryDashboardStats: '/catalogue/categories/dashboard/stats',
       catalogues: '/catalogue/catalogues',
+      updateCatalogueStatus: (id: string) => `/catalogue/catalogues/${id}/status`,
     },
   },
 

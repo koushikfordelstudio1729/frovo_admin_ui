@@ -1,6 +1,6 @@
 "use client";
 
-import { Eye, Edit3 } from "lucide-react";
+import { Eye, Edit3, Trash2 } from "lucide-react";
 import { Toggle } from "@/components";
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
@@ -29,6 +29,7 @@ type CategoryRowProps = {
   onEdit?: (category: Category) => void;
   onView?: (category: Category) => void;
   onViewSub?: (categoryId: string, subName: string) => void;
+  onDelete?: (category: Category) => void;
 };
 
 const CategoryRow: React.FC<CategoryRowProps> = ({
@@ -41,6 +42,7 @@ const CategoryRow: React.FC<CategoryRowProps> = ({
   onEdit,
   onView,
   onViewSub,
+  onDelete,
 }) => {
   const [open, setOpen] = useState(false);
 
@@ -92,6 +94,13 @@ const CategoryRow: React.FC<CategoryRowProps> = ({
               >
                 Edit
               </button>
+              <button
+                className="p-2 text-red-500 hover:text-red-600 rounded-lg transition-colors cursor-pointer"
+                onClick={() => onDelete?.(category)}
+                title="Delete Category"
+              >
+                <Trash2 size={18} />
+              </button>
             </div>
           </div>
         </div>
@@ -111,34 +120,9 @@ const CategoryRow: React.FC<CategoryRowProps> = ({
                   <p>{sub.createdAt}</p>
                 </div>
 
-                <div className="w-1/3 flex items-center justify-between text-sm">
-                  <div className="min-w-0 flex-1 pr-4">
-                    <p className="font-semibold truncate">Last updated date</p>
-                    <p className="truncate">{sub.updatedAt}</p>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <Toggle
-                      enabled={sub.isActive}
-                      onChange={(next) => onToggleSubCategory(sub.name, next)}
-                      label="Active / Inactive"
-                    />
-                    <div className="flex items-center gap-1">
-                      <button
-                        className="p-2 text-blue-600 hover:text-blue-800 rounded-lg transition-colors cursor-pointer"
-                        onClick={() => onViewSub?.(category.id, sub.name)}
-                        title="View Subcategory"
-                      >
-                        <Eye size={16} />
-                      </button>
-                      <button
-                        className="px-3 py-1.5 rounded-md bg-orange-500 text-white text-xs font-medium hover:bg-orange-600 transition-colors"
-                        onClick={() => onEdit?.(category)}
-                      >
-                        Edit
-                      </button>
-                    </div>
-                  </div>
+                <div className="w-1/3 text-sm">
+                  <p className="font-semibold">Last updated date</p>
+                  <p>{sub.updatedAt}</p>
                 </div>
               </div>
             ))}

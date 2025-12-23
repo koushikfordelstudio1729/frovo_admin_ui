@@ -3,6 +3,9 @@
 import { useSearchParams, useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { BackHeader, Label, Button, Badge } from "@/components";
+import { useState, useEffect } from "react";
+import { api } from "@/services/api";
+import { apiConfig } from "@/config/admin/api.config";
 
 type SubCategory = {
   name: string;
@@ -18,56 +21,113 @@ type Category = {
   description?: string;
   active: boolean;
   subCategories: SubCategory[];
+  imageUrl?: string;
 };
 
 export default function ViewCategoryPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
-
-  // MOCK DATA
   const categoryId = searchParams.get("id") ?? "";
-  const categoryName = searchParams.get("name") ?? "";
-  const categoryDescription = searchParams.get("description") ?? "";
-  const categoryActive = (searchParams.get("active") ?? "true") === "true";
 
-  const categoryData: Category = {
-    id: categoryId || "CAT-001",
-    name: categoryName || "Beverages",
-    description:
-      categoryDescription ||
-      "All types of beverages including soft drinks, juices, and more.",
-    active: categoryActive,
-    subCategories: [
-      {
-        name: "Soft Drinks",
-        description: "Carbonated beverages",
-        createdAt: "24-11-2025",
-        updatedAt: "18-11-2025",
-        active: true,
-      },
-      {
-        name: "Juices",
-        description: "Fresh fruit and vegetable juices",
-        createdAt: "24-11-2025",
-        updatedAt: "24-11-2025",
-        active: true,
-      },
-      {
-        name: "Energy Drinks",
-        description: "Energy boosting beverages",
-        createdAt: "24-11-2025",
-        updatedAt: "18-11-2025",
-        active: false,
-      },
-      {
-        name: "Bottled Water",
-        description: "Purified drinking water",
-        createdAt: "24-11-2025",
-        updatedAt: "18-11-2025",
-        active: true,
-      },
-    ],
-  };
+  const [categoryData, setCategoryData] = useState<Category | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchCategory = async () => {
+      if (!categoryId) {
+        setError("No category ID provided");
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+        const response = await api.get<{
+          success: boolean;
+          data: {
+            id: string;
+            category_name: string;
+            description: string;
+            sub_details: {
+              sub_categories: string;
+              sub_categories_list: string[];
+              description_sub_category: string;
+            };
+            category_image: Array<{
+              file_url: string;
+            }>;
+            category_status: string;
+            createdAt: string;
+            updatedAt: string;
+          };
+        }>(apiConfig.endpoints.catalogue.categoryById(categoryId));
+
+        if (response.data.success) {
+          const data = response.data.data;
+
+          // Transform API response to Category type
+          const transformedCategory: Category = {
+            id: data.id,
+            name: data.category_name,
+            description: data.description,
+            active: data.category_status === "active",
+            imageUrl: data.category_image?.[0]?.file_url || "",
+            subCategories: data.sub_details.sub_categories_list.map((subName) => ({
+              name: subName,
+              description: data.sub_details.description_sub_category,
+              createdAt: new Date(data.createdAt).toLocaleDateString("en-GB"),
+              updatedAt: new Date(data.updatedAt).toLocaleDateString("en-GB"),
+              active: true,
+            })),
+          };
+
+          setCategoryData(transformedCategory);
+        }
+      } catch (err) {
+        console.error("Error fetching category:", err);
+        setError("Failed to load category data");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCategory();
+  }, [categoryId]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-8">
+        <div className="max-w-full mx-auto px-6">
+          <div className="bg-white rounded-3xl shadow-sm p-10">
+            <div className="text-center py-12">
+              <p className="text-gray-500">Loading category data...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !categoryData) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-8">
+        <div className="max-w-full mx-auto px-6">
+          <div className="bg-white rounded-3xl shadow-sm p-10">
+            <div className="text-center py-12">
+              <p className="text-red-600">{error || "Category not found"}</p>
+              <Button
+                className="mt-4"
+                onClick={() => router.push("/catalogue/category-management")}
+              >
+                Back to Categories
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -106,22 +166,21 @@ export default function ViewCategoryPage() {
             {/* Uploads/Files Section */}
             <div>
               <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                Category Images
+                Category Image
               </h3>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="p-6 bg-linear-to-br from-blue-50 to-blue-100 rounded-xl text-center border-2 border-dashed border-blue-200">
-                  <p className="text-sm text-blue-700 font-medium">Image 1</p>
-                  <p className="text-xs text-blue-600 mt-1">
-                    category-beverages-1.jpg
-                  </p>
+              {categoryData.imageUrl ? (
+                <div className="rounded-xl overflow-hidden border-2 border-gray-200">
+                  <img
+                    src={categoryData.imageUrl}
+                    alt={categoryData.name}
+                    className="w-full h-64 object-cover"
+                  />
                 </div>
-                <div className="p-6 bg-linear-to-br from-blue-50 to-blue-100 rounded-xl text-center border-2 border-dashed border-blue-200">
-                  <p className="text-sm text-blue-700 font-medium">Image 2</p>
-                  <p className="text-xs text-blue-600 mt-1">
-                    category-beverages-2.jpg
-                  </p>
+              ) : (
+                <div className="p-6 bg-gray-50 rounded-xl text-center border-2 border-dashed border-gray-200">
+                  <p className="text-sm text-gray-500">No image uploaded</p>
                 </div>
-              </div>
+              )}
             </div>
           </div>
 
