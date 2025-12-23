@@ -57,6 +57,10 @@ export const apiConfig = {
       delete: (id: string) => `/warehouse/warehouses/${id}`,
       myWarehouse: '/warehouse/warehouses/my-warehouse',
     },
+    catalogue: {
+      category: '/catalogue/category',
+      categoryById: (id: string) => `/catalogue/category/${id}`,
+    },
   },
 
   statusCodes: {
