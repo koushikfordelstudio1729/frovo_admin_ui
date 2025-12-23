@@ -1,10 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Category } from "@/components/common/CategoryRow/CategoryRow";
 
 type PendingType = "category" | "subcategory" | null;
 
 export const useCategoryToggleWithConfirm = (initialCategories: Category[]) => {
   const [categories, setCategories] = useState<Category[]>(initialCategories);
+
+  // Update categories when initialCategories changes (from API)
+  useEffect(() => {
+    setCategories(initialCategories);
+  }, [initialCategories]);
 
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);

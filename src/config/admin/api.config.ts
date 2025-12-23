@@ -59,7 +59,9 @@ export const apiConfig = {
     },
     catalogue: {
       category: '/catalogue/category',
+      categories: '/catalogue/categories',
       categoryById: (id: string) => `/catalogue/category/${id}`,
+      catalogues: '/catalogue/catalogues',
     },
   },
 
