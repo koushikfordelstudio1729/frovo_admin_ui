@@ -1,7 +1,7 @@
 "use client";
 
 import { JSX, useState, useEffect } from "react";
-import { Plus, Search, Edit3, Trash2, Eye } from "lucide-react";
+import { Plus, Search, Edit3, Trash2, Eye, Package, CheckCircle, XCircle } from "lucide-react";
 
 import {
   Input,
@@ -10,6 +10,8 @@ import {
   ConfirmDialog,
   Pagination,
   Label,
+  StatCard,
+  Select,
 } from "@/components";
 import Table, { Column } from "@/components/name&table/Table";
 import { useRouter } from "next/navigation";
@@ -55,6 +57,8 @@ const SkuMaster = () => {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
+  const [activeCount, setActiveCount] = useState(0);
+  const [inactiveCount, setInactiveCount] = useState(0);
   const pageSize = 10;
 
   // confirm‑toggle state
@@ -94,6 +98,12 @@ const SkuMaster = () => {
         setSkus(response.data.data.products);
         setTotal(response.data.data.total);
         setTotalPages(response.data.data.totalPages);
+
+        // Calculate active/inactive counts
+        const active = response.data.data.products.filter((sku: Sku) => sku.status === "active").length;
+        const inactive = response.data.data.products.filter((sku: Sku) => sku.status === "inactive").length;
+        setActiveCount(active);
+        setInactiveCount(inactive);
       }
     } catch (err: any) {
       console.error("Error fetching catalogues:", err);
@@ -286,6 +296,25 @@ const SkuMaster = () => {
         </div>
       )}
 
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-3 gap-8 mb-8">
+        <StatCard
+          title="Total SKUs"
+          count={total}
+          icon={Package}
+        />
+        <StatCard
+          title="Active SKUs"
+          count={activeCount}
+          icon={CheckCircle}
+        />
+        <StatCard
+          title="Inactive SKUs"
+          count={inactiveCount}
+          icon={XCircle}
+        />
+      </div>
+
       {/* top controls */}
       <div className="flex flex-wrap items-end justify-between gap-4 mb-8">
         <div className="flex gap-4 flex-wrap">
@@ -298,20 +327,21 @@ const SkuMaster = () => {
             onChange={(e) => setSearch(e.target.value)}
             startIcon={<Search size={16} />}
           />
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium text-gray-700">Status Filter</label>
-            <select
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+          <div>
+            <Select
+              label="Status Filter"
+              selectClassName="py-2 px-4"
               value={statusFilter}
-              onChange={(e) => {
-                setStatusFilter(e.target.value);
+              options={[
+                { value: "", label: "All" },
+                { value: "active", label: "Active" },
+                { value: "inactive", label: "Inactive" },
+              ]}
+              onChange={(value) => {
+                setStatusFilter(value);
                 setPage(1); // Reset to first page when filter changes
               }}
-            >
-              <option value="">All</option>
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-            </select>
+            />
           </div>
         </div>
       </div>

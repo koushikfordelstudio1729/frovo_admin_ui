@@ -27,7 +27,7 @@ const CreateSkuPage = () => {
   const [productName, setProductName] = useState("");
   const [brandName, setBrandName] = useState("");
   const [description, setDescription] = useState("");
-  const [category, setCategory] = useState("");
+  const [categoryId, setCategoryId] = useState("");
   const [subCategory, setSubCategory] = useState("");
   const [manufacturerName, setManufacturerName] = useState("");
   const [manufacturerAddress, setManufacturerAddress] = useState("");
@@ -73,7 +73,7 @@ const CreateSkuPage = () => {
           setProductName(data.product_name || "");
           setBrandName(data.brand_name || "");
           setDescription(data.description || "");
-          setCategory(data.category || "");
+          setCategoryId(data.category_id || data.category || "");
           setSubCategory(data.sub_category || "");
           setManufacturerName(data.manufacturer_name || "");
           setManufacturerAddress(data.manufacturer_address || "");
@@ -118,9 +118,12 @@ const CreateSkuPage = () => {
 
   // Update sub-categories when category changes
   useEffect(() => {
-    if (category) {
+    // Reset sub-category when category changes
+    setSubCategory("");
+
+    if (categoryId) {
       const selectedCategory = categories.find(
-        (cat) => cat.category_name === category
+        (cat) => cat.id === categoryId
       );
 
       if (selectedCategory && selectedCategory.sub_categories_list) {
@@ -130,9 +133,8 @@ const CreateSkuPage = () => {
       }
     } else {
       setSubCategories([]);
-      setSubCategory("");
     }
-  }, [category, categories]);
+  }, [categoryId, categories]);
 
   // success dialog state
   const [successOpen, setSuccessOpen] = useState(false);
@@ -173,8 +175,13 @@ const CreateSkuPage = () => {
       formData.append("product_name", productName);
       formData.append("brand_name", brandName);
       formData.append("description", description);
-      formData.append("category", category);
-      formData.append("sub_category", subCategory);
+      formData.append("category_id", categoryId);
+
+      // Only append sub_category if user actually selected one (not empty)
+      if (subCategory && subCategory.trim() !== "" && subCategory !== "-- No sub category --") {
+        formData.append("sub_category", subCategory);
+      }
+
       formData.append("manufacturer_name", manufacturerName);
       formData.append("manufacturer_address", manufacturerAddress);
       formData.append("shell_life", shellLife);
@@ -318,24 +325,26 @@ const CreateSkuPage = () => {
               label="Category"
               placeholder="Select category"
               variant="orange"
-              value={category}
-              onChange={(value) => setCategory(value)}
+              value={categoryId}
+              onChange={(value) => setCategoryId(value)}
               options={categories.map((cat) => ({
-                value: cat.category_name,
+                value: cat.id,
                 label: cat.category_name,
               }))}
             />
             <Select
-              label="Sub category"
-              placeholder="Select sub category"
+              label="Sub category (Optional)"
               variant="orange"
               value={subCategory}
               onChange={(value) => setSubCategory(value)}
-              disabled={!category || subCategories.length === 0}
-              options={subCategories.map((subCat) => ({
-                value: subCat,
-                label: subCat,
-              }))}
+              disabled={!categoryId}
+              options={[
+                { value: "", label: "-- No sub category --" },
+                ...subCategories.map((subCat) => ({
+                  value: subCat,
+                  label: subCat,
+                }))
+              ]}
             />
           </div>
 
