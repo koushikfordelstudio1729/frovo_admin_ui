@@ -16,10 +16,10 @@ export const DUMMY_USERS: User[] = [
     redirectPath: "/warehouse/dashboard",
   },
   {
-    email: "vendor.admin@frovo.com",
-    password: "VendorAdmin@123",
+    email: "vendor@example.com",
+    password: "SecurePassword123!",
     role: "vendor_admin",
     name: "Vendor Admin",
-    redirectPath: "/vendor/dashboard",
+    redirectPath: "/vendor/registered-company",
   },
 ];

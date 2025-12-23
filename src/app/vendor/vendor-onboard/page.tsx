@@ -12,6 +12,8 @@ import {
   Pagination,
   Toggle,
   ConfirmDialog,
+  SearchableSelect,
+  SuccessDialog,
 } from "@/components";
 import FileUpload from "@/components/common/FileUpload";
 import {
@@ -111,6 +113,7 @@ const VendorOnboardPage = () => {
   const [contractExpiryDate, setContractExpiryDate] = useState("");
   const [contractRenewalDate, setContractRenewalDate] = useState("");
   const [internalNotes, setInternalNotes] = useState("");
+  const [showSuccess, setShowSuccess] = useState(false);
 
   // List States
   const [vendors, setVendors] = useState<Vendor[]>([]);
@@ -128,9 +131,18 @@ const VendorOnboardPage = () => {
     name: string;
   }>({ open: false, id: "", name: "" });
 
+  const [statusDialog, setStatusDialog] = useState<{
+    open: boolean;
+    id: string;
+    name: string;
+    currentEnabled: boolean;
+  }>({ open: false, id: "", name: "", currentEnabled: false });
+
   // Company dropdown states
   const [companies, setCompanies] = useState<any[]>([]);
-  const [companyOptions, setCompanyOptions] = useState<{ label: string; value: string }[]>([]);
+  const [companyOptions, setCompanyOptions] = useState<
+    { label: string; value: string }[]
+  >([]);
 
   const ITEMS_PER_PAGE = 10;
   const today = new Date().toISOString().split("T")[0];
@@ -157,12 +169,15 @@ const VendorOnboardPage = () => {
 
         // Create options for dropdown: "CIN - Company Name"
         // Use a Set to ensure unique CINs
-        const uniqueCompanies = validCompanies.reduce((acc: any[], company: any) => {
-          if (!acc.find((c) => c.cin === company.cin)) {
-            acc.push(company);
-          }
-          return acc;
-        }, []);
+        const uniqueCompanies = validCompanies.reduce(
+          (acc: any[], company: any) => {
+            if (!acc.find((c) => c.cin === company.cin)) {
+              acc.push(company);
+            }
+            return acc;
+          },
+          []
+        );
 
         const options = uniqueCompanies.map((company: any) => ({
           label: `${company.cin} - ${company.registered_company_name}`,
@@ -245,9 +260,7 @@ const VendorOnboardPage = () => {
       await updateVendor(id, { vendor_status: newStatus });
 
       setVendors((prev) =>
-        prev.map((v) =>
-          v._id === id ? { ...v, vendor_status: newStatus } : v
-        )
+        prev.map((v) => (v._id === id ? { ...v, vendor_status: newStatus } : v))
       );
 
       toast.success(
@@ -263,13 +276,11 @@ const VendorOnboardPage = () => {
   const handleDelete = async () => {
     try {
       await deleteVendor(deleteDialog.id);
-      toast.success("Vendor deleted successfully");
+      toast.success("Brand deleted successfully");
       setDeleteDialog({ open: false, id: "", name: "" });
       fetchVendors();
     } catch (error: any) {
-      toast.error(
-        error?.response?.data?.message || "Failed to delete vendor"
-      );
+      toast.error(error?.response?.data?.message || "Failed to delete brand");
     }
   };
 
@@ -307,7 +318,14 @@ const VendorOnboardPage = () => {
 
     try {
       await createVendor(payload);
-      toast.success("Vendor Created Successfully!");
+
+      setShowSuccess(true);
+      setTimeout(() => {
+        setShowSuccess(false);
+
+        setActiveTab("list");
+        fetchVendors();
+      }, 2000);
 
       // Reset form
       setCinNumber("");
@@ -338,17 +356,17 @@ const VendorOnboardPage = () => {
       setActiveTab("list");
       fetchVendors();
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || "Failed to create vendor");
+      toast.error(err?.response?.data?.message || "Failed to create brand");
     }
   };
 
   const vendorColumns = [
-    { key: "vendor_id", label: "Vendor ID" },
-    { key: "vendor_name", label: "Vendor Name" },
+    { key: "vendor_id", label: "Brand ID" },
+    { key: "vendor_name", label: "Brand Name" },
     { key: "vendor_category", label: "Category" },
     { key: "contact_phone", label: "Contact" },
     { key: "vendor_email", label: "Email" },
-    { key: "verification_status", label: "Verification" },
+    { key: "verification_status", label: "Status" },
     { key: "action", label: "Action" },
   ];
 
@@ -384,30 +402,41 @@ const VendorOnboardPage = () => {
             : value === "pending" || value === "in-review"
             ? "warning"
             : "rejected";
-        return <Badge label={value.toUpperCase()} variant={verifyVariant} />;
+        return (
+          <Badge
+            showDot
+            label={value.charAt(0).toUpperCase() + value.slice(1).toLowerCase()}
+            variant={verifyVariant}
+          />
+        );
 
       case "action":
         return (
           <div className="flex items-center gap-3">
-            <Eye
-              size={18}
-              className="text-green-600 cursor-pointer hover:text-green-700"
+            <button
+              title="View Details"
               onClick={() =>
                 router.push(`/vendor/vendor-management/view/${vendor._id}`)
               }
-              title="View Details"
-            />
-            <Edit2
-              size={18}
-              className="text-purple-600 cursor-pointer hover:text-purple-700"
+            >
+              <Eye
+                size={18}
+                className="text-green-600 cursor-pointer hover:text-green-700"
+              />
+            </button>
+            <button
+              title="Edit Vendor"
               onClick={() =>
                 router.push(`/vendor/vendor-management/edit/${vendor._id}`)
               }
-              title="Edit Vendor"
-            />
-            <Trash2
-              size={18}
-              className="text-red-600 cursor-pointer hover:text-red-700"
+            >
+              <Edit2
+                size={18}
+                className="text-purple-600 cursor-pointer hover:text-purple-700"
+              />
+            </button>
+            <button
+              title="Delete Vendor"
               onClick={() =>
                 setDeleteDialog({
                   open: true,
@@ -415,15 +444,21 @@ const VendorOnboardPage = () => {
                   name: vendor.vendor_name,
                 })
               }
-              title="Delete Vendor"
-            />
+            >
+              <Trash2
+                size={18}
+                className="text-red-600 cursor-pointer hover:text-red-700"
+              />
+            </button>
             <Toggle
               enabled={vendor.vendor_status === "active"}
               onChange={() =>
-                handleToggleStatus(
-                  vendor._id,
-                  vendor.vendor_status === "active"
-                )
+                setStatusDialog({
+                  open: true,
+                  id: vendor._id,
+                  name: vendor.vendor_name,
+                  currentEnabled: vendor.vendor_status === "active",
+                })
               }
             />
           </div>
@@ -434,16 +469,22 @@ const VendorOnboardPage = () => {
     }
   };
 
+  const handleConfirmStatusChange = async () => {
+    const { id, currentEnabled } = statusDialog;
+    await handleToggleStatus(id, currentEnabled);
+    setStatusDialog({ open: false, id: "", name: "", currentEnabled: false });
+  };
+
   return (
     <div className="min-h-screen pt-10 px-4">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div>
-          <Label className="text-2xl font-semibold">Vendor Onboard</Label>
+          <Label className="text-2xl font-semibold">Brand Onboard</Label>
           <p className="text-gray-500 text-sm mt-1">
             {activeTab === "list"
-              ? `Total ${pagination.totalCount} vendors registered`
-              : "Add new vendor to the system"}
+              ? `Total ${pagination.totalCount} Brands registered`
+              : "Add new brands to the system"}
           </p>
         </div>
       </div>
@@ -453,26 +494,26 @@ const VendorOnboardPage = () => {
         <div className="flex gap-8">
           <button
             onClick={() => setActiveTab("list")}
-            className={`pb-4 px-2 font-medium transition-colors relative ${
+            className={`pb-4 px-2 font-medium transition-colors relative cursor-pointer ${
               activeTab === "list"
                 ? "text-orange-600"
                 : "text-gray-500 hover:text-gray-700"
             }`}
           >
-            Vendor List
+            Brands List
             {activeTab === "list" && (
               <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-600" />
             )}
           </button>
           <button
             onClick={() => setActiveTab("add")}
-            className={`pb-4 px-2 font-medium transition-colors relative ${
+            className={`pb-4 px-2 font-medium transition-colors relative cursor-pointer ${
               activeTab === "add"
                 ? "text-orange-600"
                 : "text-gray-500 hover:text-gray-700"
             }`}
           >
-            Add Vendor
+            Add Brand
             {activeTab === "add" && (
               <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-600" />
             )}
@@ -486,16 +527,18 @@ const VendorOnboardPage = () => {
           {/* Actions */}
           <div className="flex justify-between items-center mb-6">
             <div className="flex gap-2">
-              <Input
-                label="Search Vendor"
-                placeholder="Search by name or vendor ID"
-                value={search}
-                inputClassName="py-3 px-4"
-                labelClassName="text-xl"
-                onChange={(e) => setSearch(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                variant="search"
-              />
+              <div className="w-sm">
+                <Input
+                  label="Search Brands"
+                  placeholder="Search by name or brand ID"
+                  value={search}
+                  inputClassName="py-3 px-4"
+                  labelClassName="text-xl"
+                  onChange={(e) => setSearch(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                  variant="search"
+                />
+              </div>
               <Button
                 variant="primary"
                 className="mt-auto rounded-lg"
@@ -532,19 +575,23 @@ const VendorOnboardPage = () => {
           {/* Table */}
           {loading ? (
             <div className="text-center py-12 bg-white rounded-lg">
-              <p className="text-gray-500 text-lg">Loading vendors...</p>
+              <p className="text-gray-500 text-lg">Loading brands...</p>
             </div>
           ) : vendors.length === 0 ? (
             <div className="text-center py-12 bg-white rounded-lg">
-              <p className="text-gray-500 text-lg">No vendors found</p>
+              <p className="text-gray-500 text-lg">No brands found</p>
             </div>
           ) : (
             <>
-              <Table
-                columns={vendorColumns}
-                data={vendors}
-                renderCell={renderCell}
-              />
+              <div className="overflow-x-auto">
+                <div className="min-w-[1500px]">
+                  <Table
+                    columns={vendorColumns}
+                    data={vendors}
+                    renderCell={renderCell}
+                  />
+                </div>
+              </div>
 
               {/* Pagination */}
               <div className="flex justify-between items-center mt-6">
@@ -562,26 +609,29 @@ const VendorOnboardPage = () => {
         </div>
       ) : (
         <div className="bg-white rounded-xl p-8">
-          {/* Vendor Details Form */}
+          {/* brands Details Form */}
           <Label className="text-orange-500 text-2xl font-semibold">
-            Vendor Details
+            Brand Details
           </Label>
 
           <div className="mt-6 grid grid-cols-2 gap-12">
-            <Select
+            <SearchableSelect
               label="Select Company (CIN) *"
               variant="orange"
               options={companyOptions}
               value={cinNumber}
-              onChange={handleCompanySelect}
+              onChange={(val) => {
+                if (urlCin) return; // keep locked when coming from company page
+                handleCompanySelect(val);
+              }}
               placeholder="Select company by CIN"
               selectClassName="py-4 px-4"
-              disabled={!!urlCin}
             />
+
             <Input
-              label="Vendor Name *"
+              label="Brand Name *"
               variant="orange"
-              placeholder="Enter vendor name"
+              placeholder="Enter brand name"
               value={vendorName}
               onChange={(e) => setVendorName(e.target.value)}
             />
@@ -589,7 +639,7 @@ const VendorOnboardPage = () => {
 
           <div className="mt-6 grid grid-cols-2 gap-12">
             <Input
-              label="Vendor Billing Name *"
+              label="Brand Billing Name *"
               variant="orange"
               placeholder="Enter Billing Name"
               value={vendorBillingName}
@@ -608,7 +658,7 @@ const VendorOnboardPage = () => {
 
           <div className="mt-6 grid grid-cols-2 gap-12">
             <Select
-              label="Vendor Type"
+              label="Brand Type"
               variant="orange"
               options={vendorTypeOptions}
               value={vendorType}
@@ -617,7 +667,7 @@ const VendorOnboardPage = () => {
               selectClassName="py-4 px-4"
             />
             <Select
-              label="Vendor Category"
+              label="Brand Category"
               variant="orange"
               options={vendorCategoryOptions}
               value={vendorCategory}
@@ -834,6 +884,43 @@ const VendorOnboardPage = () => {
         confirmVariant="danger"
         onConfirm={handleDelete}
         onCancel={() => setDeleteDialog({ open: false, id: "", name: "" })}
+      />
+
+      {/* Status Change Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={statusDialog.open}
+        title={
+          statusDialog.currentEnabled ? "Deactivate Brand" : "Activate Brand"
+        }
+        message={
+          statusDialog.currentEnabled
+            ? `Are you sure you want to deactivate "${statusDialog.name}"?`
+            : `Are you sure you want to activate "${statusDialog.name}"?`
+        }
+        confirmText={statusDialog.currentEnabled ? "Deactivate" : "Activate"}
+        cancelText="Cancel"
+        confirmVariant={statusDialog.currentEnabled ? "danger" : "primary"}
+        onConfirm={handleConfirmStatusChange}
+        onCancel={() =>
+          setStatusDialog({
+            open: false,
+            id: "",
+            name: "",
+            currentEnabled: false,
+          })
+        }
+      />
+
+      <SuccessDialog
+        open={showSuccess}
+        title="Brand created"
+        message="Brand has been added successfully."
+        primaryText="OK"
+        onClose={() => {
+          setShowSuccess(false);
+          setActiveTab("list");
+          fetchVendors();
+        }}
       />
     </div>
   );

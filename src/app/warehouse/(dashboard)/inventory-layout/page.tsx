@@ -24,6 +24,8 @@ import {
   Select,
   Input,
   Drawer,
+  StatCard,
+  BackHeader,
 } from "@/components";
 import { useMyWarehouse } from "@/hooks/warehouse";
 import { useInventoryLayout } from "@/hooks/warehouse/useInventoryLayout";
@@ -339,7 +341,11 @@ export default function InventoryLayoutPage() {
   }, [inventory]);
 
   // Render cell
-  const renderCell = (key: string, value: unknown, row?: Record<string, unknown>) => {
+  const renderCell = (
+    key: string,
+    value: unknown,
+    row?: Record<string, unknown>
+  ) => {
     if (key === "select") {
       const item = row?._rawData as InventoryItem;
       return (
@@ -354,16 +360,25 @@ export default function InventoryLayoutPage() {
 
     if (key === "status") {
       const statusValue = value as string;
+
       let variant: "approved" | "warning" | "rejected" = "approved";
       if (statusValue === "low_stock") variant = "warning";
       if (statusValue === "out_of_stock") variant = "rejected";
 
+      const labelMap: Record<string, string> = {
+        active: "Active",
+        low_stock: "Low Stock",
+        out_of_stock: "Out of Stock",
+      };
+
+      const label = labelMap[statusValue] ?? statusValue;
+
       return (
         <Badge
           variant={variant}
-          label={statusValue.replace("_", " ").toUpperCase()}
+          label={label}
           size="md"
-          showDot={true}
+          showDot
           className="px-3 py-1 text-sm rounded-full"
         />
       );
@@ -464,9 +479,7 @@ export default function InventoryLayoutPage() {
     <div className="min-h-screen bg-gray-50 p-6">
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-2 mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">
-          Inventory - {warehouse.name}
-        </h1>
+        <BackHeader title={`Inventory - ${warehouse.name}`} />
         <div className="flex gap-4 items-center">
           <Button
             className="rounded-lg"
@@ -492,55 +505,29 @@ export default function InventoryLayoutPage() {
       {/* Stats Cards */}
       {!statsLoading && stats && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Items</p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">
-                  {stats.totalItems}
-                </p>
-              </div>
-              <Package className="w-12 h-12 text-blue-500" />
-            </div>
-          </div>
+          <StatCard
+            title="Total Items"
+            count={stats.totalItems}
+            icon={Package}
+          />
 
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Active Items</p>
-                <p className="text-3xl font-bold text-green-600 mt-2">
-                  {stats.activeItems}
-                </p>
-              </div>
-              <CheckCircle className="w-12 h-12 text-green-500" />
-            </div>
-          </div>
+          <StatCard
+            title="Active Items"
+            count={stats.activeItems}
+            icon={CheckCircle}
+          />
 
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Low Stock</p>
-                <p className="text-3xl font-bold text-orange-600 mt-2">
-                  {stats.lowStockItems}
-                </p>
-              </div>
-              <TrendingDown className="w-12 h-12 text-orange-500" />
-            </div>
-          </div>
+          <StatCard
+            title="Low Stock"
+            count={stats.lowStockItems}
+            icon={TrendingDown}
+          />
 
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">
-                  Expired / Near Expiry
-                </p>
-                <p className="text-3xl font-bold text-red-600 mt-2">
-                  {stats.expiredItems + stats.nearExpiryItems}
-                </p>
-              </div>
-              <AlertCircle className="w-12 h-12 text-red-500" />
-            </div>
-          </div>
+          <StatCard
+            title="Expired / Near Expiry"
+            count={stats.expiredItems + stats.nearExpiryItems}
+            icon={AlertCircle}
+          />
         </div>
       )}
 
@@ -559,7 +546,7 @@ export default function InventoryLayoutPage() {
                     }
                   }}
                   onChange={handleSelectAll}
-                  className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                  className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500 cursor-pointer"
                 />
                 <span className="text-sm font-medium text-gray-700">
                   Select All ({inventory.length})
@@ -569,8 +556,8 @@ export default function InventoryLayoutPage() {
                 <>
                   <div className="h-6 w-px bg-gray-300"></div>
                   <span className="text-sm font-semibold text-blue-900">
-                    {selectedItems.length} item{selectedItems.length !== 1 ? "s" : ""}{" "}
-                    selected
+                    {selectedItems.length} item
+                    {selectedItems.length !== 1 ? "s" : ""} selected
                   </span>
                   <Button
                     variant="secondary"
@@ -605,22 +592,28 @@ export default function InventoryLayoutPage() {
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Filters</h3>
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-          <Select
-            id="status-filter"
-            label="Status"
-            options={statusOptions}
-            value={statusFilter}
-            onChange={setStatusFilter}
-            selectClassName="px-4 py-2"
-          />
-          <Select
-            id="expiry-status-filter"
-            label="Expiry Status"
-            options={expiryStatusOptions}
-            value={expiryStatusFilter}
-            onChange={setExpiryStatusFilter}
-            selectClassName="px-4 py-2"
-          />
+          <div>
+            <h2 className="text-gray-700 text-sm mb-2 font-semibold">Status</h2>
+            <Select
+              id="status-filter"
+              options={statusOptions}
+              value={statusFilter}
+              onChange={setStatusFilter}
+              selectClassName="px-4 py-3 bg-gray-100"
+            />
+          </div>
+          <div>
+            <h2 className="text-gray-700 text-sm mb-2 font-semibold">
+              Expiry Status
+            </h2>
+            <Select
+              id="expiry-status-filter"
+              options={expiryStatusOptions}
+              value={expiryStatusFilter}
+              onChange={setExpiryStatusFilter}
+              selectClassName="px-4 py-3 bg-gray-100"
+            />
+          </div>
           <Input
             id="sku-filter"
             label="SKU"
@@ -643,7 +636,7 @@ export default function InventoryLayoutPage() {
             <Button
               onClick={handleApplyFilters}
               variant="primary"
-              className="rounded-lg w-full"
+              className="rounded-lg w-full py-4"
             >
               Apply Filters
             </Button>
@@ -661,7 +654,8 @@ export default function InventoryLayoutPage() {
               {appliedFilters.status && (
                 <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-800 px-4 py-2 rounded-full">
                   <span className="font-medium text-sm">
-                    Status: {getStatusLabel(appliedFilters.status, statusOptions)}
+                    Status:{" "}
+                    {getStatusLabel(appliedFilters.status, statusOptions)}
                   </span>
                   <button
                     onClick={clearFilters}
@@ -677,7 +671,10 @@ export default function InventoryLayoutPage() {
                 <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-800 px-4 py-2 rounded-full">
                   <span className="font-medium text-sm">
                     Expiry:{" "}
-                    {getStatusLabel(appliedFilters.expiryStatus, expiryStatusOptions)}
+                    {getStatusLabel(
+                      appliedFilters.expiryStatus,
+                      expiryStatusOptions
+                    )}
                   </span>
                   <button
                     onClick={clearFilters}
@@ -691,7 +688,9 @@ export default function InventoryLayoutPage() {
 
               {appliedFilters.sku && (
                 <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-800 px-4 py-2 rounded-full">
-                  <span className="font-medium text-sm">SKU: {appliedFilters.sku}</span>
+                  <span className="font-medium text-sm">
+                    SKU: {appliedFilters.sku}
+                  </span>
                   <button
                     onClick={clearFilters}
                     className="ml-1 hover:bg-blue-200 rounded-full p-1 transition-colors"
@@ -748,12 +747,14 @@ export default function InventoryLayoutPage() {
       {/* Table */}
       {!loading && !error && (
         <>
-          <div className="mt-6">
-            <Table
-              columns={inventoryColumns}
-              data={tableData}
-              renderCell={renderCell}
-            />
+          <div className="overflow-x-auto">
+            <div className="min-w-[1800px]">
+              <Table
+                columns={inventoryColumns}
+                data={tableData}
+                renderCell={renderCell}
+              />
+            </div>
           </div>
 
           {/* Pagination */}
@@ -813,7 +814,9 @@ export default function InventoryLayoutPage() {
             <div className="bg-gray-50 p-4 rounded-lg">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-sm font-semibold text-gray-600">SKU</Label>
+                  <Label className="text-sm font-semibold text-gray-600">
+                    SKU
+                  </Label>
                   <p className="text-lg text-gray-900">{editDrawer.item.sku}</p>
                 </div>
                 <div>
@@ -828,11 +831,17 @@ export default function InventoryLayoutPage() {
                   <Label className="text-sm font-semibold text-gray-600">
                     Batch ID
                   </Label>
-                  <p className="text-lg text-gray-900">{editDrawer.item.batchId}</p>
+                  <p className="text-lg text-gray-900">
+                    {editDrawer.item.batchId}
+                  </p>
                 </div>
                 <div>
-                  <Label className="text-sm font-semibold text-gray-600">Age</Label>
-                  <p className="text-lg text-gray-900">{editDrawer.item.age} days</p>
+                  <Label className="text-sm font-semibold text-gray-600">
+                    Age
+                  </Label>
+                  <p className="text-lg text-gray-900">
+                    {editDrawer.item.age} days
+                  </p>
                 </div>
               </div>
             </div>
@@ -908,7 +917,10 @@ export default function InventoryLayoutPage() {
                   onChange={(e) =>
                     setEditFormData({
                       ...editFormData,
-                      location: { ...editFormData.location, zone: e.target.value },
+                      location: {
+                        ...editFormData.location,
+                        zone: e.target.value,
+                      },
                     })
                   }
                   variant="default"
@@ -921,7 +933,10 @@ export default function InventoryLayoutPage() {
                   onChange={(e) =>
                     setEditFormData({
                       ...editFormData,
-                      location: { ...editFormData.location, aisle: e.target.value },
+                      location: {
+                        ...editFormData.location,
+                        aisle: e.target.value,
+                      },
                     })
                   }
                   variant="default"
@@ -934,7 +949,10 @@ export default function InventoryLayoutPage() {
                   onChange={(e) =>
                     setEditFormData({
                       ...editFormData,
-                      location: { ...editFormData.location, rack: e.target.value },
+                      location: {
+                        ...editFormData.location,
+                        rack: e.target.value,
+                      },
                     })
                   }
                   variant="default"
@@ -947,7 +965,10 @@ export default function InventoryLayoutPage() {
                   onChange={(e) =>
                     setEditFormData({
                       ...editFormData,
-                      location: { ...editFormData.location, bin: e.target.value },
+                      location: {
+                        ...editFormData.location,
+                        bin: e.target.value,
+                      },
                     })
                   }
                   variant="default"
@@ -960,11 +981,12 @@ export default function InventoryLayoutPage() {
 
       {/* Confirmation Dialog */}
       {confirmDialog.isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl p-8 max-w-md w-full">
             <div className="text-center">
               <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-orange-100 mb-4">
-                {(confirmDialog.type === "archive" || confirmDialog.type === "bulk_archive") ? (
+                {confirmDialog.type === "archive" ||
+                confirmDialog.type === "bulk_archive" ? (
                   <Archive className="h-6 w-6 text-orange-600" />
                 ) : (
                   <ArchiveRestore className="h-6 w-6 text-green-600" />
@@ -972,14 +994,19 @@ export default function InventoryLayoutPage() {
               </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 {confirmDialog.type === "archive" && "Archive Inventory Item?"}
-                {confirmDialog.type === "unarchive" && "Unarchive Inventory Item?"}
-                {confirmDialog.type === "bulk_archive" && `Archive ${confirmDialog.count} Items?`}
-                {confirmDialog.type === "bulk_unarchive" && `Unarchive ${confirmDialog.count} Items?`}
+                {confirmDialog.type === "unarchive" &&
+                  "Unarchive Inventory Item?"}
+                {confirmDialog.type === "bulk_archive" &&
+                  `Archive ${confirmDialog.count} Items?`}
+                {confirmDialog.type === "bulk_unarchive" &&
+                  `Unarchive ${confirmDialog.count} Items?`}
               </h3>
               <p className="text-sm text-gray-600 mb-6">
-                {confirmDialog.type === "archive" && confirmDialog.item &&
+                {confirmDialog.type === "archive" &&
+                  confirmDialog.item &&
                   `Are you sure you want to archive ${confirmDialog.item.productName} (${confirmDialog.item.sku})? This will move it to the archived items list.`}
-                {confirmDialog.type === "unarchive" && confirmDialog.item &&
+                {confirmDialog.type === "unarchive" &&
+                  confirmDialog.item &&
                   `Are you sure you want to unarchive ${confirmDialog.item.productName} (${confirmDialog.item.sku})? This will restore it to the active inventory.`}
                 {confirmDialog.type === "bulk_archive" &&
                   `Are you sure you want to archive ${confirmDialog.count} selected items? This will move them to the archived items list.`}
@@ -996,7 +1023,9 @@ export default function InventoryLayoutPage() {
                   Cancel
                 </Button>
                 <Button
-                  variant={confirmDialog.type === "archive" ? "danger" : "primary"}
+                  variant={
+                    confirmDialog.type === "archive" ? "danger" : "primary"
+                  }
                   size="md"
                   className="rounded-lg"
                   onClick={handleConfirm}
@@ -1020,11 +1049,14 @@ export default function InventoryLayoutPage() {
       {viewModal.isOpen && viewModal.item && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ backgroundColor: 'rgba(0, 0, 0, 0.15)', backdropFilter: 'blur(4px)' }}
+          style={{
+            backgroundColor: "rgba(0, 0, 0, 0.15)",
+            backdropFilter: "blur(4px)",
+          }}
         >
           <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col">
             {/* Header - Fixed */}
-            <div className="flex items-center justify-between px-8 pt-8 pb-4 border-b flex-shrink-0">
+            <div className="flex items-center justify-between px-8 pt-8 pb-4 border-b shrink-0">
               <h3 className="text-2xl font-bold text-gray-900">
                 Inventory Item Details
               </h3>
@@ -1039,252 +1071,278 @@ export default function InventoryLayoutPage() {
             {/* Scrollable Content */}
             <div className="overflow-y-auto px-8 py-6 flex-1">
               <div className="space-y-6">
-              {/* Basic Information */}
-              <div>
-                <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                  <Package className="w-5 h-5 text-blue-600" />
-                  Basic Information
-                </h4>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-6 bg-gray-50 p-6 rounded-lg">
-                  <div>
-                    <Label className="text-sm font-semibold text-gray-600">SKU</Label>
-                    <p className="text-base text-gray-900 mt-1">{viewModal.item.sku}</p>
-                  </div>
-                  <div>
-                    <Label className="text-sm font-semibold text-gray-600">
-                      Product Name
-                    </Label>
-                    <p className="text-base text-gray-900 mt-1">
-                      {viewModal.item.productName}
-                    </p>
-                  </div>
-                  <div>
-                    <Label className="text-sm font-semibold text-gray-600">
-                      Batch ID
-                    </Label>
-                    <p className="text-base text-gray-900 mt-1">
-                      {viewModal.item.batchId}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Warehouse & Status */}
-              <div>
-                <h4 className="text-lg font-semibold text-gray-900 mb-4">
-                  Warehouse & Status
-                </h4>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-6 bg-gray-50 p-6 rounded-lg">
-                  <div>
-                    <Label className="text-sm font-semibold text-gray-600">
-                      Warehouse Name
-                    </Label>
-                    <p className="text-base text-gray-900 mt-1">
-                      {viewModal.item.warehouse.name}
-                    </p>
-                  </div>
-                  <div>
-                    <Label className="text-sm font-semibold text-gray-600">
-                      Warehouse Code
-                    </Label>
-                    <p className="text-base text-gray-900 mt-1">
-                      {viewModal.item.warehouse.code}
-                    </p>
-                  </div>
-                  <div>
-                    <Label className="text-sm font-semibold text-gray-600">Status</Label>
-                    <div className="mt-1">
-                      <Badge
-                        variant={
-                          viewModal.item.status === "active"
-                            ? "approved"
-                            : viewModal.item.status === "low_stock"
-                            ? "warning"
-                            : "rejected"
-                        }
-                        label={viewModal.item.status.replace("_", " ").toUpperCase()}
-                        size="md"
-                        showDot={true}
-                        className="px-3 py-1 text-sm rounded-full"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <Label className="text-sm font-semibold text-gray-600">
-                      Archived Status
-                    </Label>
-                    <p className="text-base text-gray-900 mt-1">
-                      {viewModal.item.isArchived ? "Archived" : "Active"}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Quantity Information */}
-              <div>
-                <h4 className="text-lg font-semibold text-gray-900 mb-4">
-                  Quantity Information
-                </h4>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-6 bg-gray-50 p-6 rounded-lg">
-                  <div>
-                    <Label className="text-sm font-semibold text-gray-600">
-                      Current Quantity
-                    </Label>
-                    <p className="text-2xl font-bold text-blue-600 mt-1">
-                      {viewModal.item.quantity}
-                    </p>
-                  </div>
-                  <div>
-                    <Label className="text-sm font-semibold text-gray-600">
-                      Min Stock Level
-                    </Label>
-                    <p className="text-2xl font-bold text-orange-600 mt-1">
-                      {viewModal.item.minStockLevel}
-                    </p>
-                  </div>
-                  <div>
-                    <Label className="text-sm font-semibold text-gray-600">
-                      Max Stock Level
-                    </Label>
-                    <p className="text-2xl font-bold text-green-600 mt-1">
-                      {viewModal.item.maxStockLevel}
-                    </p>
-                  </div>
-                  <div>
-                    <Label className="text-sm font-semibold text-gray-600">Age</Label>
-                    <p className="text-2xl font-bold text-gray-900 mt-1">
-                      {viewModal.item.age} days
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Location Details */}
-              <div>
-                <h4 className="text-lg font-semibold text-gray-900 mb-4">
-                  Location Details
-                </h4>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-6 bg-gray-50 p-6 rounded-lg">
-                  <div>
-                    <Label className="text-sm font-semibold text-gray-600">Zone</Label>
-                    <p className="text-base text-gray-900 mt-1">
-                      {viewModal.item.location.zone}
-                    </p>
-                  </div>
-                  <div>
-                    <Label className="text-sm font-semibold text-gray-600">Aisle</Label>
-                    <p className="text-base text-gray-900 mt-1">
-                      {viewModal.item.location.aisle}
-                    </p>
-                  </div>
-                  <div>
-                    <Label className="text-sm font-semibold text-gray-600">Rack</Label>
-                    <p className="text-base text-gray-900 mt-1">
-                      {viewModal.item.location.rack}
-                    </p>
-                  </div>
-                  <div>
-                    <Label className="text-sm font-semibold text-gray-600">Bin</Label>
-                    <p className="text-base text-gray-900 mt-1">
-                      {viewModal.item.location.bin}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Dates & Expiry */}
-              <div>
-                <h4 className="text-lg font-semibold text-gray-900 mb-4">
-                  Dates & Expiry
-                </h4>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-6 bg-gray-50 p-6 rounded-lg">
-                  <div>
-                    <Label className="text-sm font-semibold text-gray-600">
-                      Expiry Date
-                    </Label>
-                    <p className="text-base text-gray-900 mt-1">
-                      {viewModal.item.expiryDate
-                        ? new Date(viewModal.item.expiryDate).toLocaleDateString()
-                        : "N/A"}
-                    </p>
-                  </div>
-                  <div>
-                    <Label className="text-sm font-semibold text-gray-600">
-                      Created At
-                    </Label>
-                    <p className="text-base text-gray-900 mt-1">
-                      {new Date(viewModal.item.createdAt).toLocaleString()}
-                    </p>
-                  </div>
-                  <div>
-                    <Label className="text-sm font-semibold text-gray-600">
-                      Last Updated
-                    </Label>
-                    <p className="text-base text-gray-900 mt-1">
-                      {new Date(viewModal.item.updatedAt).toLocaleString()}
-                    </p>
-                  </div>
-                  {viewModal.item.archivedAt && (
+                {/* Basic Information */}
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <Package className="w-5 h-5 text-blue-600" />
+                    Basic Information
+                  </h4>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-6 bg-gray-50 p-6 rounded-lg">
                     <div>
                       <Label className="text-sm font-semibold text-gray-600">
-                        Archived At
+                        SKU
                       </Label>
                       <p className="text-base text-gray-900 mt-1">
-                        {new Date(viewModal.item.archivedAt).toLocaleString()}
+                        {viewModal.item.sku}
                       </p>
                     </div>
-                  )}
+                    <div>
+                      <Label className="text-sm font-semibold text-gray-600">
+                        Product Name
+                      </Label>
+                      <p className="text-base text-gray-900 mt-1">
+                        {viewModal.item.productName}
+                      </p>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-semibold text-gray-600">
+                        Batch ID
+                      </Label>
+                      <p className="text-base text-gray-900 mt-1">
+                        {viewModal.item.batchId}
+                      </p>
+                    </div>
+                  </div>
                 </div>
-              </div>
 
-              {/* Created By Information */}
-              <div>
-                <h4 className="text-lg font-semibold text-gray-900 mb-4">
-                  Created By
-                </h4>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-6 bg-gray-50 p-6 rounded-lg">
-                  <div>
-                    <Label className="text-sm font-semibold text-gray-600">Name</Label>
-                    <p className="text-base text-gray-900 mt-1">
-                      {viewModal.item.createdBy.name}
-                    </p>
-                  </div>
-                  <div>
-                    <Label className="text-sm font-semibold text-gray-600">Email</Label>
-                    <p className="text-base text-gray-900 mt-1">
-                      {viewModal.item.createdBy.email}
-                    </p>
-                  </div>
-                  <div>
-                    <Label className="text-sm font-semibold text-gray-600">User ID</Label>
-                    <p className="text-base text-gray-900 mt-1 font-mono text-sm">
-                      {viewModal.item.createdBy.id}
-                    </p>
+                {/* Warehouse & Status */}
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-4">
+                    Warehouse & Status
+                  </h4>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-6 bg-gray-50 p-6 rounded-lg">
+                    <div>
+                      <Label className="text-sm font-semibold text-gray-600">
+                        Warehouse Name
+                      </Label>
+                      <p className="text-base text-gray-900 mt-1">
+                        {viewModal.item.warehouse.name}
+                      </p>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-semibold text-gray-600">
+                        Warehouse Code
+                      </Label>
+                      <p className="text-base text-gray-900 mt-1">
+                        {viewModal.item.warehouse.code}
+                      </p>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-semibold text-gray-600">
+                        Status
+                      </Label>
+                      <div className="mt-1">
+                        <Badge
+                          variant={
+                            viewModal.item.status === "active"
+                              ? "approved"
+                              : viewModal.item.status === "low_stock"
+                              ? "warning"
+                              : "rejected"
+                          }
+                          label={viewModal.item.status
+                            .replace("_", " ")
+                            .toUpperCase()}
+                          size="md"
+                          showDot={true}
+                          className="px-3 py-1 text-sm rounded-full"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-semibold text-gray-600">
+                        Archived Status
+                      </Label>
+                      <p className="text-base text-gray-900 mt-1">
+                        {viewModal.item.isArchived ? "Archived" : "Active"}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* System Information */}
-              <div>
-                <h4 className="text-lg font-semibold text-gray-900 mb-4">
-                  System Information
-                </h4>
-                <div className="grid grid-cols-1 gap-6 bg-gray-50 p-6 rounded-lg">
-                  <div>
-                    <Label className="text-sm font-semibold text-gray-600">
-                      Inventory ID
-                    </Label>
-                    <p className="text-base text-gray-900 mt-1 font-mono text-sm">
-                      {viewModal.item._id}
-                    </p>
+                {/* Quantity Information */}
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-4">
+                    Quantity Information
+                  </h4>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-6 bg-gray-50 p-6 rounded-lg">
+                    <div>
+                      <Label className="text-sm font-semibold text-gray-600">
+                        Current Quantity
+                      </Label>
+                      <p className="text-2xl font-bold text-blue-600 mt-1">
+                        {viewModal.item.quantity}
+                      </p>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-semibold text-gray-600">
+                        Min Stock Level
+                      </Label>
+                      <p className="text-2xl font-bold text-orange-600 mt-1">
+                        {viewModal.item.minStockLevel}
+                      </p>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-semibold text-gray-600">
+                        Max Stock Level
+                      </Label>
+                      <p className="text-2xl font-bold text-green-600 mt-1">
+                        {viewModal.item.maxStockLevel}
+                      </p>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-semibold text-gray-600">
+                        Age
+                      </Label>
+                      <p className="text-2xl font-bold text-gray-900 mt-1">
+                        {viewModal.item.age} days
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
+
+                {/* Location Details */}
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-4">
+                    Location Details
+                  </h4>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-6 bg-gray-50 p-6 rounded-lg">
+                    <div>
+                      <Label className="text-sm font-semibold text-gray-600">
+                        Zone
+                      </Label>
+                      <p className="text-base text-gray-900 mt-1">
+                        {viewModal.item.location.zone}
+                      </p>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-semibold text-gray-600">
+                        Aisle
+                      </Label>
+                      <p className="text-base text-gray-900 mt-1">
+                        {viewModal.item.location.aisle}
+                      </p>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-semibold text-gray-600">
+                        Rack
+                      </Label>
+                      <p className="text-base text-gray-900 mt-1">
+                        {viewModal.item.location.rack}
+                      </p>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-semibold text-gray-600">
+                        Bin
+                      </Label>
+                      <p className="text-base text-gray-900 mt-1">
+                        {viewModal.item.location.bin}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Dates & Expiry */}
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-4">
+                    Dates & Expiry
+                  </h4>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-6 bg-gray-50 p-6 rounded-lg">
+                    <div>
+                      <Label className="text-sm font-semibold text-gray-600">
+                        Expiry Date
+                      </Label>
+                      <p className="text-base text-gray-900 mt-1">
+                        {viewModal.item.expiryDate
+                          ? new Date(
+                              viewModal.item.expiryDate
+                            ).toLocaleDateString()
+                          : "N/A"}
+                      </p>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-semibold text-gray-600">
+                        Created At
+                      </Label>
+                      <p className="text-base text-gray-900 mt-1">
+                        {new Date(viewModal.item.createdAt).toLocaleString()}
+                      </p>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-semibold text-gray-600">
+                        Last Updated
+                      </Label>
+                      <p className="text-base text-gray-900 mt-1">
+                        {new Date(viewModal.item.updatedAt).toLocaleString()}
+                      </p>
+                    </div>
+                    {viewModal.item.archivedAt && (
+                      <div>
+                        <Label className="text-sm font-semibold text-gray-600">
+                          Archived At
+                        </Label>
+                        <p className="text-base text-gray-900 mt-1">
+                          {new Date(viewModal.item.archivedAt).toLocaleString()}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Created By Information */}
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-4">
+                    Created By
+                  </h4>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-6 bg-gray-50 p-6 rounded-lg">
+                    <div>
+                      <Label className="text-sm font-semibold text-gray-600">
+                        Name
+                      </Label>
+                      <p className="text-base text-gray-900 mt-1">
+                        {viewModal.item.createdBy.name}
+                      </p>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-semibold text-gray-600">
+                        Email
+                      </Label>
+                      <p className="text-base text-gray-900 mt-1">
+                        {viewModal.item.createdBy.email}
+                      </p>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-semibold text-gray-600">
+                        User ID
+                      </Label>
+                      <p className="text-gray-900 mt-1 font-mono text-sm">
+                        {viewModal.item.createdBy.id}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* System Information */}
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-4">
+                    System Information
+                  </h4>
+                  <div className="grid grid-cols-1 gap-6 bg-gray-50 p-6 rounded-lg">
+                    <div>
+                      <Label className="text-sm font-semibold text-gray-600">
+                        Inventory ID
+                      </Label>
+                      <p className="text-gray-900 mt-1 font-mono text-sm">
+                        {viewModal.item._id}
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
             {/* Footer - Fixed */}
-            <div className="px-8 py-6 border-t flex justify-end flex-shrink-0">
+            <div className="px-8 py-6 border-t flex justify-end shrink-0">
               <Button
                 variant="secondary"
                 size="lg"

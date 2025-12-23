@@ -59,7 +59,7 @@ export default function VendorAuditTrailPage() {
       const res = await getVendorById(vendorId);
       setVendor(res.data.data);
     } catch (error) {
-      toast.error("Failed to load vendor details");
+      toast.error("Failed to load brands details");
       console.error(error);
     }
   };
@@ -67,7 +67,11 @@ export default function VendorAuditTrailPage() {
   const loadAuditTrail = async () => {
     try {
       setLoading(true);
-      const res = await getVendorAuditTrail(vendorId, currentPage, ITEMS_PER_PAGE);
+      const res = await getVendorAuditTrail(
+        vendorId,
+        currentPage,
+        ITEMS_PER_PAGE
+      );
       setAudits(res.data.data.audits);
       setPagination({
         totalPages: res.data.data.pages,
@@ -111,7 +115,7 @@ export default function VendorAuditTrailPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
-      <BackHeader title="Vendor Audit Trail" />
+      <BackHeader title="Brand Audit Trail" />
 
       <div className="bg-white rounded-xl p-8 space-y-8">
         {/* Vendor Info */}
@@ -122,7 +126,9 @@ export default function VendorAuditTrailPage() {
                 <h2 className="text-2xl font-semibold text-gray-900">
                   {vendor.vendor_name}
                 </h2>
-                <p className="text-gray-600 mt-1">{vendor.vendor_billing_name}</p>
+                <p className="text-gray-600 mt-1">
+                  {vendor.vendor_billing_name}
+                </p>
                 <p className="text-sm text-gray-500 mt-2">
                   <strong>Vendor ID:</strong> {vendor.vendor_id}
                 </p>
@@ -227,8 +233,7 @@ export default function VendorAuditTrailPage() {
                         </p>
                         <div className="text-sm text-gray-600 space-y-1">
                           <p>
-                            <strong>Name:</strong>{" "}
-                            {audit.user?.name || "N/A"}
+                            <strong>Name:</strong> {audit.user?.name || "N/A"}
                           </p>
                           <p>
                             <strong>Email:</strong> {audit.user_email}

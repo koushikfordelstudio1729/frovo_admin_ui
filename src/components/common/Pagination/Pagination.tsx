@@ -14,51 +14,40 @@ export const Pagination: React.FC<PaginationProps> = ({
 }) => {
   const createPageButtons = () => {
     const pages: (number | "...")[] = [];
-    const maxVisible = 5;
+    const maxVisible = 3;
 
-    if (totalPages <= maxVisible + 2) {
-      // Show all pages if total is small
+    if (totalPages <= maxVisible + 1) {
       for (let i = 1; i <= totalPages; i++) {
         pages.push(i);
       }
       return pages;
     }
 
-    // Always show first page
-    pages.push(1);
-
-    // Calculate the range of pages to show
-    let startPage: number;
-    let endPage: number;
-
+    // Always show first 3 pages
     if (currentPage <= 3) {
-      // Near the start
-      startPage = 2;
-      endPage = maxVisible;
-      for (let i = startPage; i <= endPage; i++) {
+      for (let i = 1; i <= maxVisible; i++) {
         pages.push(i);
       }
       pages.push("...");
       pages.push(totalPages);
-    } else if (currentPage >= totalPages - 2) {
-      // Near the end
+    }
+    // Show current page and neighbors when in middle
+    else if (currentPage > 3 && currentPage < totalPages - 2) {
+      pages.push(1);
       pages.push("...");
-      startPage = totalPages - maxVisible + 1;
-      endPage = totalPages - 1;
-      for (let i = startPage; i <= endPage; i++) {
-        pages.push(i);
-      }
-      pages.push(totalPages);
-    } else {
-      // In the middle
-      pages.push("...");
-      startPage = currentPage - 1;
-      endPage = currentPage + 1;
-      for (let i = startPage; i <= endPage; i++) {
-        pages.push(i);
-      }
+      pages.push(currentPage - 1);
+      pages.push(currentPage);
+      pages.push(currentPage + 1);
       pages.push("...");
       pages.push(totalPages);
+    }
+    // Show last 3 pages
+    else {
+      pages.push(1);
+      pages.push("...");
+      for (let i = totalPages - 2; i <= totalPages; i++) {
+        pages.push(i);
+      }
     }
 
     return pages;
@@ -73,10 +62,10 @@ export const Pagination: React.FC<PaginationProps> = ({
         <button
           onClick={() => onPageChange(1)}
           disabled={currentPage === 1}
-          className={`px-3 py-2 text-sm rounded border-2 ${
+          className={`px-3 py-2 text-sm rounded border-2 transition-colors  ${
             currentPage === 1
               ? "text-gray-400 border-gray-300 cursor-not-allowed opacity-60"
-              : "text-gray-700 border-gray-400 hover:bg-gray-100"
+              : "text-gray-700 border-gray-400 hover:bg-gray-100 cursor-pointer"
           }`}
         >
           {"<< First"}
@@ -86,10 +75,10 @@ export const Pagination: React.FC<PaginationProps> = ({
         <button
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage === 1}
-          className={`px-3 py-2 text-sm rounded border-2 ${
+          className={`px-3 py-2 text-sm rounded border-2 transition-colors ${
             currentPage === 1
               ? "text-gray-400 border-gray-300 cursor-not-allowed opacity-60"
-              : "text-gray-700 border-gray-400 hover:bg-gray-100"
+              : "text-gray-700 border-gray-400 hover:bg-gray-100 cursor-pointer"
           }`}
         >
           {"< Back"}
@@ -103,7 +92,7 @@ export const Pagination: React.FC<PaginationProps> = ({
             return (
               <span
                 key={key}
-                className="px-3 py-2 text-sm text-gray-500 select-none"
+                className="px-3 py-2 text-sm text-gray-500 select-none "
               >
                 ...
               </span>
@@ -114,10 +103,10 @@ export const Pagination: React.FC<PaginationProps> = ({
             <button
               key={key}
               onClick={() => onPageChange(page as number)}
-              className={`px-3 py-2 text-sm rounded font-medium transition ${
+              className={`px-3 py-2 text-sm rounded font-medium transition-colors ${
                 currentPage === page
                   ? "bg-gray-900 text-white border-2 border-gray-900"
-                  : "border-2 border-gray-400 text-gray-700 hover:bg-gray-100"
+                  : "border-2 border-gray-400 text-gray-700 hover:bg-gray-100 cursor-pointer"
               }`}
             >
               {page}
@@ -129,10 +118,10 @@ export const Pagination: React.FC<PaginationProps> = ({
         <button
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
-          className={`px-3 py-2 text-sm rounded border-2 ${
+          className={`px-3 py-2 text-sm rounded border-2 transition-colors ${
             currentPage === totalPages
               ? "text-gray-400 border-gray-300 cursor-not-allowed opacity-60"
-              : "text-gray-700 border-gray-400 hover:bg-gray-100"
+              : "text-gray-700 border-gray-400 hover:bg-gray-100 cursor-pointer"
           }`}
         >
           {"Next >"}
@@ -142,10 +131,10 @@ export const Pagination: React.FC<PaginationProps> = ({
         <button
           onClick={() => onPageChange(totalPages)}
           disabled={currentPage === totalPages}
-          className={`px-3 py-2 text-sm rounded border-2 ${
+          className={`px-3 py-2 text-sm rounded border-2 transition-colors ${
             currentPage === totalPages
               ? "text-gray-400 border-gray-300 cursor-not-allowed opacity-60"
-              : "text-gray-700 border-gray-400 hover:bg-gray-100"
+              : "text-gray-700 border-gray-400 hover:bg-gray-100 cursor-pointer"
           }`}
         >
           {"Last >>"}

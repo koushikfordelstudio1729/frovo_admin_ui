@@ -254,7 +254,7 @@ const GRNSummary = () => {
   };
 
   return (
-    <div className="min-h-screen pt-4">
+    <div className="min-h-full pt-4 w-full overflow-x-auto">
       <div className="flex items-center justify-between">
         <BackHeader title="GRN Summery" />
         <div className="mt-8">
@@ -275,23 +275,29 @@ const GRNSummary = () => {
       )}
 
       {/* Filters */}
-      <div className="p-6 mt-6">
+      <div className="p-6 mt-4">
         <div className="grid grid-cols-5 gap-8">
-          <Select
-            id="qc-status-filter"
-            label="QC Status"
-            options={qcStatusOptions}
-            value={qcStatusFilter}
-            onChange={handleQcStatusChange}
-            selectClassName="px-4 py-4 border-2 border-orange-300"
-          />
+          <div>
+            <h3 className="text-gray-700 text-sm font-semibold mb-1.5">
+              QC Status
+            </h3>
+            <Select
+              id="qc-status-filter"
+              variant="default"
+              options={qcStatusOptions}
+              value={qcStatusFilter}
+              onChange={handleQcStatusChange}
+              selectClassName="px-4 py-3 bg-gray-100"
+            />
+          </div>
           <Input
             id="start-date"
             label="Start Date"
             type="date"
             value={startDate}
             onChange={(e) => handleStartDateChange(e.target.value)}
-            variant="orange"
+            variant="default"
+            inputClassName=""
           />
           <Input
             id="end-date"
@@ -299,7 +305,7 @@ const GRNSummary = () => {
             type="date"
             value={endDate}
             onChange={(e) => handleEndDateChange(e.target.value)}
-            variant="orange"
+            variant="default"
           />
           <div className="flex items-end">
             {hasActiveFilters && (
@@ -385,12 +391,14 @@ const GRNSummary = () => {
 
       {!loading && !error && (
         <>
-          <div className="mt-6">
-            <Table
-              columns={grnSummaryColumns}
-              data={paginatedData}
-              renderCell={renderCell}
-            />
+          <div className="overflow-x-auto">
+            <div className="min-w-[1500px]">
+              <Table
+                columns={grnSummaryColumns}
+                data={paginatedData}
+                renderCell={renderCell}
+              />
+            </div>
           </div>
 
           {tableData.length === 0 && (

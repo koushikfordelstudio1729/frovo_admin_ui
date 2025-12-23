@@ -87,11 +87,9 @@ export default function BulkVerifyVendorsPage() {
       toast.success(
         `Successfully ${verificationStatus} ${selectedVendorIds.length} vendor(s)`
       );
-      router.push("/vendor/vendor-management");
+      router.push("/vendor/vendor-onboard");
     } catch (error: any) {
-      toast.error(
-        error?.response?.data?.message || "Failed to update vendors"
-      );
+      toast.error(error?.response?.data?.message || "Failed to update vendors");
     } finally {
       setSubmitting(false);
     }
@@ -100,15 +98,15 @@ export default function BulkVerifyVendorsPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-lg font-semibold text-gray-600">Loading Vendors...</p>
+        <p className="text-lg font-semibold text-gray-600">Loading Brands...</p>
       </div>
     );
   }
 
   const columns = [
     { key: "select", label: "" },
-    { key: "vendor_id", label: "Vendor ID" },
-    { key: "vendor_name", label: "Vendor Name" },
+    { key: "vendor_id", label: "Brand ID" },
+    { key: "vendor_name", label: "Brand Name" },
     { key: "vendor_category", label: "Category" },
     { key: "contact_phone", label: "Contact" },
     { key: "vendor_email", label: "Email" },
@@ -138,7 +136,11 @@ export default function BulkVerifyVendorsPage() {
 
       case "risk_rating":
         const riskVariant =
-          value === "low" ? "active" : value === "medium" ? "warning" : "rejected";
+          value === "low"
+            ? "active"
+            : value === "medium"
+            ? "warning"
+            : "rejected";
         return <Badge label={value.toUpperCase()} variant={riskVariant} />;
 
       default:
@@ -153,18 +155,18 @@ export default function BulkVerifyVendorsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
-      <BackHeader title="Bulk Verify Vendors" />
+      <BackHeader title="Bulk Verify Brands" />
 
       <div className="bg-white rounded-xl p-8 space-y-8">
         {/* Info */}
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
           <Label className="text-xl font-semibold text-blue-700 mb-2">
-            Bulk Vendor Verification
+            Bulk Brands Verification
           </Label>
           <p className="text-gray-700">
-            Select vendors from the list below and choose to verify or reject them
-            in bulk. All selected vendors will be updated with the same verification
-            status.
+            Select brands from the list below and choose to verify or reject
+            them in bulk. All selected brands will be updated with the same
+            verification status.
           </p>
         </div>
 
@@ -172,10 +174,10 @@ export default function BulkVerifyVendorsPage() {
         <div className="flex justify-between items-center">
           <div>
             <Label className="text-xl font-semibold">
-              Pending Vendors ({vendors.length})
+              Pending brands ({vendors.length})
             </Label>
             <p className="text-gray-500 text-sm mt-1">
-              {selectedVendorIds.length} vendor(s) selected
+              {selectedVendorIds.length} brands(s) selected
             </p>
           </div>
 
@@ -186,7 +188,9 @@ export default function BulkVerifyVendorsPage() {
               onChange={handleSelectAll}
               className="w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
             />
-            <span className="text-sm font-medium text-gray-700">Select All</span>
+            <span className="text-sm font-medium text-gray-700">
+              Select All
+            </span>
           </div>
         </div>
 
@@ -194,7 +198,7 @@ export default function BulkVerifyVendorsPage() {
         {vendors.length === 0 ? (
           <div className="text-center py-12 bg-gray-50 rounded-lg">
             <p className="text-gray-500 text-lg">
-              No pending vendors found for verification
+              No pending brands found for verification
             </p>
           </div>
         ) : (
@@ -209,7 +213,9 @@ export default function BulkVerifyVendorsPage() {
             <hr className="border-gray-200" />
 
             <div className="space-y-6">
-              <Label className="text-xl font-semibold">Verification Decision</Label>
+              <Label className="text-xl font-semibold">
+                Verification Decision
+              </Label>
 
               <div className="grid grid-cols-2 gap-6">
                 <Select
@@ -224,13 +230,13 @@ export default function BulkVerifyVendorsPage() {
                   <div className="flex items-center gap-2">
                     <CheckCircle className="text-green-600" size={24} />
                     <span className="text-sm font-medium text-gray-700">
-                      Verify: Approve vendors for operations
+                      Verify: Approve brand for operations
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <XCircle className="text-red-600" size={24} />
                     <span className="text-sm font-medium text-gray-700">
-                      Reject: Deny vendor access
+                      Reject: Deny brand access
                     </span>
                   </div>
                 </div>
@@ -257,9 +263,9 @@ export default function BulkVerifyVendorsPage() {
               >
                 {submitting
                   ? "Processing..."
-                  : `${verificationStatus === "verified" ? "Verify" : "Reject"} ${
-                      selectedVendorIds.length
-                    } Vendor(s)`}
+                  : `${
+                      verificationStatus === "verified" ? "Verify" : "Reject"
+                    } ${selectedVendorIds.length} Vendor(s)`}
               </Button>
 
               <Button

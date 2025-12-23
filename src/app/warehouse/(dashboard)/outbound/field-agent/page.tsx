@@ -340,10 +340,11 @@ export default function AssignFieldAgentPage() {
           <Select
             id="status-filter"
             label="Status"
+            variant="default"
             options={statusOptions}
             value={statusFilter}
             onChange={handleStatusFilterChange}
-            selectClassName="px-4 py-2 border-2 border-orange-300"
+            selectClassName="px-4 py-2"
           />
           <div className="flex items-end">
             {hasActiveFilters && (

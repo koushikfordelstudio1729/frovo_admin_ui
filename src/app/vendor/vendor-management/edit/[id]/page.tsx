@@ -138,9 +138,9 @@ export default function EditVendorPage() {
           internal_notes: vendorData.internal_notes || "",
         });
       } catch (error: any) {
-        toast.error("Failed to load vendor details");
+        toast.error("Failed to load brand details");
         console.error(error);
-        router.push("/vendor/vendor-management");
+        router.push("/vendor/vendor-onboard");
       } finally {
         setLoadingData(false);
       }
@@ -174,21 +174,21 @@ export default function EditVendorPage() {
 
     // Required fields
     if (!form.vendor_name.trim())
-      newErrors.vendor_name = "Vendor name is required";
+      newErrors.vendor_name = "Brand name is required";
     if (!form.vendor_billing_name.trim())
       newErrors.vendor_billing_name = "Billing name is required";
     if (form.vendor_type.length === 0)
-      newErrors.vendor_type = "At least one vendor type is required";
+      newErrors.vendor_type = "At least one brand type is required";
     if (!form.vendor_category)
-      newErrors.vendor_category = "Vendor category is required";
+      newErrors.vendor_category = "brand category is required";
     if (!form.primary_contact_name.trim())
       newErrors.primary_contact_name = "Contact name is required";
     if (!form.contact_phone.trim())
       newErrors.contact_phone = "Contact phone is required";
     if (!form.vendor_email.trim())
-      newErrors.vendor_email = "Vendor email is required";
+      newErrors.vendor_email = "Brand email is required";
     if (!form.vendor_address.trim())
-      newErrors.vendor_address = "Vendor address is required";
+      newErrors.vendor_address = "Brand address is required";
 
     // Field validations
     if (form.ifsc_code.trim()) {
@@ -197,7 +197,10 @@ export default function EditVendorPage() {
     }
 
     if (form.contact_phone.trim()) {
-      const validation = validateVendorField("PHONE", form.contact_phone.trim());
+      const validation = validateVendorField(
+        "PHONE",
+        form.contact_phone.trim()
+      );
       if (!validation.isValid) newErrors.contact_phone = validation.error;
     }
 
@@ -265,15 +268,15 @@ export default function EditVendorPage() {
 
       await updateVendor(vendorId, payload);
 
-      toast.success("Vendor updated successfully!");
-      router.push("/vendor/vendor-management");
+      toast.success("Brand updated successfully!");
+      router.push("/vendor/vendor-onboard");
     } catch (err: any) {
       const msg =
         err?.response?.data?.error ||
         err?.response?.data?.message ||
-        "Failed to update vendor";
+        "Failed to update brand";
       toast.error(msg);
-      console.error("Vendor Update Error →", err);
+      console.error("Brand Update Error →", err);
     } finally {
       setLoading(false);
     }
@@ -283,7 +286,7 @@ export default function EditVendorPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <p className="text-lg font-semibold text-gray-600">
-          Loading Vendor Details...
+          Loading Brand Details...
         </p>
       </div>
     );
@@ -292,21 +295,21 @@ export default function EditVendorPage() {
   if (!vendor) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-lg font-semibold text-gray-600">Vendor not found</p>
+        <p className="text-lg font-semibold text-gray-600">Brand not found</p>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
-      <BackHeader title={`Edit Vendor - ${vendor.vendor_id}`} />
+      <BackHeader title={`Edit Brand - ${vendor.vendor_id}`} />
 
       <div className="bg-white rounded-xl p-8 space-y-10">
         {/* Vendor Info Header */}
         <div className="p-4 bg-orange-50 rounded-lg">
           <p className="text-sm text-gray-700">
-            <strong>Vendor ID:</strong> {vendor.vendor_id} | <strong>CIN:</strong>{" "}
-            {vendor.cin}
+            <strong>Brand ID:</strong> {vendor.vendor_id} |{" "}
+            <strong>CIN:</strong> {vendor.cin}
           </p>
           <p className="text-sm text-gray-600 mt-1">
             Created: {new Date(vendor.createdAt).toLocaleDateString()} | Last
@@ -322,11 +325,11 @@ export default function EditVendorPage() {
         <div className="grid grid-cols-2 mt-8 gap-6">
           <div>
             <Input
-              label="Vendor Name *"
+              label="Brand Name *"
               value={form.vendor_name}
               variant="orange"
               onChange={(e) => handleChange("vendor_name", e.target.value)}
-              placeholder="Enter vendor name"
+              placeholder="Enter brand name"
             />
             {errors.vendor_name && (
               <p className="text-red-500 text-sm mt-1">{errors.vendor_name}</p>
@@ -335,10 +338,12 @@ export default function EditVendorPage() {
 
           <div>
             <Input
-              label="Vendor Billing Name *"
+              label="Brand Billing Name *"
               value={form.vendor_billing_name}
               variant="orange"
-              onChange={(e) => handleChange("vendor_billing_name", e.target.value)}
+              onChange={(e) =>
+                handleChange("vendor_billing_name", e.target.value)
+              }
               placeholder="Official billing name"
             />
             {errors.vendor_billing_name && (
@@ -350,7 +355,7 @@ export default function EditVendorPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Vendor Type(s) *
+              Brand Type(s) *
             </label>
             <select
               multiple
@@ -380,7 +385,7 @@ export default function EditVendorPage() {
 
           <div>
             <Select
-              label="Vendor Category *"
+              label="Brand Category *"
               options={VENDOR_CATEGORY_OPTIONS}
               value={form.vendor_category}
               variant="orange"
@@ -389,7 +394,9 @@ export default function EditVendorPage() {
               placeholder="Select category"
             />
             {errors.vendor_category && (
-              <p className="text-red-500 text-sm mt-1">{errors.vendor_category}</p>
+              <p className="text-red-500 text-sm mt-1">
+                {errors.vendor_category}
+              </p>
             )}
           </div>
 
@@ -407,7 +414,7 @@ export default function EditVendorPage() {
 
           <div>
             <Select
-              label="Vendor Status *"
+              label="Brand Status *"
               options={VENDOR_STATUS_OPTIONS}
               value={form.vendor_status}
               variant="orange"
@@ -441,7 +448,9 @@ export default function EditVendorPage() {
               label="Primary Contact Name *"
               value={form.primary_contact_name}
               variant="orange"
-              onChange={(e) => handleChange("primary_contact_name", e.target.value)}
+              onChange={(e) =>
+                handleChange("primary_contact_name", e.target.value)
+              }
               placeholder="Enter contact person name"
             />
             {errors.primary_contact_name && (
@@ -461,7 +470,9 @@ export default function EditVendorPage() {
               placeholder="+919876543210"
             />
             {errors.contact_phone ? (
-              <p className="text-red-500 text-sm mt-1">{errors.contact_phone}</p>
+              <p className="text-red-500 text-sm mt-1">
+                {errors.contact_phone}
+              </p>
             ) : (
               <p className="text-gray-500 text-xs mt-1">
                 Format: {VENDOR_VALIDATION_PATTERNS.PHONE.example}
@@ -471,11 +482,11 @@ export default function EditVendorPage() {
 
           <div>
             <Input
-              label="Vendor Email *"
+              label="Brand Email *"
               value={form.vendor_email}
               variant="orange"
               onChange={(e) => handleChange("vendor_email", e.target.value)}
-              placeholder="vendor@example.com"
+              placeholder="brand@example.com"
             />
             {errors.vendor_email && (
               <p className="text-red-500 text-sm mt-1">{errors.vendor_email}</p>
@@ -484,7 +495,7 @@ export default function EditVendorPage() {
 
           <div>
             <Textarea
-              label="Vendor Address *"
+              label="Brand Address *"
               variant="orange"
               placeholder="Enter complete address"
               value={form.vendor_address}
@@ -492,7 +503,9 @@ export default function EditVendorPage() {
               rows={3}
             />
             {errors.vendor_address && (
-              <p className="text-red-500 text-sm mt-1">{errors.vendor_address}</p>
+              <p className="text-red-500 text-sm mt-1">
+                {errors.vendor_address}
+              </p>
             )}
           </div>
         </div>
@@ -510,7 +523,9 @@ export default function EditVendorPage() {
               label="Bank Account Number *"
               value={form.bank_account_number}
               variant="orange"
-              onChange={(e) => handleChange("bank_account_number", e.target.value)}
+              onChange={(e) =>
+                handleChange("bank_account_number", e.target.value)
+              }
               onBlur={() => handleBlur("ACCOUNT_NUMBER")}
               placeholder="1234567890123456"
             />
@@ -652,7 +667,9 @@ export default function EditVendorPage() {
               type="date"
               value={form.contract_expiry_date}
               variant="orange"
-              onChange={(e) => handleChange("contract_expiry_date", e.target.value)}
+              onChange={(e) =>
+                handleChange("contract_expiry_date", e.target.value)
+              }
             />
           </div>
 
@@ -699,7 +716,7 @@ export default function EditVendorPage() {
             disabled={loading}
             className="px-8 rounded-lg"
           >
-            {loading ? "Updating..." : "Update Vendor"}
+            {loading ? "Updating..." : "Update Brand"}
           </Button>
 
           <Button

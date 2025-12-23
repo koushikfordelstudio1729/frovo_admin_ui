@@ -14,7 +14,9 @@ export default function CompanyDetailsPage() {
   const cin = params.cin as string;
 
   const [loading, setLoading] = useState(true);
-  const [data, setData] = useState<CompanyWithVendorsResponse["data"] | null>(null);
+  const [data, setData] = useState<CompanyWithVendorsResponse["data"] | null>(
+    null
+  );
 
   useEffect(() => {
     const fetchCompanyDetails = async () => {
@@ -23,7 +25,9 @@ export default function CompanyDetailsPage() {
         const res = await getCompanyWithVendors(cin);
         setData(res.data.data);
       } catch (error: any) {
-        toast.error(error?.response?.data?.message || "Failed to load company details");
+        toast.error(
+          error?.response?.data?.message || "Failed to load company details"
+        );
         router.push("/vendor/registered-company");
       } finally {
         setLoading(false);
@@ -48,6 +52,10 @@ export default function CompanyDetailsPage() {
     }
   };
 
+  const getRiskLabel = (risk: string) => {
+    return risk.charAt(0).toUpperCase() + risk.slice(1).toLowerCase();
+  };
+
   const getStatusBadgeVariant = (status: string) => {
     switch (status.toLowerCase()) {
       case "verified":
@@ -64,10 +72,16 @@ export default function CompanyDetailsPage() {
     }
   };
 
+  const getStatusLabel = (status: string) => {
+    return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-lg font-semibold text-gray-600">Loading company details...</p>
+        <p className="text-lg font-semibold text-gray-600">
+          Loading company details...
+        </p>
       </div>
     );
   }
@@ -109,7 +123,9 @@ export default function CompanyDetailsPage() {
         <Button
           variant="secondary"
           className="rounded-lg"
-          onClick={() => router.push(`/vendor/registered-company/edit/${company.cin}`)}
+          onClick={() =>
+            router.push(`/vendor/registered-company/edit/${company.cin}`)
+          }
         >
           Edit Company
         </Button>
@@ -120,18 +136,25 @@ export default function CompanyDetailsPage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           <div>
             <Label className="text-sm text-gray-600">CIN</Label>
-            <p className="text-lg font-semibold mt-1 text-gray-900">{company.cin}</p>
+            <p className="text-lg font-semibold mt-1 text-gray-900">
+              {company.cin}
+            </p>
           </div>
           <div>
             <Label className="text-sm text-gray-600">Legal Entity</Label>
-            <p className="text-lg font-semibold mt-1 text-gray-900">{company.legal_entity_structure}</p>
+            <p className="text-lg font-semibold mt-1 text-gray-900">
+              {company.legal_entity_structure}
+            </p>
           </div>
           <div>
             <Label className="text-sm text-gray-600">Company Status</Label>
             <div className="mt-1">
               <Badge
-                label={company.company_status.toUpperCase()}
-                variant={company.company_status === "active" ? "active" : "rejected"}
+                label={getStatusLabel(company.company_status)}
+                variant={
+                  company.company_status === "active" ? "active" : "rejected"
+                }
+                showDot
               />
             </div>
           </div>
@@ -139,51 +162,68 @@ export default function CompanyDetailsPage() {
             <Label className="text-sm text-gray-600">Risk Rating</Label>
             <div className="mt-1">
               <Badge
-                label={company.risk_rating.toUpperCase()}
+                label={getRiskLabel(company.risk_rating)}
                 variant={getRiskBadgeVariant(company.risk_rating)}
               />
             </div>
           </div>
           <div>
             <Label className="text-sm text-gray-600">GST Number</Label>
-            <p className="text-lg font-semibold mt-1 text-gray-900">{company.gst_number || "N/A"}</p>
+            <p className="text-lg font-semibold mt-1 text-gray-900">
+              {company.gst_number || "N/A"}
+            </p>
           </div>
           <div>
-            <Label className="text-sm text-gray-600">Date of Incorporation</Label>
+            <Label className="text-sm text-gray-600">
+              Date of Incorporation
+            </Label>
             <p className="text-lg font-semibold mt-1 text-gray-900">
               {new Date(company.date_of_incorporation).toLocaleDateString()}
             </p>
           </div>
-          <div>
+          <div className="min-w-0">
             <Label className="text-sm text-gray-600">Website</Label>
             <a
               href={company.corporate_website}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-lg font-semibold mt-1 text-orange-500 hover:underline block truncate"
+              className="text-lg font-semibold mt-1 text-orange-500 hover:underline block wrap-break-word"
             >
               {company.corporate_website}
             </a>
           </div>
-          <div>
+
+          <div className="min-w-0">
             <Label className="text-sm text-gray-600">Email</Label>
-            <p className="text-lg font-semibold mt-1 text-gray-900 truncate">{company.office_email}</p>
+            <p className="text-lg font-semibold mt-1 text-gray-900 block wrap-break-word">
+              {company.office_email}
+            </p>
           </div>
         </div>
 
         <div className="mt-4 pt-4 border-t">
-          <Label className="text-sm text-gray-600">Registered Office Address</Label>
-          <p className="text-base mt-1 text-gray-900">{company.company_address}</p>
+          <Label className="text-sm text-gray-600">
+            Registered Office Address
+          </Label>
+          <p className="text-base mt-1 text-gray-900">
+            {company.company_address}
+          </p>
         </div>
 
         <div className="mt-4 grid grid-cols-2 gap-4">
           <div>
-            <Label className="text-sm text-gray-600">Director / Authorized Signatory</Label>
-            <p className="text-lg font-semibold mt-1 text-gray-900">{company.directory_signature_name}</p>
+            <Label className="text-sm text-gray-600">
+              Director / Authorized Signatory
+            </Label>
+            <p className="text-lg font-semibold mt-1 text-gray-900">
+              {company.directory_signature_name}
+            </p>
           </div>
           <div>
             <Label className="text-sm text-gray-600">DIN</Label>
-            <p className="text-lg font-semibold mt-1 text-gray-900">{company.din}</p>
+            <p className="text-lg font-semibold mt-1 text-gray-900">
+              {company.din}
+            </p>
           </div>
         </div>
       </div>
@@ -214,30 +254,44 @@ export default function CompanyDetailsPage() {
 
       {/* Vendor Status Breakdown */}
       <div className="bg-white rounded-xl p-6 mb-6 shadow-sm">
-        <Label className="text-xl font-semibold mb-4">Vendor Status Breakdown</Label>
+        <Label className="text-xl font-semibold mb-4">
+          Vendor Status Breakdown
+        </Label>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
           <div className="text-center p-4 bg-green-50 rounded-lg">
-            <p className="text-2xl font-bold text-green-600">{statistics.by_status.verified}</p>
+            <p className="text-2xl font-bold text-green-600">
+              {statistics.by_status.verified}
+            </p>
             <p className="text-sm text-gray-600 mt-1">Verified</p>
           </div>
           <div className="text-center p-4 bg-yellow-50 rounded-lg">
-            <p className="text-2xl font-bold text-yellow-600">{statistics.by_status.pending}</p>
+            <p className="text-2xl font-bold text-yellow-600">
+              {statistics.by_status.pending}
+            </p>
             <p className="text-sm text-gray-600 mt-1">Pending</p>
           </div>
           <div className="text-center p-4 bg-blue-50 rounded-lg">
-            <p className="text-2xl font-bold text-blue-600">{statistics.by_status["in-review"]}</p>
+            <p className="text-2xl font-bold text-blue-600">
+              {statistics.by_status["in-review"]}
+            </p>
             <p className="text-sm text-gray-600 mt-1">In Review</p>
           </div>
           <div className="text-center p-4 bg-purple-50 rounded-lg">
-            <p className="text-2xl font-bold text-purple-600">{statistics.by_status.approved}</p>
+            <p className="text-2xl font-bold text-purple-600">
+              {statistics.by_status.approved}
+            </p>
             <p className="text-sm text-gray-600 mt-1">Approved</p>
           </div>
           <div className="text-center p-4 bg-red-50 rounded-lg">
-            <p className="text-2xl font-bold text-red-600">{statistics.by_status.rejected}</p>
+            <p className="text-2xl font-bold text-red-600">
+              {statistics.by_status.rejected}
+            </p>
             <p className="text-sm text-gray-600 mt-1">Rejected</p>
           </div>
           <div className="text-center p-4 bg-gray-50 rounded-lg">
-            <p className="text-2xl font-bold text-gray-600">{statistics.by_status.failed}</p>
+            <p className="text-2xl font-bold text-gray-600">
+              {statistics.by_status.failed}
+            </p>
             <p className="text-sm text-gray-600 mt-1">Failed</p>
           </div>
         </div>
@@ -249,7 +303,9 @@ export default function CompanyDetailsPage() {
         <div className="grid grid-cols-3 gap-4">
           {statistics.by_risk.low && (
             <div className="text-center p-4 bg-green-50 rounded-lg">
-              <p className="text-2xl font-bold text-green-600">{statistics.by_risk.low.count}</p>
+              <p className="text-2xl font-bold text-green-600">
+                {statistics.by_risk.low.count}
+              </p>
               <p className="text-sm text-gray-600 mt-1">
                 Low Risk ({statistics.by_risk.low.percentage}%)
               </p>
@@ -267,7 +323,9 @@ export default function CompanyDetailsPage() {
           )}
           {statistics.by_risk.high && (
             <div className="text-center p-4 bg-red-50 rounded-lg">
-              <p className="text-2xl font-bold text-red-600">{statistics.by_risk.high.count}</p>
+              <p className="text-2xl font-bold text-red-600">
+                {statistics.by_risk.high.count}
+              </p>
               <p className="text-sm text-gray-600 mt-1">
                 High Risk ({statistics.by_risk.high.percentage}%)
               </p>
@@ -278,13 +336,22 @@ export default function CompanyDetailsPage() {
 
       {/* Top Categories */}
       <div className="bg-white rounded-xl p-6 mb-6 shadow-sm">
-        <Label className="text-xl font-semibold mb-4">Top Vendor Categories</Label>
+        <Label className="text-xl font-semibold mb-4">
+          Top Vendor Categories
+        </Label>
         <div className="space-y-3">
           {statistics.top_categories.map((cat, idx) => (
-            <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <div
+              key={idx}
+              className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+            >
               <div className="flex items-center gap-3">
-                <span className="text-lg font-semibold text-orange-500">#{idx + 1}</span>
-                <span className="font-medium capitalize text-gray-900">{cat.category}</span>
+                <span className="text-lg font-semibold text-orange-500">
+                  #{idx + 1}
+                </span>
+                <span className="font-medium capitalize text-gray-900">
+                  {cat.category}
+                </span>
               </div>
               <div className="flex items-center gap-4">
                 <span className="text-gray-900">{cat.count} vendors</span>
@@ -302,14 +369,16 @@ export default function CompanyDetailsPage() {
           <Button
             variant="primary"
             className="rounded-lg"
-            onClick={() => router.push("/vendor/dashboard")}
+            onClick={() => router.push("/vendor/vendor-onboard")}
           >
             View All Vendors
           </Button>
         </div>
 
         {recent_vendors.length === 0 ? (
-          <p className="text-center text-gray-500 py-8">No vendors registered yet</p>
+          <p className="text-center text-gray-500 py-8">
+            No vendors registered yet
+          </p>
         ) : (
           <div className="space-y-3">
             {recent_vendors.map((vendor) => (
@@ -318,26 +387,33 @@ export default function CompanyDetailsPage() {
                 className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
               >
                 <div className="flex-1">
-                  <p className="font-semibold text-lg text-gray-900">{vendor.vendor_name}</p>
+                  <p className="font-semibold text-lg text-gray-900">
+                    {vendor.vendor_name}
+                  </p>
                   <p className="text-sm text-gray-600">
                     {vendor.vendor_id} • {vendor.vendor_category}
                   </p>
                   <p className="text-xs text-gray-500 mt-1">
-                    Created by {vendor.createdBy.name} ({vendor.createdBy.email})
+                    Created by {vendor.createdBy.name} ({vendor.createdBy.email}
+                    )
                   </p>
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="text-right">
                     <Badge
-                      label={vendor.verification_status.toUpperCase()}
-                      variant={getStatusBadgeVariant(vendor.verification_status)}
+                      label={getStatusLabel(vendor.verification_status)}
+                      variant={getStatusBadgeVariant(
+                        vendor.verification_status
+                      )}
+                      showDot
+                      className="mt-5"
                     />
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="flex justify-center text-xs text-gray-500 mt-1">
                       {new Date(vendor.createdAt).toLocaleDateString()}
                     </p>
                   </div>
                   <Badge
-                    label={vendor.risk_rating.toUpperCase()}
+                    label={getRiskLabel(vendor.risk_rating)}
                     variant={getRiskBadgeVariant(vendor.risk_rating)}
                   />
                 </div>

@@ -25,7 +25,7 @@ export const VendorHeader: React.FC = () => {
     }
     return null;
   }
-  const title = getCurrentPageLabel(vendorNavigation) || "Vendor Dashboard";
+  const title = getCurrentPageLabel(vendorNavigation) || "Brand Dashboard";
 
   return (
     <header className="fixed top-0 right-0 left-64 bg-white h-16 flex items-center justify-between px-8 z-40">

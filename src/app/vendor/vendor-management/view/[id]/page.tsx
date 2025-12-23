@@ -1,7 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { BackHeader, Button, Badge, Label, Select, Textarea, ConfirmDialog } from "@/components";
+import {
+  BackHeader,
+  Button,
+  Badge,
+  Label,
+  Select,
+  Textarea,
+  ConfirmDialog,
+} from "@/components";
 import { useRouter, useParams } from "next/navigation";
 import {
   getVendorById,
@@ -70,7 +78,7 @@ export default function ViewVendorPage() {
     } catch (error: any) {
       toast.error("Failed to load vendor details");
       console.error(error);
-      router.push("/vendor/vendor-management");
+      router.push("/vendor/vendor-onboard");
     } finally {
       setLoading(false);
     }
@@ -103,7 +111,7 @@ export default function ViewVendorPage() {
         verification_status: verificationStatus as any,
         notes: verificationNotes,
       });
-      toast.success("Vendor verification status updated successfully");
+      toast.success("Brand verification status updated successfully");
       setShowVerificationModal(false);
       setVerificationStatus("");
       setVerificationNotes("");
@@ -143,7 +151,9 @@ export default function ViewVendorPage() {
       loadDocuments();
       loadVendor();
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || "Failed to upload document");
+      toast.error(
+        error?.response?.data?.message || "Failed to upload document"
+      );
     } finally {
       setUploading(false);
     }
@@ -157,7 +167,9 @@ export default function ViewVendorPage() {
       loadDocuments();
       loadVendor();
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || "Failed to delete document");
+      toast.error(
+        error?.response?.data?.message || "Failed to delete document"
+      );
     }
   };
 
@@ -165,7 +177,7 @@ export default function ViewVendorPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <p className="text-lg font-semibold text-gray-600">
-          Loading Vendor Details...
+          Loading Brands Details...
         </p>
       </div>
     );
@@ -174,7 +186,7 @@ export default function ViewVendorPage() {
   if (!vendor) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-lg font-semibold text-gray-600">Vendor not found</p>
+        <p className="text-lg font-semibold text-gray-600">Brands not found</p>
       </div>
     );
   }
@@ -226,7 +238,7 @@ export default function ViewVendorPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
-      <BackHeader title="Vendor Details" />
+      <BackHeader title="Brand Details" />
 
       <div className="bg-white rounded-xl p-8 space-y-8">
         {/* Header Section */}
@@ -271,7 +283,9 @@ export default function ViewVendorPage() {
             </Button>
             <Button
               variant="secondary"
-              onClick={() => router.push(`/vendor/vendor-management/audit/${vendor._id}`)}
+              onClick={() =>
+                router.push(`/vendor/vendor-management/audit/${vendor._id}`)
+              }
               className="flex items-center gap-2 rounded-lg"
             >
               <History size={18} />
@@ -285,7 +299,7 @@ export default function ViewVendorPage() {
               className="flex items-center gap-2 rounded-lg"
             >
               <Edit2 size={18} />
-              Edit Vendor
+              Edit Brand
             </Button>
           </div>
         </div>
@@ -298,7 +312,7 @@ export default function ViewVendorPage() {
             <div className="flex items-center gap-3">
               <FileText className="text-orange-600" size={32} />
               <div>
-                <p className="text-sm text-gray-600">Vendor ID</p>
+                <p className="text-sm text-gray-600">Brand ID</p>
                 <p className="text-xl font-bold text-gray-900">
                   {vendor.vendor_id}
                 </p>
@@ -337,10 +351,10 @@ export default function ViewVendorPage() {
             Basic Information
           </Label>
           <dl className="space-y-0">
-            <InfoRow label="Vendor Name" value={vendor.vendor_name} />
+            <InfoRow label="Brand Name" value={vendor.vendor_name} />
             <InfoRow label="Billing Name" value={vendor.vendor_billing_name} />
             <InfoRow
-              label="Vendor Type"
+              label="Brand Type"
               value={vendor.vendor_type.join(", ").toUpperCase()}
             />
             <InfoRow
@@ -357,7 +371,10 @@ export default function ViewVendorPage() {
               value={vendor.material_categories_supplied?.join(", ") || "—"}
             />
             <InfoRow label="CIN" value={vendor.cin} />
-            <InfoRow label="Warehouse ID" value={vendor.warehouse_id || "N/A"} />
+            <InfoRow
+              label="Warehouse ID"
+              value={vendor.warehouse_id || "N/A"}
+            />
           </dl>
         </div>
 
@@ -419,7 +436,7 @@ export default function ViewVendorPage() {
           </Label>
           <dl className="space-y-0">
             <InfoRow
-              label="Vendor Status"
+              label="Brand Status"
               value={
                 <Badge
                   label={vendor.vendor_status.toUpperCase()}
@@ -440,7 +457,7 @@ export default function ViewVendorPage() {
               }
             />
             <InfoRow
-              label="Vendor Status Cycle"
+              label="Brand Status Cycle"
               value={vendor.vendor_status_cycle.toUpperCase()}
             />
             {vendor.verified_by && (
@@ -518,7 +535,7 @@ export default function ViewVendorPage() {
                     </p>
                     <Trash2
                       size={16}
-                      className="text-red-600 cursor-pointer hover:text-red-700 flex-shrink-0"
+                      className="text-red-600 cursor-pointer hover:text-red-700 shrink-0"
                       onClick={() =>
                         setDeleteDialog({
                           open: true,
@@ -604,7 +621,7 @@ export default function ViewVendorPage() {
             className="px-8 rounded-lg flex items-center gap-2"
           >
             <Edit2 size={18} />
-            Edit Vendor
+            Edit Brand
           </Button>
 
           <Button
@@ -619,9 +636,11 @@ export default function ViewVendorPage() {
 
       {/* Verification Modal */}
       {showVerificationModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-8 max-w-md w-full mx-4">
-            <h2 className="text-2xl font-semibold mb-6">Update Verification Status</h2>
+            <h2 className="text-2xl font-semibold mb-6 text-gray-700">
+              Update Verification Status
+            </h2>
 
             <div className="space-y-4">
               <Select
@@ -669,9 +688,11 @@ export default function ViewVendorPage() {
 
       {/* Upload Document Modal */}
       {showUploadModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-8 max-w-md w-full mx-4">
-            <h2 className="text-2xl font-semibold mb-6">Upload Document</h2>
+            <h2 className="text-2xl font-semibold mb-6 text-gray-700">
+              Upload Document
+            </h2>
 
             <div className="space-y-4">
               <div>
@@ -681,7 +702,7 @@ export default function ViewVendorPage() {
                 <input
                   type="file"
                   onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
-                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100"
+                  className="block w-full cursor-pointer text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100"
                 />
               </div>
 
@@ -702,7 +723,7 @@ export default function ViewVendorPage() {
                   type="date"
                   value={uploadExpiry}
                   onChange={(e) => setUploadExpiry(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                  className="w-full px-4 py-3 text-gray-700 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                 />
               </div>
             </div>
@@ -742,6 +763,7 @@ export default function ViewVendorPage() {
           onCancel={() =>
             setDeleteDialog({ open: false, documentId: "", documentName: "" })
           }
+          isOpen={false}
         />
       )}
     </div>

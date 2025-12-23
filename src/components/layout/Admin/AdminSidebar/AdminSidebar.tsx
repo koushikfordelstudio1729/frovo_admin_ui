@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-
 import {
   Shield,
   SquarePen,
@@ -36,24 +35,34 @@ const iconMap: Record<string, React.ComponentType<{ size?: number }>> = {
 
 export const AdminSidebar: React.FC = () => {
   const pathname = usePathname();
+
+  const group1 = adminNavigation.slice(0, 4);
+  const group2 = adminNavigation.slice(4, 8);
+  const group3 = adminNavigation.slice(8);
+
   return (
-    <aside className="w-64 bg-white text-white min-h-screen fixed left-0 top-0 overflow-auto p-6">
-      {/* Logo Section */}
-      <div className="mb-6 flex justify-center">
-        <Image
-          src="/images/logo.svg"
-          alt="frovo logo"
-          width={130}
-          height={50}
-          priority
-        />
+    <aside className="w-64 bg-white h-screen fixed left-0 top-0 flex flex-col">
+      {/* Logo */}
+      <div className="p-6 pb-4 shrink-0">
+        <div className="flex justify-center">
+          <Image
+            src="/images/logo.svg"
+            alt="frovo logo"
+            width={130}
+            height={50}
+            priority
+          />
+        </div>
       </div>
 
-      {/* Navigation Items */}
-      <nav className="space-y-4">
+      {/* Navigation with same scroll + orange scrollbar */}
+      <nav
+        className="flex-1 overflow-y-auto px-6 pb-6 space-y-5"
+        style={{ scrollbarWidth: "thin", scrollbarColor: "#fb923c #f3f4f6" }}
+      >
         {/* Group 1 */}
-        <div className="bg-[#FFEAE4] rounded-2xl py-4">
-          {adminNavigation.slice(0, 4).map((item) => {
+        <div className="bg-[#FFEAE4] rounded-2xl py-3 space-y-1">
+          {group1.map((item) => {
             const Icon = iconMap[item.icon];
             const isActive = pathname === item.href;
             return (
@@ -69,8 +78,8 @@ export const AdminSidebar: React.FC = () => {
         </div>
 
         {/* Group 2 */}
-        <div className="space-y-1 bg-[#FFEAE4] rounded-2xl py-4">
-          {adminNavigation.slice(4, 8).map((item) => {
+        <div className="bg-[#FFEAE4] rounded-2xl py-3 space-y-1">
+          {group2.map((item) => {
             const Icon = iconMap[item.icon];
             const isActive = pathname === item.href;
             return (
@@ -86,8 +95,8 @@ export const AdminSidebar: React.FC = () => {
         </div>
 
         {/* Group 3 */}
-        <div className="space-y-1 bg-[#FFEAE4] rounded-2xl py-4">
-          {adminNavigation.slice(8).map((item) => {
+        <div className="bg-[#FFEAE4] rounded-2xl py-3 space-y-1">
+          {group3.map((item) => {
             const Icon = iconMap[item.icon];
             const isActive = pathname === item.href;
             return (

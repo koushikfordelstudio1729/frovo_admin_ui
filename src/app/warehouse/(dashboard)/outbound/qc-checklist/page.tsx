@@ -14,8 +14,13 @@ import {
   Drawer,
   Pagination,
   SearchableSelect,
+  BackHeader,
 } from "@/components";
-import { useQCTemplates, usePurchaseOrders, useMyWarehouse } from "@/hooks/warehouse";
+import {
+  useQCTemplates,
+  usePurchaseOrders,
+  useMyWarehouse,
+} from "@/hooks/warehouse";
 import type { QCTemplate, CreateQCTemplatePayload } from "@/types";
 
 interface Parameter {
@@ -359,18 +364,7 @@ export default function QCChecklistTemplatesPage() {
     <div className="min-h-screen bg-gray-50 p-4">
       {/* Header */}
       <div className="flex items-center justify-between gap-3 my-4">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => router.back()}
-            className="p-2 hover:cursor-pointer"
-            aria-label="Go back"
-          >
-            <ArrowLeft className="w-6 h-6 text-gray-700" />
-          </button>
-          <h1 className="text-2xl font-bold text-gray-900">
-            QC Checklist Templates
-          </h1>
-        </div>
+        <BackHeader title="QC Checklist template" />
         <Button
           variant="primary"
           size="md"
@@ -512,7 +506,7 @@ export default function QCChecklistTemplatesPage() {
       </Drawer>
 
       {/* Filter + Search Section */}
-      <div className="pt-6 mb-6">
+      <div className="pt-4 mb-6">
         <div className="grid grid-cols-3 gap-4">
           <Input
             id="search"
@@ -520,7 +514,7 @@ export default function QCChecklistTemplatesPage() {
             placeholder="Search by template title or SKU"
             value={searchTerm}
             onChange={handleSearchChange}
-            variant="orange"
+            variant="default"
           />
           <div className="flex items-end">
             {hasActiveFilters && (

@@ -1,9 +1,23 @@
 "use client";
 
-import { ArrowLeft } from "lucide-react";
+import {
+  ArrowLeft,
+  Search,
+  CheckSquare,
+  Square,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useCallback } from "react";
-import { Button, Input, Textarea, Select } from "@/components/common";
+import {
+  Button,
+  Input,
+  Textarea,
+  Select,
+  BackHeader,
+} from "@/components/common";
+import SuccessDialog from "@/components/common/SuccessDialog"; // Import SuccessDialog
 import { api } from "@/services/api";
 import { apiConfig } from "@/config/admin";
 
@@ -40,24 +54,31 @@ const CreateRoleForm: React.FC = () => {
   const [formData, setFormData] = useState({
     roleName: "",
     department: "",
-    scopeLevel: "global", // Default to global
+    scopeLevel: "global",
     description: "",
     uiAccess: "",
   });
 
   const [permissions, setPermissions] = useState<Permission[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
-
-  const [selectedPermissions, setSelectedPermissions] = useState<Set<string>>(new Set());
+  const [selectedPermissions, setSelectedPermissions] = useState<Set<string>>(
+    new Set()
+  );
+  const [searchQuery, setSearchQuery] = useState("");
+  const [expandedModules, setExpandedModules] = useState<Set<string>>(
+    new Set()
+  );
 
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [successConfig, setSuccessConfig] = useState({
+    title: "",
+    message: "",
+  });
 
-  const scopeLevelOptions = [
-    { value: "global", label: "Global" },
-  ];
+  const scopeLevelOptions = [{ value: "global", label: "Global" }];
 
   const uiAccessOptions = [
     { value: "Admin Panel", label: "Admin Panel" },
@@ -71,33 +92,39 @@ const CreateRoleForm: React.FC = () => {
       const response = await api.get<{
         success: boolean;
         message: string;
-        data: Permission[] | { permissions: { [group: string]: Array<{
-          id: string;
-          key: string;
-          description: string;
-          module: string;
-          action: string;
-        }> } };
+        data:
+          | Permission[]
+          | {
+              permissions: {
+                [group: string]: Array<{
+                  id: string;
+                  key: string;
+                  description: string;
+                  module: string;
+                  action: string;
+                }>;
+              };
+            };
       }>(apiConfig.endpoints.permissions.list);
 
       if (response.data.success) {
-        // Handle both response formats
         if (Array.isArray(response.data.data)) {
           setPermissions(response.data.data);
-        } else if (response.data.data && 'permissions' in response.data.data) {
-          // Flatten grouped permissions into a single array
+        } else if (response.data.data && "permissions" in response.data.data) {
           const allPermissions: Permission[] = [];
-          Object.values(response.data.data.permissions).forEach((groupPerms) => {
-            groupPerms.forEach((perm) => {
-              allPermissions.push({
-                _id: perm.id,
-                name: perm.key,
-                description: perm.description,
-                module: perm.module,
-                action: perm.action,
+          Object.values(response.data.data.permissions).forEach(
+            (groupPerms) => {
+              groupPerms.forEach((perm) => {
+                allPermissions.push({
+                  _id: perm.id,
+                  name: perm.key,
+                  description: perm.description,
+                  module: perm.module,
+                  action: perm.action,
+                });
               });
-            });
-          });
+            }
+          );
           setPermissions(allPermissions);
         }
       }
@@ -114,14 +141,11 @@ const CreateRoleForm: React.FC = () => {
         data: Department[];
       }>(apiConfig.endpoints.departments);
 
-      console.log("Departments API Response:", response.data);
-
       if (response.data.success) {
         setDepartments(response.data.data || []);
       }
     } catch (err) {
       console.error("Error fetching departments:", err);
-      // Set empty array on error so dropdown doesn't break
       setDepartments([]);
     }
   }, []);
@@ -129,10 +153,7 @@ const CreateRoleForm: React.FC = () => {
   const fetchInitialData = useCallback(async () => {
     try {
       setLoading(true);
-      await Promise.all([
-        fetchPermissions(),
-        fetchDepartments(),
-      ]);
+      await Promise.all([fetchPermissions(), fetchDepartments()]);
     } catch (err) {
       console.error("Error fetching initial data:", err);
     } finally {
@@ -144,6 +165,17 @@ const CreateRoleForm: React.FC = () => {
     fetchInitialData();
   }, [fetchInitialData]);
 
+  // Auto-dismiss success dialog after 2 seconds
+  useEffect(() => {
+    if (showSuccess) {
+      const timer = setTimeout(() => {
+        setShowSuccess(false);
+      }, 2000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [showSuccess]);
+
   const handlePermissionToggle = (permissionName: string) => {
     setSelectedPermissions((prev) => {
       const newSet = new Set(prev);
@@ -152,6 +184,37 @@ const CreateRoleForm: React.FC = () => {
       } else {
         newSet.add(permissionName);
       }
+      return newSet;
+    });
+  };
+
+  const toggleModule = (module: string) => {
+    setExpandedModules((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(module)) {
+        newSet.delete(module);
+      } else {
+        newSet.add(module);
+      }
+      return newSet;
+    });
+  };
+
+  const toggleAllModulePermissions = (module: string) => {
+    const modulePermissions = groupedPermissions[module];
+    const allSelected = modulePermissions.every((p) =>
+      selectedPermissions.has(p.name)
+    );
+
+    setSelectedPermissions((prev) => {
+      const newSet = new Set(prev);
+      modulePermissions.forEach((p) => {
+        if (allSelected) {
+          newSet.delete(p.name);
+        } else {
+          newSet.add(p.name);
+        }
+      });
       return newSet;
     });
   };
@@ -186,7 +249,13 @@ const CreateRoleForm: React.FC = () => {
       const response = await api.post(apiConfig.endpoints.roles, payload);
 
       if (response.data.success) {
+        // Show success dialog
+        setSuccessConfig({
+          title: "Role Created Successfully!",
+          message: `The role "${formData.roleName}" has been created and is ready to be assigned to users.`,
+        });
         setShowSuccess(true);
+
         // Reset form
         setFormData({
           roleName: "",
@@ -196,8 +265,13 @@ const CreateRoleForm: React.FC = () => {
           uiAccess: "",
         });
         setSelectedPermissions(new Set());
+        setSearchQuery("");
+
+        // Navigate after dialog closes (2 seconds + small delay)
+        setTimeout(() => {
+          router.push("/admin/roles-permissions");
+        }, 2500);
       }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(err.response?.data?.message || "Failed to create role");
       console.error("Error creating role:", err);
@@ -207,6 +281,13 @@ const CreateRoleForm: React.FC = () => {
   };
 
   const handleSaveDraft = () => {
+    // Show success dialog for draft
+    setSuccessConfig({
+      title: "Draft Saved Successfully!",
+      message: `Your role draft has been saved. You can continue editing it later.`,
+    });
+    setShowSuccess(true);
+
     console.log("Draft saved:", formData);
   };
 
@@ -219,85 +300,63 @@ const CreateRoleForm: React.FC = () => {
     return acc;
   }, {} as { [key: string]: Permission[] });
 
+  // Filter permissions based on search
+  const filteredGroupedPermissions = Object.keys(groupedPermissions).reduce(
+    (acc, module) => {
+      const filteredPerms = groupedPermissions[module].filter(
+        (perm) =>
+          perm.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          perm.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          module.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      if (filteredPerms.length > 0) {
+        acc[module] = filteredPerms;
+      }
+      return acc;
+    },
+    {} as { [key: string]: Permission[] }
+  );
+
+  // Calculate module statistics
+  const getModuleStats = (module: string) => {
+    const total = groupedPermissions[module].length;
+    const selected = groupedPermissions[module].filter((p) =>
+      selectedPermissions.has(p.name)
+    ).length;
+    return { total, selected };
+  };
+
+  // Select all permissions
+  const selectAllPermissions = () => {
+    const allPermissionNames = permissions.map((p) => p.name);
+    setSelectedPermissions(new Set(allPermissionNames));
+  };
+
+  // Deselect all permissions
+  const deselectAllPermissions = () => {
+    setSelectedPermissions(new Set());
+  };
+
   return (
     <div className="min-h-full pb-16">
-      {/* Success Modal */}
-      {showSuccess && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white rounded-xl p-8 max-w-md w-full mx-4 shadow-2xl">
-            <div className="text-center">
-              {/* Success Icon */}
-              <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4">
-                <svg
-                  className="h-10 w-10 text-green-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
-              </div>
-
-              {/* Success Message */}
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                Role Created Successfully!
-              </h3>
-              <p className="text-gray-600 mb-6">
-                The role has been created and is ready to be assigned to users.
-              </p>
-
-              {/* Buttons */}
-              <div className="flex gap-3 justify-center">
-                <Button
-                  variant="primary"
-                  size="md"
-                  onClick={() => {
-                    setShowSuccess(false);
-                    router.push("/admin/roles");
-                  }}
-                  className="px-6"
-                >
-                  View Roles
-                </Button>
-                <Button
-                  variant="secondary"
-                  size="md"
-                  onClick={() => setShowSuccess(false)}
-                  className="px-6"
-                >
-                  Create Another
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Success Dialog */}
+      <SuccessDialog
+        open={showSuccess}
+        title={successConfig.title}
+        message={successConfig.message}
+        onClose={() => setShowSuccess(false)}
+      />
 
       {/* Header */}
-      <div className="flex items-center gap-3 mb-8 mt-4">
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className="text-gray-900 mt-8 hover:text-gray-700 transition-colors"
-          aria-label="Go back"
-        >
-          <ArrowLeft size={28} />
-        </button>
-        <h1 className="text-3xl font-semibold text-gray-900 pt-8">
-          Create new role
-        </h1>
+      <div className="flex items-center gap-3 mt-4">
+        <BackHeader title="Create new role" />
       </div>
 
       {/* Form Container */}
       <div className="bg-white rounded-xl p-8">
         {/* Title */}
         <div className="flex items-center justify-center mb-8">
-          <h2 className="text-4xl text-gray-900 font-bold">Basic Info</h2>
+          <h2 className="text-3xl text-gray-900 font-bold">Basic Info</h2>
         </div>
 
         {/* Error Message */}
@@ -326,13 +385,25 @@ const CreateRoleForm: React.FC = () => {
               label="Department (Optional)"
               variant="orange"
               selectClassName="px-6 py-4 border-2 bg-white text-base"
-              options={loading ? [] : departments.filter(dept => dept.id && dept.name).map((dept) => ({
-                value: dept.id,
-                label: dept.name,
-              }))}
+              options={
+                loading
+                  ? []
+                  : departments
+                      .filter((dept) => dept.id && dept.name)
+                      .map((dept) => ({
+                        value: dept.id,
+                        label: dept.name,
+                      }))
+              }
               value={formData.department}
               onChange={(val) => setFormData({ ...formData, department: val })}
-              placeholder={loading ? "Loading departments..." : departments.length === 0 ? "No departments available" : "Select Department"}
+              placeholder={
+                loading
+                  ? "Loading departments..."
+                  : departments.length === 0
+                  ? "No departments available"
+                  : "Select Department"
+              }
             />
           </div>
 
@@ -374,94 +445,171 @@ const CreateRoleForm: React.FC = () => {
 
           {/* Permissions Section */}
           <div className="mt-8">
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">
-              Permissions *
-            </h3>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-2xl font-bold text-gray-900">
+                Permissions *
+              </h3>
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-gray-600 bg-orange-50 px-4 py-2 rounded-full font-medium">
+                  {selectedPermissions.size} of {permissions.length} selected
+                </span>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={selectAllPermissions}
+                  className="text-sm"
+                >
+                  Select All
+                </Button>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={deselectAllPermissions}
+                  className="text-sm"
+                >
+                  Clear All
+                </Button>
+              </div>
+            </div>
+
+            {/* Search Permissions */}
+            <div className="mb-6">
+              <Input
+                variant="search"
+                placeholder="Search permissions by name or description..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                startIcon={<Search size={20} />}
+              />
+            </div>
 
             {loading ? (
               <div className="text-center py-8 text-gray-500">
                 Loading permissions...
               </div>
             ) : (
-              <div className="space-y-6">
-                {Object.keys(groupedPermissions).map((module) => (
-                  <div
-                    key={module}
-                    className="border border-gray-200 rounded-lg p-6"
-                  >
-                    <div className="flex items-center justify-between mb-4">
-                      <h4 className="text-lg font-semibold text-gray-900 capitalize">
-                        {module}
-                      </h4>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const modulePermissions = groupedPermissions[module];
-                          const allSelected = modulePermissions.every((p) =>
-                            selectedPermissions.has(p.name)
-                          );
-
-                          modulePermissions.forEach((p) => {
-                            if (allSelected) {
-                              selectedPermissions.delete(p.name);
-                            } else {
-                              selectedPermissions.add(p.name);
-                            }
-                          });
-                          setSelectedPermissions(new Set(selectedPermissions));
-                        }}
-                        className="text-sm text-blue-600 hover:text-blue-800 font-medium"
-                      >
-                        {groupedPermissions[module].every((p) =>
-                          selectedPermissions.has(p.name)
-                        )
-                          ? "Deselect All"
-                          : "Select All"}
-                      </button>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {groupedPermissions[module].map((permission) => (
-                        <div
-                          key={permission._id}
-                          className="flex items-start gap-3 p-3 bg-gray-50 rounded-md"
-                        >
-                          <input
-                            type="checkbox"
-                            id={permission._id}
-                            checked={selectedPermissions.has(permission.name)}
-                            onChange={() =>
-                              handlePermissionToggle(permission.name)
-                            }
-                            className="mt-1 accent-blue-600 w-5 h-5 rounded transition border-gray-300 shadow-sm cursor-pointer"
-                          />
-                          <label
-                            htmlFor={permission._id}
-                            className="flex-1 cursor-pointer"
-                          >
-                            <div className="font-medium text-gray-900">
-                              {permission.name}
-                            </div>
-                            <div className="text-sm text-gray-600">
-                              {permission.description}
-                            </div>
-                          </label>
-                        </div>
-                      ))}
-                    </div>
+              <div className="space-y-3">
+                {Object.keys(filteredGroupedPermissions).length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    No permissions found matching your search.
                   </div>
-                ))}
+                ) : (
+                  Object.keys(filteredGroupedPermissions).map((module) => {
+                    const stats = getModuleStats(module);
+                    const isExpanded = expandedModules.has(module);
+                    const allSelected = stats.selected === stats.total;
+
+                    return (
+                      <div
+                        key={module}
+                        className="border-2 border-gray-200 rounded-lg overflow-hidden hover:border-orange-300 transition-colors"
+                      >
+                        {/* Module Header */}
+                        <div
+                          className="bg-gray-50 px-6 py-4 cursor-pointer hover:bg-gray-100 transition-colors"
+                          onClick={() => toggleModule(module)}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleAllModulePermissions(module);
+                                }}
+                                className="hover:scale-110 transition-transform"
+                              >
+                                {allSelected ? (
+                                  <CheckSquare className="w-6 h-6 text-orange-600" />
+                                ) : stats.selected > 0 ? (
+                                  <div className="w-6 h-6 border-2 border-orange-600 rounded bg-orange-100 flex items-center justify-center">
+                                    <div className="w-3 h-3 bg-orange-600 rounded-sm" />
+                                  </div>
+                                ) : (
+                                  <Square className="w-6 h-6 text-gray-400" />
+                                )}
+                              </button>
+                              <div>
+                                <h4 className="text-lg font-semibold text-gray-900 capitalize">
+                                  {module}
+                                </h4>
+                                <p className="text-sm text-gray-600">
+                                  {stats.selected} of {stats.total} permissions
+                                  selected
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <span className="text-xs bg-gray-200 text-gray-700 px-3 py-1 rounded-full font-medium">
+                                {stats.total} permissions
+                              </span>
+                              {isExpanded ? (
+                                <ChevronUp className="w-5 h-5 text-gray-600" />
+                              ) : (
+                                <ChevronDown className="w-5 h-5 text-gray-600" />
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Module Permissions */}
+                        {isExpanded && (
+                          <div className="p-6 bg-white">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                              {filteredGroupedPermissions[module].map(
+                                (permission) => (
+                                  <div
+                                    key={permission._id}
+                                    className={`flex items-start gap-3 p-4 rounded-lg border-2 transition-all cursor-pointer ${
+                                      selectedPermissions.has(permission.name)
+                                        ? "bg-orange-50 border-orange-300 hover:bg-orange-100"
+                                        : "bg-gray-50 border-gray-200 hover:bg-gray-100 hover:border-gray-300"
+                                    }`}
+                                    onClick={() =>
+                                      handlePermissionToggle(permission.name)
+                                    }
+                                  >
+                                    <input
+                                      type="checkbox"
+                                      id={permission._id}
+                                      checked={selectedPermissions.has(
+                                        permission.name
+                                      )}
+                                      onChange={() =>
+                                        handlePermissionToggle(permission.name)
+                                      }
+                                      className="mt-1 accent-orange-600 w-5 h-5 rounded transition border-gray-300 shadow-sm cursor-pointer"
+                                      onClick={(e) => e.stopPropagation()}
+                                    />
+                                    <label
+                                      htmlFor={permission._id}
+                                      className="flex-1 cursor-pointer"
+                                    >
+                                      <div className="font-semibold text-gray-900 mb-1">
+                                        {permission.name}
+                                      </div>
+                                      <div className="text-sm text-gray-600">
+                                        {permission.description}
+                                      </div>
+                                    </label>
+                                  </div>
+                                )
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })
+                )}
               </div>
             )}
           </div>
 
-          {/* Selected Permissions Count */}
-          <div className="text-center text-sm text-gray-600 py-2">
-            {selectedPermissions.size} permission(s) selected
-          </div>
-
           {/* Buttons */}
-          <div className="flex gap-4 justify-center pt-4">
+          <div className="flex gap-4 justify-center pt-6">
             <Button
               type="submit"
               variant="primary"

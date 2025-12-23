@@ -37,7 +37,7 @@ export const ROLE_ROUTES: Record<string, RoleRouteConfig> = {
   vendor_admin: {
     systemRole: "vendor_admin",
     uiAccess: "Admin Panel",
-    defaultRoute: "/vendor/dashboard",
+    defaultRoute: "/vendor/registered-company",
     description: "Vendor management with full control over vendor lifecycle",
   },
 
@@ -45,7 +45,7 @@ export const ROLE_ROUTES: Record<string, RoleRouteConfig> = {
   vendor: {
     systemRole: "vendor",
     uiAccess: "Vendor Portal",
-    defaultRoute: "/vendor/dashboard",
+    defaultRoute: "/vendor/registered-company",
     description: "Vendor portal access",
   },
 
@@ -78,7 +78,8 @@ export const ROLE_ROUTES: Record<string, RoleRouteConfig> = {
     systemRole: "warehouse_manager_full",
     uiAccess: "Warehouse Portal",
     defaultRoute: "/warehouse/dashboard",
-    description: "Warehouse operations with full access - can manage POs, create GRNs, and manage inventory",
+    description:
+      "Warehouse operations with full access - can manage POs, create GRNs, and manage inventory",
   },
 
   // Warehouse Manager - Standard warehouse manager
@@ -118,7 +119,9 @@ export const getRedirectPathByRole = (systemRole: string): string => {
   }
 
   // Fallback to default route if role not found
-  console.warn(`Role '${systemRole}' not found in routing configuration. Using default fallback.`);
+  console.warn(
+    `Role '${systemRole}' not found in routing configuration. Using default fallback.`
+  );
   return DEFAULT_FALLBACK_ROUTE;
 };
 
@@ -140,7 +143,9 @@ export const getRedirectPathByUser = (user: {
   const primaryRole = user.roles[0].systemRole || user.roles[0].key;
 
   if (!primaryRole) {
-    console.warn("User role has no systemRole or key property. Using default fallback route.");
+    console.warn(
+      "User role has no systemRole or key property. Using default fallback route."
+    );
     return DEFAULT_FALLBACK_ROUTE;
   }
 
@@ -169,7 +174,9 @@ export const isValidRole = (systemRole: string): boolean => {
  * @param systemRole - The system role key
  * @returns Role configuration or undefined
  */
-export const getRoleConfig = (systemRole: string): RoleRouteConfig | undefined => {
+export const getRoleConfig = (
+  systemRole: string
+): RoleRouteConfig | undefined => {
   return ROLE_ROUTES[systemRole];
 };
 

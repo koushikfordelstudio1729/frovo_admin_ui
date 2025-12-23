@@ -264,7 +264,7 @@ const DispatchSummary = () => {
   };
 
   return (
-    <div className="min-h-screen pt-4">
+    <div className="min-h-full pt-4 w-full overflow-x-auto">
       {/* Header + Create button top-right */}
       <div className="flex items-center justify-between">
         <BackHeader title="Dispatch Summary" />
@@ -283,10 +283,11 @@ const DispatchSummary = () => {
           <Select
             id="status-filter"
             label="Status"
+            variant="default"
             options={statusOptions}
             value={statusFilter}
             onChange={handleStatusFilterChange}
-            selectClassName="px-4 py-3 border-2 border-orange-300"
+            selectClassName="px-4 py-3"
           />
           <div className="w-32 flex items-end">
             {hasActiveFilters && (
@@ -346,12 +347,14 @@ const DispatchSummary = () => {
       {/* Table + Pagination */}
       {!loading && !error && (
         <>
-          <div className="mt-6">
-            <Table
-              columns={dispatchSummaryColumns}
-              data={paginatedData}
-              renderCell={renderCell}
-            />
+          <div className="overflow-x-auto mt-4">
+            <div className="min-w-[1400px]">
+              <Table
+                columns={dispatchSummaryColumns}
+                data={paginatedData}
+                renderCell={renderCell}
+              />
+            </div>
           </div>
 
           {/* Empty State */}

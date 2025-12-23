@@ -61,9 +61,7 @@ export default function VendorProfilePage() {
           "Profile endpoint not found. Please verify the backend has implemented GET /api/vendors/profile/me"
         );
       } else {
-        toast.error(
-          error?.response?.data?.message || "Failed to load profile"
-        );
+        toast.error(error?.response?.data?.message || "Failed to load profile");
       }
     } finally {
       setLoading(false);
@@ -162,7 +160,7 @@ export default function VendorProfilePage() {
       </div>
 
       {/* User Info Card */}
-      <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl p-8 mb-6 shadow-lg text-white">
+      <div className="bg-linear-to-r from-orange-500 to-orange-600 rounded-xl p-8 mb-6 shadow-lg text-white">
         <div className="flex items-center gap-6">
           <div className="bg-white/20 backdrop-blur-sm p-6 rounded-full">
             <User size={48} className="text-white" />
@@ -177,7 +175,7 @@ export default function VendorProfilePage() {
               <span className="font-bold text-2xl">
                 {user_info.total_vendors_created}
               </span>{" "}
-              vendors
+              brands
             </p>
           </div>
         </div>
@@ -185,12 +183,10 @@ export default function VendorProfilePage() {
 
       {/* Statistics Cards */}
       <div className="mb-6">
-        <Label className="text-xl font-semibold mb-4">
-          Vendor Statistics
-        </Label>
+        <Label className="text-xl font-semibold mb-4">Brand Statistics</Label>
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mt-4">
           <StatCard
-            title="Total Vendors"
+            title="Total Brands"
             count={statistics.total_vendors.toString()}
             icon={TrendingUp}
           />
@@ -294,19 +290,19 @@ export default function VendorProfilePage() {
       <div className="bg-white rounded-xl p-6 shadow-sm">
         <div className="flex justify-between items-center mb-6">
           <Label className="text-xl font-semibold">
-            My Created Vendors ({vendors.length})
+            My Created Brands ({vendors.length})
           </Label>
         </div>
 
         {vendors.length === 0 ? (
           <div className="text-center py-12 bg-gray-50 rounded-lg">
-            <p className="text-gray-500 text-lg">No vendors created yet</p>
+            <p className="text-gray-500 text-lg">No brands created yet</p>
             <p className="text-gray-400 text-sm mt-2">
-              Start by creating your first vendor
+              Start by creating your first brand
             </p>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-4 max-h-[520px] overflow-y-auto pr-1">
             {vendors.map((vendor) => (
               <div
                 key={vendor._id}
@@ -321,7 +317,9 @@ export default function VendorProfilePage() {
                       {vendor.vendor_name}
                     </h3>
                     <Badge
-                      label={vendor.verification_status?.toUpperCase() || "PENDING"}
+                      label={
+                        vendor.verification_status?.toUpperCase() || "PENDING"
+                      }
                       variant={getStatusBadgeVariant(
                         vendor.verification_status || "pending"
                       )}
@@ -361,7 +359,9 @@ export default function VendorProfilePage() {
                 <div className="flex items-center gap-4">
                   <Badge
                     label={vendor.risk_rating?.toUpperCase() || "MEDIUM"}
-                    variant={getRiskBadgeVariant(vendor.risk_rating || "medium")}
+                    variant={getRiskBadgeVariant(
+                      vendor.risk_rating || "medium"
+                    )}
                   />
                 </div>
               </div>
@@ -386,8 +386,8 @@ export default function VendorProfilePage() {
                 Confirm Logout
               </h2>
               <p className="text-gray-600">
-                Are you sure you want to logout? You will need to login again
-                to access your account.
+                Are you sure you want to logout? You will need to login again to
+                access your account.
               </p>
             </div>
 

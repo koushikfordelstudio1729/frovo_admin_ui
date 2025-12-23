@@ -16,6 +16,7 @@ type BadgeVariant =
   | "warning"
   | "info"
   | "orange"
+  | "delete"
   | "custom";
 
 type BadgeSize = "sm" | "md" | "lg";
@@ -43,6 +44,7 @@ const variantStyles: Record<BadgeVariant, string> = {
   warning: "bg-yellow-400 text-yellow-800",
   info: "bg-blue-100 text-blue-800",
   orange: "bg-orange-500 text-white",
+  delete: "bg-red-700 text-white",
   custom: "",
 };
 

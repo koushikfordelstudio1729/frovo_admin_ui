@@ -548,18 +548,20 @@ export default function RejectionReturnQueuePage() {
           <Select
             id="status-filter"
             label="Status"
+            variant="default"
             options={statusOptions}
             value={statusFilter}
             onChange={handleStatusFilterChange}
-            selectClassName="px-4 py-3 border-2 border-orange-300"
+            selectClassName="px-4 py-3"
           />
           <Select
             id="return-type-filter"
             label="Return Type"
+            variant="default"
             options={returnTypeOptions}
             value={returnTypeFilter}
             onChange={handleReturnTypeFilterChange}
-            selectClassName="px-4 py-3 border-2 border-orange-300"
+            selectClassName="px-4 py-3"
           />
           <div className="flex items-end">
             {hasActiveFilters && (

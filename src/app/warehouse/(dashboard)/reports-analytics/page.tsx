@@ -48,7 +48,10 @@ export default function ReportsAnalyticsPage() {
     const fetchReportData = async () => {
       try {
         setLoading(true);
-        const response = await warehouseAPI.getGenericReport(dataType, warehouse._id);
+        const response = await warehouseAPI.getGenericReport(
+          dataType,
+          warehouse._id
+        );
         const apiResponse = response.data;
 
         if (apiResponse.success) {
@@ -65,7 +68,7 @@ export default function ReportsAnalyticsPage() {
   }, [dataType, warehouse?._id]);
 
   // Export report
-  const handleExportReport = async (format: 'csv' | 'json') => {
+  const handleExportReport = async (format: "csv" | "json") => {
     if (!dataType) {
       toast.error("Please select a data type first");
       return;
@@ -85,24 +88,32 @@ export default function ReportsAnalyticsPage() {
         warehouse._id
       );
 
-      if (format === 'csv') {
+      if (format === "csv") {
         // Create a blob from the response and download it
-        const blob = new Blob([response.data], { type: 'text/csv' });
+        const blob = new Blob([response.data], { type: "text/csv" });
         const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
+        const link = document.createElement("a");
         link.href = url;
-        link.setAttribute('download', `${dataType}_${new Date().toISOString().split('T')[0]}.csv`);
+        link.setAttribute(
+          "download",
+          `${dataType}_${new Date().toISOString().split("T")[0]}.csv`
+        );
         document.body.appendChild(link);
         link.click();
         link.remove();
         window.URL.revokeObjectURL(url);
       } else {
         // For JSON, create a downloadable file
-        const blob = new Blob([JSON.stringify(response.data, null, 2)], { type: 'application/json' });
+        const blob = new Blob([JSON.stringify(response.data, null, 2)], {
+          type: "application/json",
+        });
         const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
+        const link = document.createElement("a");
         link.href = url;
-        link.setAttribute('download', `${dataType}_${new Date().toISOString().split('T')[0]}.json`);
+        link.setAttribute(
+          "download",
+          `${dataType}_${new Date().toISOString().split("T")[0]}.json`
+        );
         document.body.appendChild(link);
         link.click();
         link.remove();
@@ -112,7 +123,10 @@ export default function ReportsAnalyticsPage() {
       toast.success(`Report exported as ${format.toUpperCase()}`);
     } catch (error: any) {
       console.error("Error exporting report:", error);
-      const errorMessage = error?.response?.data?.message || error?.message || "Failed to export report";
+      const errorMessage =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Failed to export report";
       toast.error(errorMessage);
     } finally {
       setExporting(false);
@@ -136,7 +150,7 @@ export default function ReportsAnalyticsPage() {
       };
     }
 
-    if (dataType === 'inventory_summary' && reportData.summary) {
+    if (dataType === "inventory_summary" && reportData.summary) {
       return {
         totalSKUs: reportData.summary.totalSKUs || 0,
         totalPOs: reportData.summary.totalPOs || 0,
@@ -151,7 +165,7 @@ export default function ReportsAnalyticsPage() {
       };
     }
 
-    if (dataType === 'purchase_orders' && reportData.summary) {
+    if (dataType === "purchase_orders" && reportData.summary) {
       return {
         totalSKUs: 0,
         totalPOs: reportData.summary.totalPOs || 0,
@@ -226,8 +240,12 @@ export default function ReportsAnalyticsPage() {
             </svg>
           </div>
           <div>
-            <p className="text-sm font-medium text-orange-900">Viewing reports for:</p>
-            <p className="text-lg font-bold text-orange-950">{warehouse.name}</p>
+            <p className="text-sm font-medium text-orange-900">
+              Viewing reports for:
+            </p>
+            <p className="text-lg font-bold text-orange-950">
+              {warehouse.name}
+            </p>
             <p className="text-xs text-orange-700">Code: {warehouse.code}</p>
           </div>
         </div>
@@ -253,7 +271,7 @@ export default function ReportsAnalyticsPage() {
           <Button
             variant="secondary"
             className="rounded-lg flex gap-2 px-6"
-            onClick={() => handleExportReport('csv')}
+            onClick={() => handleExportReport("csv")}
             disabled={exporting || !reportData}
           >
             <Download size={18} />
@@ -262,7 +280,7 @@ export default function ReportsAnalyticsPage() {
           <Button
             variant="primary"
             className="rounded-lg flex gap-2 px-6"
-            onClick={() => handleExportReport('json')}
+            onClick={() => handleExportReport("json")}
             disabled={exporting || !reportData}
           >
             <Download size={18} />
@@ -270,7 +288,6 @@ export default function ReportsAnalyticsPage() {
           </Button>
         </div>
       </div>
-
 
       {/* Loading State */}
       {loading && (
@@ -350,8 +367,12 @@ export default function ReportsAnalyticsPage() {
 
       {/* Conditional render tables */}
       <div className="mt-8">
-        {dataType === "inventory_summary" && <InventorySummaryTable reportData={reportData} />}
-        {dataType === "purchase_orders" && <PurchaseOrderTable reportData={reportData} />}
+        {dataType === "inventory_summary" && (
+          <InventorySummaryTable reportData={reportData} />
+        )}
+        {dataType === "purchase_orders" && (
+          <PurchaseOrderTable reportData={reportData} />
+        )}
         {dataType === "inventory_turnover" && (
           <div className="mt-8">
             <div className="text-lg text-gray-700 font-semibold mb-2">
@@ -362,21 +383,41 @@ export default function ReportsAnalyticsPage() {
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">SKU</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product Name</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Current Qty</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Received</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Turnover Rate</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        SKU
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        Product Name
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        Current Qty
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        Total Received
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        Turnover Rate
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {reportData.data.map((item: any, index: number) => (
                       <tr key={index}>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.sku}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.productName}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.currentQuantity}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.totalReceived}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.turnoverRate.toFixed(2)}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {item.sku}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {item.productName}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {item.currentQuantity}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {item.totalReceived}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {item.turnoverRate.toFixed(2)}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -384,7 +425,9 @@ export default function ReportsAnalyticsPage() {
               </div>
             ) : (
               <div className="text-center py-12 bg-gray-50 rounded-lg">
-                <p className="text-gray-500">No inventory turnover data found</p>
+                <p className="text-gray-500">
+                  No inventory turnover data found
+                </p>
               </div>
             )}
           </div>
@@ -395,8 +438,12 @@ export default function ReportsAnalyticsPage() {
               QC Summary
             </div>
             <div className="text-center py-12 bg-gray-50 rounded-lg">
-              <p className="text-gray-500">QC Summary data available in summary cards above</p>
-              <p className="text-sm text-gray-400 mt-2">Total Receivings: {reportData?.summary?.totalReceivings || 0}</p>
+              <p className="text-gray-500">
+                QC Summary data available in summary cards above
+              </p>
+              <p className="text-sm text-gray-400 mt-2">
+                Total Receivings: {reportData?.summary?.totalReceivings || 0}
+              </p>
             </div>
           </div>
         )}
@@ -407,13 +454,33 @@ export default function ReportsAnalyticsPage() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="bg-white rounded-lg shadow-md p-6">
-                <h3 className="font-semibold text-gray-900 mb-4">Overall Score</h3>
-                <p className="text-4xl font-bold text-blue-600">{reportData?.overallScore || 0}%</p>
+                <h3 className="font-semibold text-gray-900 mb-4">
+                  Overall Score
+                </h3>
+                <p className="text-4xl font-bold text-blue-600">
+                  {reportData?.overallScore || 0}%
+                </p>
               </div>
               <div className="bg-white rounded-lg shadow-md p-6">
-                <h3 className="font-semibold text-gray-900 mb-4">Inventory Efficiency</h3>
-                <p className="text-sm text-gray-600">Avg Utilization: <span className="font-semibold">{((reportData?.inventoryEfficiency?.avgUtilization || 0) * 100).toFixed(2)}%</span></p>
-                <p className="text-sm text-gray-600">Total Items: <span className="font-semibold">{reportData?.inventoryEfficiency?.totalItems || 0}</span></p>
+                <h3 className="font-semibold text-gray-900 mb-4">
+                  Inventory Efficiency
+                </h3>
+                <p className="text-sm text-gray-600">
+                  Avg Utilization:{" "}
+                  <span className="font-semibold">
+                    {(
+                      (reportData?.inventoryEfficiency?.avgUtilization || 0) *
+                      100
+                    ).toFixed(2)}
+                    %
+                  </span>
+                </p>
+                <p className="text-sm text-gray-600">
+                  Total Items:{" "}
+                  <span className="font-semibold">
+                    {reportData?.inventoryEfficiency?.totalItems || 0}
+                  </span>
+                </p>
               </div>
             </div>
           </div>
@@ -426,28 +493,48 @@ export default function ReportsAnalyticsPage() {
             {reportData?.ageingBuckets && (
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
-                  <p className="text-sm font-medium text-green-900">0-30 days</p>
-                  <p className="text-3xl font-bold text-green-600 mt-2">{reportData.ageingBuckets['0-30 days']}</p>
+                  <p className="text-sm font-medium text-green-900">
+                    0-30 days
+                  </p>
+                  <p className="text-3xl font-bold text-green-600 mt-2">
+                    {reportData.ageingBuckets["0-30 days"]}
+                  </p>
                 </div>
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 text-center">
-                  <p className="text-sm font-medium text-blue-900">31-60 days</p>
-                  <p className="text-3xl font-bold text-blue-600 mt-2">{reportData.ageingBuckets['31-60 days']}</p>
+                  <p className="text-sm font-medium text-blue-900">
+                    31-60 days
+                  </p>
+                  <p className="text-3xl font-bold text-blue-600 mt-2">
+                    {reportData.ageingBuckets["31-60 days"]}
+                  </p>
                 </div>
                 <div className="bg-orange-50 border border-orange-200 rounded-lg p-6 text-center">
-                  <p className="text-sm font-medium text-orange-900">61-90 days</p>
-                  <p className="text-3xl font-bold text-orange-600 mt-2">{reportData.ageingBuckets['61-90 days']}</p>
+                  <p className="text-sm font-medium text-orange-900">
+                    61-90 days
+                  </p>
+                  <p className="text-3xl font-bold text-orange-600 mt-2">
+                    {reportData.ageingBuckets["61-90 days"]}
+                  </p>
                 </div>
                 <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
                   <p className="text-sm font-medium text-red-900">90+ days</p>
-                  <p className="text-3xl font-bold text-red-600 mt-2">{reportData.ageingBuckets['90+ days']}</p>
+                  <p className="text-3xl font-bold text-red-600 mt-2">
+                    {reportData.ageingBuckets["90+ days"]}
+                  </p>
                 </div>
               </div>
             )}
           </div>
         )}
-        {dataType === "vendor_performance" && <VendorPerformanceTable reportData={reportData} />}
-        {dataType === "machine_stock" && <MachineStockTable reportData={reportData} />}
-        {dataType === "refill_summary" && <RefillSummaryTable reportData={reportData} />}
+        {dataType === "vendor_performance" && (
+          <VendorPerformanceTable reportData={reportData} />
+        )}
+        {dataType === "machine_stock" && (
+          <MachineStockTable reportData={reportData} />
+        )}
+        {dataType === "refill_summary" && (
+          <RefillSummaryTable reportData={reportData} />
+        )}
       </div>
     </div>
   );

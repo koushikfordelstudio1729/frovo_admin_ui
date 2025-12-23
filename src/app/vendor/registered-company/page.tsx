@@ -33,7 +33,7 @@ const companyColumns = [
   { key: "company", label: "Company" },
   { key: "cin", label: "CIN" },
   { key: "gstin", label: "GSTIN" },
-  { key: "vendors", label: "No. of Vendors" },
+  { key: "vendors", label: "No. of Brands" },
   { key: "status", label: "Status" },
   { key: "riskRating", label: "Risk Rating" },
   { key: "action", label: "Action" },
@@ -68,6 +68,18 @@ export default function CompanyList() {
     name: string;
   }>({ open: false, cin: "", name: "" });
 
+  const [statusDialog, setStatusDialog] = useState<{
+    open: boolean;
+    cin: string;
+    enabled: boolean;
+    name: string;
+  }>({
+    open: false,
+    cin: "",
+    enabled: false,
+    name: "",
+  });
+
   const [pagination, setPagination] = useState({
     totalPages: 1,
     totalCount: 0,
@@ -94,7 +106,9 @@ export default function CompanyList() {
 
       let filteredData = data;
       if (statusFilter) {
-        filteredData = data.filter((c: VendorCompany) => c.company_status === statusFilter);
+        filteredData = data.filter(
+          (c: VendorCompany) => c.company_status === statusFilter
+        );
       }
 
       const mapped = filteredData.map((c: VendorCompany) => ({
@@ -141,9 +155,13 @@ export default function CompanyList() {
         )
       );
 
-      toast.success(`Company ${currentEnabled ? "deactivated" : "activated"} successfully`);
+      toast.success(
+        `Company ${currentEnabled ? "deactivated" : "activated"} successfully`
+      );
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || "Failed to update company status");
+      toast.error(
+        error?.response?.data?.message || "Failed to update company status"
+      );
     }
   };
 
@@ -190,7 +208,10 @@ export default function CompanyList() {
             : value === "inactive"
             ? "rejected"
             : "warning";
-        return <Badge label={value.toUpperCase()} variant={statusVariant} />;
+
+        const label =
+          value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+        return <Badge label={label} showDot variant={statusVariant} />;
 
       case "riskRating":
         const riskVariant =
@@ -199,36 +220,44 @@ export default function CompanyList() {
             : value === "medium"
             ? "warning"
             : "rejected";
-        return <Badge label={value.toUpperCase()} variant={riskVariant} />;
+
+        const riskLabel =
+          value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+        return <Badge label={riskLabel} variant={riskVariant} />;
 
       case "action":
         return (
           <div className="flex items-center gap-3">
-            <UserPlus
-              size={18}
-              className="text-blue-600 cursor-pointer hover:text-blue-700"
-              onClick={() => handleAddVendor(company)}
-              title="Add Vendor"
-            />
-            <Eye
-              size={18}
-              className="text-green-600 cursor-pointer hover:text-green-700"
+            <button title="Add Vendor" onClick={() => handleAddVendor(company)}>
+              <UserPlus
+                size={18}
+                className="text-blue-600 cursor-pointer hover:text-blue-700"
+              />
+            </button>
+            <button
+              title="View Details"
               onClick={() =>
                 router.push(`/vendor/registered-company/company/${company.cin}`)
               }
-              title="View Details"
-            />
-            <Edit2
-              size={18}
-              className="text-purple-600 cursor-pointer hover:text-purple-700"
+            >
+              <Eye
+                size={18}
+                className="text-green-600 cursor-pointer hover:text-green-700"
+              />
+            </button>
+            <button
+              title="Edit Company"
               onClick={() =>
                 router.push(`/vendor/registered-company/edit/${company.cin}`)
               }
-              title="Edit Company"
-            />
-            <Trash2
-              size={18}
-              className="text-red-600 cursor-pointer hover:text-red-700"
+            >
+              <Edit2
+                size={18}
+                className="text-purple-600 cursor-pointer hover:text-purple-700"
+              />
+            </button>
+            <button
+              title="Delete Company"
               onClick={() =>
                 setDeleteDialog({
                   open: true,
@@ -236,11 +265,22 @@ export default function CompanyList() {
                   name: company.company,
                 })
               }
-              title="Delete Company"
-            />
+            >
+              <Trash2
+                size={18}
+                className="text-red-600 cursor-pointer hover:text-red-700"
+              />
+            </button>
             <Toggle
               enabled={company.enabled}
-              onChange={() => handleToggleStatus(company.cin, company.enabled)}
+              onChange={() =>
+                setStatusDialog({
+                  open: true,
+                  cin: company.cin,
+                  enabled: company.enabled,
+                  name: company.company,
+                })
+              }
             />
           </div>
         );
@@ -329,17 +369,18 @@ export default function CompanyList() {
         </div>
       ) : (
         <>
-          <Table
-            columns={companyColumns}
-            data={companies}
-            renderCell={renderCell}
-          />
+          <div className="overflow-x-auto">
+            <div className="min-w-[1500px]">
+              <Table
+                columns={companyColumns}
+                data={companies}
+                renderCell={renderCell}
+              />
+            </div>
+          </div>
 
           {/* Pagination */}
-          <div className="flex justify-between items-center mt-6">
-            <p className="text-gray-600">
-              Showing page {pagination.currentPage} of {pagination.totalPages}
-            </p>
+          <div className="flex justify-end items-center mt-6">
             <Pagination
               currentPage={currentPage}
               totalPages={pagination.totalPages}
@@ -359,6 +400,29 @@ export default function CompanyList() {
         confirmVariant="danger"
         onConfirm={handleDelete}
         onCancel={() => setDeleteDialog({ open: false, cin: "", name: "" })}
+      />
+      <ConfirmDialog
+        isOpen={statusDialog.open}
+        title={statusDialog.enabled ? "Deactivate Company" : "Activate Company"}
+        message={
+          <>
+            Are you sure you want to{" "}
+            <span className="font-semibold">
+              {statusDialog.enabled ? "deactivate" : "activate"}
+            </span>{" "}
+            "{statusDialog.name}"?
+          </>
+        }
+        confirmText={statusDialog.enabled ? "Deactivate" : "Activate"}
+        cancelText="Cancel"
+        confirmVariant={statusDialog.enabled ? "danger" : "primary"}
+        onConfirm={async () => {
+          await handleToggleStatus(statusDialog.cin, statusDialog.enabled);
+          setStatusDialog({ open: false, cin: "", enabled: false, name: "" });
+        }}
+        onCancel={() =>
+          setStatusDialog({ open: false, cin: "", enabled: false, name: "" })
+        }
       />
     </div>
   );

@@ -5,7 +5,7 @@ type InputVariant = "default" | "orange" | "search" | "underline" | "date";
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   variant?: InputVariant;
   label?: string;
-  error?: string;
+  error?: string | number;
   helperText?: string;
   fullWidth?: boolean;
   startIcon?: React.ReactNode;

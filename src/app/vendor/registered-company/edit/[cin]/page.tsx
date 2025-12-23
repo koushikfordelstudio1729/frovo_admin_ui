@@ -7,6 +7,7 @@ import {
   Input,
   Label,
   Select,
+  SuccessDialog,
   Textarea,
 } from "@/components";
 import { useRouter, useParams } from "next/navigation";
@@ -56,6 +57,8 @@ export default function EditCompanyPage() {
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [companyData, setCompanyData] = useState<VendorCompany | null>(null);
+
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const [form, setForm] = useState<EditableFields>({
     officeAddress: "",
@@ -121,9 +124,12 @@ export default function EditCompanyPage() {
 
     // Required fields
     if (!form.email.trim()) newErrors.email = "Email is required";
-    if (!form.officeAddress.trim()) newErrors.officeAddress = "Office address is required";
-    if (!form.website.trim()) newErrors.website = "Corporate website is required";
-    if (!form.directorName.trim()) newErrors.directorName = "Director name is required";
+    if (!form.officeAddress.trim())
+      newErrors.officeAddress = "Office address is required";
+    if (!form.website.trim())
+      newErrors.website = "Corporate website is required";
+    if (!form.directorName.trim())
+      newErrors.directorName = "Director name is required";
 
     // Format validations
     if (form.gstNumber.trim()) {
@@ -137,8 +143,12 @@ export default function EditCompanyPage() {
     }
 
     if (form.website.trim()) {
-      const websiteValidation = validateCompanyField("WEBSITE", form.website.trim());
-      if (!websiteValidation.isValid) newErrors.website = websiteValidation.error;
+      const websiteValidation = validateCompanyField(
+        "WEBSITE",
+        form.website.trim()
+      );
+      if (!websiteValidation.isValid)
+        newErrors.website = websiteValidation.error;
     }
 
     setErrors(newErrors);
@@ -169,8 +179,11 @@ export default function EditCompanyPage() {
 
       await updateCompany(cin, payload);
 
-      toast.success("Company updated successfully!");
-      router.push("/vendor/registered-company");
+      setShowSuccess(true);
+      setTimeout(() => {
+        setShowSuccess(false);
+        router.push("/vendor/registered-company");
+      }, 2000);
     } catch (err: any) {
       const msg =
         err?.response?.data?.error ||
@@ -186,7 +199,9 @@ export default function EditCompanyPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-lg font-semibold text-gray-600">Loading company details...</p>
+        <p className="text-lg font-semibold text-gray-600">
+          Loading company details...
+        </p>
       </div>
     );
   }
@@ -212,25 +227,39 @@ export default function EditCompanyPage() {
           <div className="grid grid-cols-2 mt-6 gap-6 bg-gray-50 p-6 rounded-lg">
             <div>
               <Label className="text-sm text-gray-600">Company Name</Label>
-              <p className="text-lg font-medium mt-1 text-gray-900">{companyData.registered_company_name}</p>
+              <p className="text-lg font-medium mt-1 text-gray-900">
+                {companyData.registered_company_name}
+              </p>
             </div>
             <div>
-              <Label className="text-sm text-gray-600">Legal Entity Structure</Label>
-              <p className="text-lg font-medium mt-1 text-gray-900">{companyData.legal_entity_structure}</p>
+              <Label className="text-sm text-gray-600">
+                Legal Entity Structure
+              </Label>
+              <p className="text-lg font-medium mt-1 text-gray-900">
+                {companyData.legal_entity_structure}
+              </p>
             </div>
             <div>
               <Label className="text-sm text-gray-600">CIN</Label>
-              <p className="text-lg font-medium mt-1 text-gray-900">{companyData.cin}</p>
+              <p className="text-lg font-medium mt-1 text-gray-900">
+                {companyData.cin}
+              </p>
             </div>
             <div>
-              <Label className="text-sm text-gray-600">Date of Incorporation</Label>
+              <Label className="text-sm text-gray-600">
+                Date of Incorporation
+              </Label>
               <p className="text-lg font-medium mt-1 text-gray-900">
-                {new Date(companyData.date_of_incorporation).toLocaleDateString()}
+                {new Date(
+                  companyData.date_of_incorporation
+                ).toLocaleDateString()}
               </p>
             </div>
             <div>
               <Label className="text-sm text-gray-600">DIN</Label>
-              <p className="text-lg font-medium mt-1 text-gray-900">{companyData.din}</p>
+              <p className="text-lg font-medium mt-1 text-gray-900">
+                {companyData.din}
+              </p>
             </div>
           </div>
         </div>
@@ -254,7 +283,9 @@ export default function EditCompanyPage() {
               rows={6}
             />
             {errors.officeAddress && (
-              <p className="text-red-500 text-sm mt-1">{errors.officeAddress}</p>
+              <p className="text-red-500 text-sm mt-1">
+                {errors.officeAddress}
+              </p>
             )}
           </div>
 
@@ -317,7 +348,9 @@ export default function EditCompanyPage() {
               label="GST Number"
               value={form.gstNumber}
               variant="orange"
-              onChange={(e) => handleChange("gstNumber", e.target.value.toUpperCase())}
+              onChange={(e) =>
+                handleChange("gstNumber", e.target.value.toUpperCase())
+              }
               onBlur={() => handleBlur("GST")}
               placeholder="e.g., 07AABCP0634E1ZU"
             />
@@ -373,6 +406,16 @@ export default function EditCompanyPage() {
           </Button>
         </div>
       </div>
+      <SuccessDialog
+        open={showSuccess}
+        title="Company updated"
+        message="Company details have been updated successfully."
+        primaryText="OK"
+        onClose={() => {
+          setShowSuccess(false);
+          router.push("/vendor/registered-company");
+        }}
+      />
     </div>
   );
 }

@@ -16,22 +16,25 @@ interface InventorySummaryTableProps {
   reportData?: any;
 }
 
-export default function InventorySummaryTable({ reportData }: InventorySummaryTableProps) {
+export default function InventorySummaryTable({
+  reportData,
+}: InventorySummaryTableProps) {
   // Transform report data to table format
-  const data = reportData?.inventoryDetails?.map((item: any) => {
-    return {
-      sku: item.sku || 'N/A',
-      productName: item.productName || 'N/A',
-      batchId: item.batchId || 'N/A',
-      currentQty: item.quantity || 0,
-      minStock: item.minStockLevel || 0,
-      maxStock: item.maxStockLevel || 0,
-      status: item.status || 'N/A',
-      location: item.location
-        ? `${item.location.zone}-${item.location.aisle}-${item.location.rack}-${item.location.bin}`
-        : 'N/A',
-    };
-  }) || [];
+  const data =
+    reportData?.inventoryDetails?.map((item: any) => {
+      return {
+        sku: item.sku || "N/A",
+        productName: item.productName || "N/A",
+        batchId: item.batchId || "N/A",
+        currentQty: item.quantity || 0,
+        minStock: item.minStockLevel || 0,
+        maxStock: item.maxStockLevel || 0,
+        status: item.status || "N/A",
+        location: item.location
+          ? `${item.location.zone}-${item.location.aisle}-${item.location.rack}-${item.location.bin}`
+          : "N/A",
+      };
+    }) || [];
 
   return (
     <div className="mt-8">
@@ -43,27 +46,31 @@ export default function InventorySummaryTable({ reportData }: InventorySummaryTa
           <p className="text-gray-500">No inventory data found</p>
         </div>
       ) : (
-        <Table
-          columns={columns}
-          data={data}
-          renderCell={(key, value) =>
-            key === "status" ? (
-              <Badge
-                label={value.toUpperCase()}
-                variant={
-                  value === "active"
-                    ? "active"
-                    : value === "low_stock"
-                    ? "warning"
-                    : "inactive"
-                }
-                size="md"
-              />
-            ) : (
-              value
-            )
-          }
-        />
+        <div className="overflow-x-auto">
+          <div className="min-w-[1500px]">
+            <Table
+              columns={columns}
+              data={data}
+              renderCell={(key, value) =>
+                key === "status" ? (
+                  <Badge
+                    label={value.toUpperCase()}
+                    variant={
+                      value === "active"
+                        ? "active"
+                        : value === "low_stock"
+                        ? "warning"
+                        : "inactive"
+                    }
+                    size="md"
+                  />
+                ) : (
+                  value
+                )
+              }
+            />
+          </div>
+        </div>
       )}
     </div>
   );

@@ -2,17 +2,14 @@
 
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import {
-  ArrowLeft,
-  ArchiveRestore,
-  Package,
-} from "lucide-react";
+import { ArchiveRestore, Package } from "lucide-react";
 import {
   Button,
-  Label,
   Table,
   Badge,
   Pagination,
+  BackHeader,
+  StatCard,
 } from "@/components";
 import { useMyWarehouse } from "@/hooks/warehouse";
 import { warehouseAPI } from "@/services/warehouseAPI";
@@ -186,9 +183,7 @@ export default function ArchivePage() {
       }
     } catch (err: any) {
       const errorMessage =
-        err?.response?.data?.message ||
-        err?.message ||
-        "Failed to unarchive";
+        err?.response?.data?.message || err?.message || "Failed to unarchive";
       toast.error(errorMessage);
       console.error("Error unarchiving:", err);
     } finally {
@@ -219,7 +214,11 @@ export default function ArchivePage() {
   }, [archivedItems]);
 
   // Render cell
-  const renderCell = (key: string, value: unknown, row?: Record<string, unknown>) => {
+  const renderCell = (
+    key: string,
+    value: unknown,
+    row?: Record<string, unknown>
+  ) => {
     if (key === "select") {
       const item = row?._rawData as InventoryItem;
       return (
@@ -227,21 +226,27 @@ export default function ArchivePage() {
           type="checkbox"
           checked={selectedItems.includes(item._id)}
           onChange={() => handleSelectItem(item._id)}
-          className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+          className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500 cursor-pointer"
         />
       );
     }
 
     if (key === "status") {
       const statusValue = value as string;
+
       let variant: "approved" | "warning" | "rejected" = "approved";
       if (statusValue === "low_stock") variant = "warning";
       if (statusValue === "out_of_stock") variant = "rejected";
 
+      const label = statusValue
+        .split("_")
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(" ");
+
       return (
         <Badge
           variant={variant}
-          label={statusValue.replace("_", " ").toUpperCase()}
+          label={label}
           size="md"
           showDot={true}
           className="px-3 py-1 text-sm rounded-full"
@@ -308,35 +313,20 @@ export default function ArchivePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 p-4">
       {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-2 mb-6">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => router.back()}
-            className="p-2 hover:cursor-pointer"
-            aria-label="Go back"
-          >
-            <ArrowLeft className="w-6 h-6 text-gray-700" />
-          </button>
-          <h1 className="text-2xl font-bold text-gray-900">
-            Archived Inventory - {warehouse.name}
-          </h1>
-        </div>
-      </div>
+      <BackHeader title={`Archived Inventory -  ${warehouse.name}`} />
 
       {/* Stats */}
-      {!loading && (
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <div className="flex items-center gap-4">
-            <Package className="w-10 h-10 text-gray-500" />
-            <div>
-              <p className="text-sm font-medium text-gray-600">Total Archived Items</p>
-              <p className="text-2xl font-bold text-gray-900">{total}</p>
-            </div>
-          </div>
-        </div>
-      )}
+      <div className="mb-4 max-w-72">
+        {!loading && (
+          <StatCard
+            title=" Total Archived Items"
+            count={total}
+            icon={Package}
+          />
+        )}
+      </div>
 
       {/* Selection Bar */}
       {!loading && !error && archivedItems.length > 0 && (
@@ -363,8 +353,8 @@ export default function ArchivePage() {
                 <>
                   <div className="h-6 w-px bg-gray-300"></div>
                   <span className="text-sm font-semibold text-blue-900">
-                    {selectedItems.length} item{selectedItems.length !== 1 ? "s" : ""}{" "}
-                    selected
+                    {selectedItems.length} item
+                    {selectedItems.length !== 1 ? "s" : ""} selected
                   </span>
                   <Button
                     variant="secondary"
@@ -415,12 +405,14 @@ export default function ArchivePage() {
       {/* Table */}
       {!loading && !error && (
         <>
-          <div className="mt-6">
-            <Table
-              columns={archivedColumns}
-              data={tableData}
-              renderCell={renderCell}
-            />
+          <div className="overflow-x-auto">
+            <div className="min-w-[1400px]">
+              <Table
+                columns={archivedColumns}
+                data={tableData}
+                renderCell={renderCell}
+              />
+            </div>
           </div>
 
           {/* Pagination */}
@@ -454,18 +446,21 @@ export default function ArchivePage() {
 
       {/* Confirmation Dialog */}
       {confirmDialog.isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm  flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl p-8 max-w-md w-full">
             <div className="text-center">
               <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
                 <ArchiveRestore className="h-6 w-6 text-green-600" />
               </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                {confirmDialog.type === "unarchive" && "Unarchive Inventory Item?"}
-                {confirmDialog.type === "bulk_unarchive" && `Unarchive ${confirmDialog.count} Items?`}
+                {confirmDialog.type === "unarchive" &&
+                  "Unarchive Inventory Item?"}
+                {confirmDialog.type === "bulk_unarchive" &&
+                  `Unarchive ${confirmDialog.count} Items?`}
               </h3>
               <p className="text-sm text-gray-600 mb-6">
-                {confirmDialog.type === "unarchive" && confirmDialog.item &&
+                {confirmDialog.type === "unarchive" &&
+                  confirmDialog.item &&
                   `Are you sure you want to unarchive ${confirmDialog.item.productName} (${confirmDialog.item.sku})? This will restore it to the active inventory.`}
                 {confirmDialog.type === "bulk_unarchive" &&
                   `Are you sure you want to unarchive ${confirmDialog.count} selected items? This will restore them to the active inventory.`}
