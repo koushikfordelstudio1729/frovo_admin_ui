@@ -12,7 +12,7 @@ import {
 import { ClipboardCheck, Eye, Pencil, Trash2 } from "lucide-react";
 import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { getVendorDashboard } from "@/services/vendor";
+// import { getVendorDashboard } from "@/services/vendor"; // Legacy API - disabled
 import { toast } from "react-hot-toast";
 
 const statusOptions = [
@@ -41,7 +41,7 @@ const ITEMS_PER_PAGE = 10;
 const Dashboard = () => {
   const router = useRouter();
 
-  const [status, setStatus] = useState("");
+  const [status, setStatus] = useState("verified"); // Default to "verified" (active registered companies)
   const [risk, setRisk] = useState("");
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -60,28 +60,40 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchDashboard = async () => {
       try {
-        const res = await getVendorDashboard();
-        const data = res?.data?.data;
+        // Legacy API call disabled - using mock data for now
+        // TODO: Replace with new API endpoint when available
 
+        // Mock data
         setStats({
-          total: data.total_vendors,
-          pending: data.pending_approvals,
-          active: data.active_vendors,
-          rejected: data.rejected_vendors,
+          total: 0,
+          pending: 0,
+          active: 0,
+          rejected: 0,
         });
 
-        setVendors(
-          (data.vendors || []).map((v: any) => ({
-            id: v._id,
-            vendorName: v.vendor_name,
-            category: v.vendor_category,
-            status: v.verification_status,
-            riskRating: v.risk_rating,
-            contractExpiry: new Date(
-              v.contract_expiry_date
-            ).toLocaleDateString(),
-          }))
-        );
+        setVendors([]);
+
+        // Uncomment when new API is ready:
+        // const res = await getVendorDashboard();
+        // const data = res?.data?.data;
+        // setStats({
+        //   total: data.total_vendors,
+        //   pending: data.pending_approvals,
+        //   active: data.active_vendors,
+        //   rejected: data.rejected_vendors,
+        // });
+        // setVendors(
+        //   (data.vendors || []).map((v: any) => ({
+        //     id: v._id,
+        //     vendorName: v.vendor_name,
+        //     category: v.vendor_category,
+        //     status: v.verification_status,
+        //     riskRating: v.risk_rating,
+        //     contractExpiry: new Date(
+        //       v.contract_expiry_date
+        //     ).toLocaleDateString(),
+        //   }))
+        // );
       } catch (err) {
         toast.error("Unable to fetch dashboard details");
       } finally {

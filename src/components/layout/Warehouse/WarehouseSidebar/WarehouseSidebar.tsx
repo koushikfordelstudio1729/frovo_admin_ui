@@ -21,6 +21,7 @@ import {
   WarehouseMenuItem,
 } from "@/config/warehouse/warehouse.config";
 import { ModuleSwitcher } from "../../../common/ModuleSwitcher";
+import { WarehouseSelector } from "../../../common/WarehouseSelector";
 import Image from "next/image";
 
 const iconMap = {
@@ -147,6 +148,9 @@ export const WarehouseSidebar: React.FC = () => {
 
         {/* Module Switcher */}
         <ModuleSwitcher currentModule="warehouse" />
+
+        {/* Warehouse Selector for Super Admin */}
+        <WarehouseSelector />
       </div>
       <nav
         className="flex-1 overflow-y-auto px-6 pb-6 space-y-5"

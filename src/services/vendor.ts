@@ -243,9 +243,9 @@ export const getCompanyAuditTrail = (id: string, page = 1, limit = 50) => {
   }>>(`${BASE_COMPANY}/${id}/audit-trail?page=${page}&limit=${limit}`);
 };
 
-// Legacy endpoints
-export const getVendorDashboard = () =>
-  api.get(`${BASE_VENDOR_ADMIN}/dashboard`);
+// Legacy endpoints - DISABLED (404 error)
+// export const getVendorDashboard = () =>
+//   api.get(`${BASE_VENDOR_ADMIN}/dashboard`);
 
 export const getAuditTrails = () => api.get("audit-trails");
 

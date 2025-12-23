@@ -15,7 +15,7 @@ export interface Module {
 const AVAILABLE_MODULES: Module[] = [
   { name: "admin", path: "/admin/roles-permissions", label: "Admin Panel" },
   { name: "catalogue", path: "/catalogue/sku-master", label: "Catalogue" },
-  { name: "vendor", path: "/vendor/dashboard", label: "Vendor Portal" },
+  { name: "vendor", path: "/vendor/registered-company", label: "Vendor Portal" },
   { name: "warehouse", path: "/warehouse/dashboard", label: "Warehouse" },
   { name: "route", path: "/route/area-definitions", label: "Area Management" },
 ];

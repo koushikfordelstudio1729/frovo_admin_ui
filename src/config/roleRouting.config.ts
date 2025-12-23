@@ -37,7 +37,7 @@ export const ROLE_ROUTES: Record<string, RoleRouteConfig> = {
   vendor_admin: {
     systemRole: "vendor_admin",
     uiAccess: "Admin Panel",
-    defaultRoute: "/vendor/dashboard",
+    defaultRoute: "/vendor/registered-company",
     description: "Vendor management with full control over vendor lifecycle",
   },
 
@@ -45,7 +45,7 @@ export const ROLE_ROUTES: Record<string, RoleRouteConfig> = {
   vendor: {
     systemRole: "vendor",
     uiAccess: "Vendor Portal",
-    defaultRoute: "/vendor/dashboard",
+    defaultRoute: "/vendor/registered-company",
     description: "Vendor portal access",
   },
 
