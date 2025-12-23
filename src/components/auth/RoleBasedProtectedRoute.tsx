@@ -54,9 +54,11 @@ export default function RoleBasedProtectedRoute({
 
       // Check 3: Does user have the required UI access?
       const userRole = user.roles[0]; // Use primary role
+      const isSuperAdmin = userRole.systemRole === "super_admin";
       const hasRequiredAccess = userRole.uiAccess === requiredUIAccess;
 
-      if (!hasRequiredAccess) {
+      // Super admin can access all portals
+      if (!isSuperAdmin && !hasRequiredAccess) {
         console.warn(
           `User does not have access to "${requiredUIAccess}". User has "${userRole.uiAccess}". Redirecting to their dashboard.`
         );
@@ -65,8 +67,8 @@ export default function RoleBasedProtectedRoute({
         return;
       }
 
-      // Check 4: If specific roles are required, check if user has one of them
-      if (allowedRoles && allowedRoles.length > 0) {
+      // Check 4: If specific roles are required, check if user has one of them (super admin bypasses this)
+      if (allowedRoles && allowedRoles.length > 0 && !isSuperAdmin) {
         const hasAllowedRole = allowedRoles.includes(userRole.systemRole);
 
         if (!hasAllowedRole) {
@@ -128,3 +130,4 @@ export const AdminProtectedRoute = createPortalProtectedRoute("Admin Panel");
 export const VendorProtectedRoute = createPortalProtectedRoute("Vendor Portal");
 export const WarehouseProtectedRoute =
   createPortalProtectedRoute("Warehouse Portal");
+export const RouteProtectedRoute = createPortalProtectedRoute("Route Portal");

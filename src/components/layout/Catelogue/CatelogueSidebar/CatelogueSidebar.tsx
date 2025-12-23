@@ -15,6 +15,7 @@ import {
   catalogueNavigation,
   CatalogueMenuItem,
 } from "@/config/catalogue/catalogue.config";
+import { ModuleSwitcher } from "../../../common/ModuleSwitcher";
 import Image from "next/image";
 
 const iconMap = {
@@ -130,6 +131,10 @@ export const CatalogueSidebar: React.FC = () => {
           priority
         />
       </div>
+
+      {/* Module Switcher */}
+      <ModuleSwitcher currentModule="catalogue" />
+
       <nav className="space-y-5">
         <div className="bg-[#FFEAE4] rounded-2xl py-3 space-y-1">
           {group1.map(TopLevelSidebar)}

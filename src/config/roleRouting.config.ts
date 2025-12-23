@@ -104,6 +104,22 @@ export const ROLE_ROUTES: Record<string, RoleRouteConfig> = {
     defaultRoute: "/catalogue/sku-master",
     description: "Custom operations manager role - handles machines and operations",
   },
+
+  // Route Manager - Route and area management
+  route_manager: {
+    systemRole: "route_manager",
+    uiAccess: "Route Portal",
+    defaultRoute: "/route/area-definitions",
+    description: "Route management - handles area definitions, route planning, and tracking",
+  },
+
+  // Area Manager - Area management
+  area_manager: {
+    systemRole: "area_manager",
+    uiAccess: "Route Portal",
+    defaultRoute: "/route/area-definitions",
+    description: "Area management - handles area definitions and route assignments",
+  },
 };
 
 /**
@@ -114,6 +130,7 @@ export const UI_ACCESS_BASE_PATHS: Record<string, string> = {
   "Admin Panel": "/admin",
   "Vendor Portal": "/vendor",
   "Warehouse Portal": "/warehouse",
+  "Route Portal": "/route",
 };
 
 /**

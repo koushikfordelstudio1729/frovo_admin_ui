@@ -18,6 +18,7 @@ import {
 import { usePathname } from "next/navigation";
 import { adminNavigation } from "@/config/admin/admin.config";
 import SidebarItem from "../../../common/SidebarItem/SidebarItem";
+import { ModuleSwitcher } from "../../../common/ModuleSwitcher";
 import Image from "next/image";
 
 const iconMap: Record<string, React.ComponentType<{ size?: number }>> = {
@@ -48,6 +49,9 @@ export const AdminSidebar: React.FC = () => {
           priority
         />
       </div>
+
+      {/* Module Switcher */}
+      <ModuleSwitcher currentModule="admin" />
 
       {/* Navigation Items */}
       <nav className="space-y-4">

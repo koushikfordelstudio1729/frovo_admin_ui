@@ -15,6 +15,7 @@ import {
   routeManagementNavigation,
   RouteManagementMenuItem,
 } from "@/config/route/route.config";
+import { ModuleSwitcher } from "../../../common/ModuleSwitcher";
 
 const iconMap = {
   layoutDashboard: LayoutDashboard,
@@ -72,6 +73,9 @@ const RouteManagementSidebar: React.FC = () => {
           priority
         />
       </div>
+
+      {/* Module Switcher */}
+      <ModuleSwitcher currentModule="route" />
 
       <nav className="space-y-5">
         {group1.length > 0 && (

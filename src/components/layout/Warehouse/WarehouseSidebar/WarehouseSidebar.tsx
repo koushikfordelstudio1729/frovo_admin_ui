@@ -20,6 +20,7 @@ import {
   warehouseNavigation,
   WarehouseMenuItem,
 } from "@/config/warehouse/warehouse.config";
+import { ModuleSwitcher } from "../../../common/ModuleSwitcher";
 import Image from "next/image";
 
 const iconMap = {
@@ -134,7 +135,7 @@ export const WarehouseSidebar: React.FC = () => {
   return (
     <aside className="w-64 bg-white h-screen fixed left-0 top-0 flex flex-col">
       <div className="p-6 pb-4 shrink-0">
-        <div className="flex justify-center">
+        <div className="flex justify-center mb-6">
           <Image
             src="/images/logo.svg"
             alt="frovo logo"
@@ -143,6 +144,9 @@ export const WarehouseSidebar: React.FC = () => {
             priority
           />
         </div>
+
+        {/* Module Switcher */}
+        <ModuleSwitcher currentModule="warehouse" />
       </div>
       <nav
         className="flex-1 overflow-y-auto px-6 pb-6 space-y-5"
