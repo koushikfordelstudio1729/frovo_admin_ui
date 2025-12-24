@@ -18,6 +18,7 @@ export interface Route {
   _id: string;
   route_name: string;
   area_name: AreaInfo | string;
+  street_name?: string;
   route_description: string;
   selected_machine: string[];
   frequency_type: FrequencyType;
@@ -35,6 +36,7 @@ export interface Route {
 export interface CreateRoutePayload {
   route_name: string;
   area_name: string; // area ID
+  street_name?: string;
   route_description: string;
   selected_machine: string[];
   frequency_type: FrequencyType;
@@ -46,6 +48,7 @@ export interface CreateRoutePayload {
 
 export interface UpdateRoutePayload {
   route_name?: string;
+  street_name?: string;
   route_description?: string;
   selected_machine?: string[];
   frequency_type?: FrequencyType;

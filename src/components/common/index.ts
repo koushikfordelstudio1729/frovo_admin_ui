@@ -27,3 +27,4 @@ export { default as LocationPicker } from "./LocationPicker";
 export { default as LocationViewer } from "./LocationViewer";
 export { default as CategoryRow } from "./CategoryRow";
 export { default as SuccessDialog } from "./SuccessDialog";
+export { Combobox } from "./Combobox/Combobox";

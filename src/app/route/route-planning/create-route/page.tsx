@@ -8,11 +8,13 @@ import {
   Radio,
   Select,
   Textarea,
+  SearchableSelect,
 } from "@/components";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { routeAPI } from "@/services/routeAPI";
 import { areaAPI } from "@/services/areaAPI";
+import { openStreetMapAPI } from "@/services/openStreetMapAPI";
 import { CreateRoutePayload, FrequencyType, WeekDay } from "@/types/route.types";
 import { toast } from "react-hot-toast";
 import MultiSelect from "@/components/common/MultiSelect/MultiSelect";
@@ -44,7 +46,10 @@ const CreateRoute = () => {
 
   // Form state
   const [routeName, setRouteName] = useState("");
+  const [selectedRouteOption, setSelectedRouteOption] = useState("");
+  const [customRouteName, setCustomRouteName] = useState("");
   const [areaId, setAreaId] = useState("");
+  const [streetName, setStreetName] = useState("");
   const [routeDescription, setRouteDescription] = useState("");
   const [selectedMachines, setSelectedMachines] = useState<string[]>([]);
   const [frequencyType, setFrequencyType] = useState<FrequencyType>("daily");
@@ -58,10 +63,12 @@ const CreateRoute = () => {
     { label: string; value: string }[]
   >([]);
   const [availableMachines, setAvailableMachines] = useState<{ value: string; label: string }[]>(DUMMY_MACHINES);
+  const [streetOptions, setStreetOptions] = useState<{ value: string; label: string }[]>([]);
 
   // Loading states
   const [loading, setLoading] = useState(false);
   const [areasLoading, setAreasLoading] = useState(false);
+  const [streetsLoading, setStreetsLoading] = useState(false);
 
   // Fetch areas on mount
   useEffect(() => {
@@ -87,11 +94,13 @@ const CreateRoute = () => {
     fetchAreas();
   }, []);
 
-  // Fetch machines when area is selected
+  // Fetch machines and streets when area is selected
   useEffect(() => {
     const fetchAreaMachines = async () => {
       if (!areaId) {
         setAvailableMachines(DUMMY_MACHINES);
+        setStreetOptions([]);
+        setStreetName("");
         return;
       }
 
@@ -102,11 +111,30 @@ const CreateRoute = () => {
           const machineArray = Array.isArray(machines) ? machines : [machines];
           const formattedMachines = machineArray.map(m => ({ value: m, label: m }));
           setAvailableMachines(formattedMachines);
+
+          // Fetch streets if area has coordinates
+          if (response.data.latitude && response.data.longitude) {
+            setStreetsLoading(true);
+            const streets = await openStreetMapAPI.getStreetsNearLocation(
+              response.data.latitude,
+              response.data.longitude,
+              2000 // 2km radius
+            );
+            const formattedStreets = streets.map(s => ({ value: s.name, label: s.name }));
+            // Add "Custom" option at the top
+            formattedStreets.unshift({ value: "custom", label: "Custom (Type your own)" });
+            setStreetOptions(formattedStreets);
+            setStreetsLoading(false);
+          } else {
+            // If no coordinates, just show custom option
+            setStreetOptions([{ value: "custom", label: "Custom (Type your own)" }]);
+          }
         }
       } catch (error) {
-        console.error("Error fetching area machines:", error);
-        toast.error("Failed to load machines for selected area");
+        console.error("Error fetching area data:", error);
+        toast.error("Failed to load area data");
         setAvailableMachines(DUMMY_MACHINES);
+        setStreetsLoading(false);
       }
     };
 
@@ -119,6 +147,15 @@ const CreateRoute = () => {
       setMachineSequence([]);
     }
   }, [frequencyType]);
+
+  // Update route name based on selection
+  useEffect(() => {
+    if (selectedRouteOption === "custom") {
+      setRouteName(customRouteName);
+    } else if (selectedRouteOption) {
+      setRouteName(selectedRouteOption);
+    }
+  }, [selectedRouteOption, customRouteName]);
 
   // Handle custom date changes
   const handleCustomDateChange = (index: number, value: string) => {
@@ -186,6 +223,11 @@ const CreateRoute = () => {
         frequency_type: frequencyType,
       };
 
+      // Add street name if provided
+      if (streetName && streetName.trim()) {
+        payload.street_name = streetName;
+      }
+
       // Add notes if provided
       if (notes && notes.trim()) {
         payload.notes = notes;
@@ -224,27 +266,53 @@ const CreateRoute = () => {
       <div className="bg-white rounded-xl w-full">
         <div className="p-10 grid grid-cols-2 gap-8">
           <div>
-            <Input
-              label="Route Name"
+            <Select
+              label="Choose Area"
+              placeholder={areasLoading ? "Loading areas..." : "Select Area"}
+              selectClassName="py-4 px-4"
               variant="orange"
-              placeholder="Enter Route Name"
-              className="w-full"
-              value={routeName}
-              onChange={(e) => setRouteName(e.target.value)}
+              value={areaId}
+              onChange={setAreaId}
+              options={areaOptions}
+              disabled={areasLoading}
             />
 
-            <div className="mt-8">
-              <Select
-                label="Choose Area"
-                placeholder={areasLoading ? "Loading areas..." : "Select Area"}
-                selectClassName="py-4 px-4"
-                variant="orange"
-                value={areaId}
-                onChange={setAreaId}
-                options={areaOptions}
-                disabled={areasLoading}
-              />
-            </div>
+            {areaId && (
+              <>
+                <div className="mt-8">
+                  <SearchableSelect
+                    label="Route Name"
+                    variant="orange"
+                    placeholder={
+                      streetsLoading
+                        ? "Loading routes..."
+                        : "Search and select route..."
+                    }
+                    options={streetOptions}
+                    value={selectedRouteOption}
+                    onChange={setSelectedRouteOption}
+                    helperText={
+                      streetOptions.length > 1
+                        ? `Found ${streetOptions.length - 1} route suggestions. Select one or choose "Custom" to type your own.`
+                        : 'Choose "Custom" to type your own route name.'
+                    }
+                  />
+                </div>
+
+                {selectedRouteOption === "custom" && (
+                  <div className="mt-8">
+                    <Input
+                      label="Custom Route Name"
+                      variant="orange"
+                      placeholder="Enter your custom route name"
+                      className="w-full"
+                      value={customRouteName}
+                      onChange={(e) => setCustomRouteName(e.target.value)}
+                    />
+                  </div>
+                )}
+              </>
+            )}
 
             <div className="mt-8">
               <Textarea
@@ -325,7 +393,7 @@ const CreateRoute = () => {
                         }}
                         className="w-4 h-4 text-orange-500"
                       />
-                      <span className="text-sm">{day}</span>
+                      <span className="text-sm text-gray-900">{day}</span>
                     </label>
                   ))}
                 </div>
