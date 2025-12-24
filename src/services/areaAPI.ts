@@ -11,7 +11,7 @@ import type {
 export const areaAPI = {
   // Get all areas with pagination and optional filters
   getAreas: async (params?: AreaParams) => {
-    const response = await api.get<AreasResponse>(apiConfig.endpoints.area.list, {
+    const response = await api.get<AreasResponse>(apiConfig.endpoints.route.area.list, {
       params,
     });
     return response.data;
@@ -20,7 +20,7 @@ export const areaAPI = {
   // Get area by ID
   getAreaById: async (id: string) => {
     const response = await api.get<AreaResponse>(
-      apiConfig.endpoints.area.getById(id)
+      apiConfig.endpoints.route.area.getById(id)
     );
     return response.data;
   },
@@ -28,7 +28,7 @@ export const areaAPI = {
   // Create new area
   createArea: async (payload: CreateAreaPayload) => {
     const response = await api.post<AreaResponse>(
-      apiConfig.endpoints.area.create,
+      apiConfig.endpoints.route.area.create,
       payload
     );
     return response.data;
@@ -37,7 +37,7 @@ export const areaAPI = {
   // Update area
   updateArea: async (id: string, payload: UpdateAreaPayload) => {
     const response = await api.put<AreaResponse>(
-      apiConfig.endpoints.area.update(id),
+      apiConfig.endpoints.route.area.update(id),
       payload
     );
     return response.data;
@@ -46,8 +46,13 @@ export const areaAPI = {
   // Delete/Deactivate area (sets status to inactive)
   deleteArea: async (id: string) => {
     const response = await api.delete<AreaResponse>(
-      apiConfig.endpoints.area.delete(id)
+      apiConfig.endpoints.route.area.delete(id)
     );
     return response.data;
+  },
+
+  // Get all areas (wrapper for compatibility)
+  getAllAreas: async (page: number = 1, limit: number = 100) => {
+    return areaAPI.getAreas({ page, limit });
   },
 };

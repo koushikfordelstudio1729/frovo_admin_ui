@@ -10,10 +10,10 @@ import {
   Textarea,
 } from "@/components";
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { routeAPI } from "@/services/routeAPI";
 import { areaAPI } from "@/services/areaAPI";
-import { CreateRoutePayload, FrequencyType, WeekDay } from "@/types/route.types";
+import { UpdateRoutePayload, FrequencyType, WeekDay, RouteData } from "@/types/route.types";
 import { toast } from "react-hot-toast";
 import MultiSelect from "@/components/common/MultiSelect/MultiSelect";
 
@@ -39,8 +39,10 @@ const DUMMY_MACHINES = [
   { value: "VM-408", label: "VM-408" },
 ];
 
-const CreateRoute = () => {
+const EditRoute = () => {
   const router = useRouter();
+  const params = useParams();
+  const routeId = params.id as string;
 
   // Form state
   const [routeName, setRouteName] = useState("");
@@ -61,14 +63,63 @@ const CreateRoute = () => {
 
   // Loading states
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [areasLoading, setAreasLoading] = useState(false);
+
+  // Fetch existing route data
+  useEffect(() => {
+    const fetchRouteData = async () => {
+      try {
+        setInitialLoading(true);
+        const response = await routeAPI.getRouteById(routeId);
+
+        if (response.success && response.data) {
+          const route = response.data;
+
+          setRouteName(route.route_name);
+          setAreaId(route.area_name._id || route.area_name);
+          setRouteDescription(route.route_description || "");
+
+          // Merge selected_machine and machine_sequence to ensure all machines in sequence are selected
+          const machinesFromSequence = route.machine_sequence || [];
+          const machinesFromSelected = route.selected_machine || [];
+          const allMachines = Array.from(new Set([...machinesFromSelected, ...machinesFromSequence]));
+
+          setSelectedMachines(allMachines);
+          setFrequencyType(route.frequency_type);
+          setWeeklyDays(route.weekly_days || []);
+          setNotes(route.notes || "");
+          setMachineSequence(route.machine_sequence || []);
+
+          // Handle custom dates
+          if (route.custom_dates && route.custom_dates.length > 0) {
+            const formattedDates = route.custom_dates.map((date: string) => {
+              const d = new Date(date);
+              return d.toISOString().split("T")[0];
+            });
+            setCustomDates(formattedDates);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching route:", error);
+        toast.error("Failed to load route data");
+        router.push("/route/route-planning");
+      } finally {
+        setInitialLoading(false);
+      }
+    };
+
+    if (routeId) {
+      fetchRouteData();
+    }
+  }, [routeId]);
 
   // Fetch areas on mount
   useEffect(() => {
     const fetchAreas = async () => {
       try {
         setAreasLoading(true);
-        const response = await areaAPI.getAllAreas(1, 100); // Get all areas
+        const response = await areaAPI.getAllAreas(1, 100);
         if (response.success && response.data) {
           const options = response.data.map((area) => ({
             label: area.area_name,
@@ -146,11 +197,6 @@ const CreateRoute = () => {
       return;
     }
 
-    if (!areaId) {
-      toast.error("Please select an area");
-      return;
-    }
-
     if (!routeDescription.trim()) {
       toast.error("Route description is required");
       return;
@@ -178,9 +224,8 @@ const CreateRoute = () => {
       setLoading(true);
 
       // Base payload for all frequency types
-      const payload: CreateRoutePayload = {
+      const payload: UpdateRoutePayload = {
         route_name: routeName,
-        area_name: areaId,
         route_description: routeDescription,
         selected_machine: selectedMachines,
         frequency_type: frequencyType,
@@ -204,23 +249,31 @@ const CreateRoute = () => {
         payload.custom_dates = customDates.filter((date) => date.trim() !== "");
       }
 
-      const response = await routeAPI.createRoute(payload);
+      const response = await routeAPI.updateRoute(routeId, payload);
 
       if (response.success) {
-        toast.success("Route created successfully");
+        toast.success("Route updated successfully");
         router.push("/route/route-planning");
       }
     } catch (error: any) {
-      console.error("Error creating route:", error);
-      toast.error(error?.response?.data?.message || "Failed to create route");
+      console.error("Error updating route:", error);
+      toast.error(error?.response?.data?.message || "Failed to update route");
     } finally {
       setLoading(false);
     }
   };
 
+  if (initialLoading) {
+    return (
+      <div className="min-h-screen pt-12 flex justify-center items-center">
+        <div className="text-gray-500">Loading route data...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-full p-4">
-      <BackHeader title="Create Route" />
+      <BackHeader title="Edit Route" />
       <div className="bg-white rounded-xl w-full">
         <div className="p-10 grid grid-cols-2 gap-8">
           <div>
@@ -244,6 +297,9 @@ const CreateRoute = () => {
                 options={areaOptions}
                 disabled={areasLoading}
               />
+              <p className="text-xs text-gray-500 mt-1">
+                Current area will be maintained. Change only if necessary.
+              </p>
             </div>
 
             <div className="mt-8">
@@ -453,7 +509,7 @@ const CreateRoute = () => {
             onClick={handleSubmit}
             disabled={loading}
           >
-            {loading ? "Creating..." : "Create Route"}
+            {loading ? "Updating..." : "Update Route"}
           </Button>
         </div>
       </div>
@@ -461,4 +517,4 @@ const CreateRoute = () => {
   );
 };
 
-export default CreateRoute;
+export default EditRoute;

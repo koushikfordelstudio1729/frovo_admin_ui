@@ -157,12 +157,24 @@ export const apiConfig = {
     },
 
     // Route/Area management endpoints
-    area: {
-      list: '/area-route/area',
-      create: '/area-route/area',
-      getById: (id: string) => `/area-route/area/${id}`,
-      update: (id: string) => `/area-route/area/${id}`,
-      delete: (id: string) => `/area-route/area/${id}`,
+    route: {
+      area: {
+        list: '/area-route/area',
+        create: '/area-route/area',
+        getById: (id: string) => `/area-route/area/${id}`,
+        update: (id: string) => `/area-route/area/${id}`,
+        delete: (id: string) => `/area-route/area/${id}`,
+      },
+
+      // Route planning endpoints
+      routePlanning: {
+        list: '/area-route/route',
+        create: '/area-route/route',
+        getById: (id: string) => `/area-route/route/${id}`,
+        getByArea: (areaId: string) => `/area-route/route/area/${areaId}`,
+        update: (id: string) => `/area-route/route/${id}`,
+        delete: (id: string) => `/area-route/route/${id}`,
+      },
     },
   },
 };
