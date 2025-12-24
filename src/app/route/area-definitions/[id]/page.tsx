@@ -1,6 +1,6 @@
 "use client";
 
-import { BackHeader, Badge, Button, Label } from "@/components";
+import { BackHeader, Badge, Button, Label, LocationViewer } from "@/components";
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { areaAPI } from "@/services/areaAPI";
@@ -117,19 +117,6 @@ const ViewArea = () => {
               </div>
             </div>
 
-            {area.latitude && (
-              <div>
-                <Label className="text-gray-500 text-sm font-medium">Latitude</Label>
-                <div className="mt-2 text-lg text-gray-900">{area.latitude}</div>
-              </div>
-            )}
-
-            {area.longitude && (
-              <div>
-                <Label className="text-gray-500 text-sm font-medium">Longitude</Label>
-                <div className="mt-2 text-lg text-gray-900">{area.longitude}</div>
-              </div>
-            )}
           </div>
 
           {/* Right Column */}
@@ -166,6 +153,17 @@ const ViewArea = () => {
           </div>
         </div>
 
+        {/* Location Map - Full Width */}
+        {area.latitude && area.longitude && (
+          <div className="mt-8">
+            <LocationViewer
+              latitude={area.latitude}
+              longitude={area.longitude}
+              areaName={area.area_name}
+              address={area.address}
+            />
+          </div>
+        )}
         <div className="mt-10 flex justify-center">
           <Button
             className="px-12 rounded-lg"

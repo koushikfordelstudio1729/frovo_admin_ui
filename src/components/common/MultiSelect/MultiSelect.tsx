@@ -174,7 +174,7 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full text-base outline-none"
+              className="w-full text-base outline-none text-gray-900 placeholder-gray-400"
               placeholder="Search machines..."
             />
           </div>

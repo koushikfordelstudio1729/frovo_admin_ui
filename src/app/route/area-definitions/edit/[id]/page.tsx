@@ -5,6 +5,7 @@ import {
   Button,
   Input,
   Label,
+  LocationPicker,
   MultiSelect,
   Textarea,
   Toggle,
@@ -35,11 +36,19 @@ const EditArea = () => {
   const [selectedMachines, setSelectedMachines] = useState<string[]>([]);
   const [areaDescription, setAreaDescription] = useState("");
   const [isActive, setIsActive] = useState(false);
-  const [latitude, setLatitude] = useState("");
-  const [longitude, setLongitude] = useState("");
+  const [latitude, setLatitude] = useState<number | undefined>();
+  const [longitude, setLongitude] = useState<number | undefined>();
   const [address, setAddress] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
+
+  const handleLocationChange = (lat: number, lng: number, addr?: string) => {
+    setLatitude(lat);
+    setLongitude(lng);
+    if (addr) {
+      setAddress(addr);
+    }
+  };
 
   // Fetch area data on mount
   useEffect(() => {
@@ -54,8 +63,8 @@ const EditArea = () => {
           setSelectedMachines(area.select_machine || []);
           setAreaDescription(area.area_description);
           setIsActive(area.status === "active");
-          setLatitude(area.latitude?.toString() || "");
-          setLongitude(area.longitude?.toString() || "");
+          setLatitude(area.latitude);
+          setLongitude(area.longitude);
           setAddress(area.address || "");
         }
       } catch (error: any) {
@@ -100,11 +109,11 @@ const EditArea = () => {
       };
 
       // Add optional fields if provided
-      if (latitude && !isNaN(parseFloat(latitude))) {
-        payload.latitude = parseFloat(latitude);
+      if (latitude !== undefined) {
+        payload.latitude = latitude;
       }
-      if (longitude && !isNaN(parseFloat(longitude))) {
-        payload.longitude = parseFloat(longitude);
+      if (longitude !== undefined) {
+        payload.longitude = longitude;
       }
       if (address.trim()) {
         payload.address = address;
@@ -135,11 +144,14 @@ const EditArea = () => {
   }
 
   return (
-    <div className="min-h-screen p-4">
+    <div className="min-h-screen p-6">
       <BackHeader title="Edit Area" />
-      <div className="bg-white rounded-xl w-full">
-        <div className="p-10 grid grid-cols-2 gap-8">
-          <div>
+
+      <div className="bg-white rounded-xl w-full shadow-sm">
+        {/* Basic Information Section */}
+        <div className="p-8 border-b border-gray-200">
+          <h2 className="text-lg font-semibold text-gray-900 mb-6">Basic Information</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Input
               label="Area Name"
               variant="orange"
@@ -149,81 +161,76 @@ const EditArea = () => {
               onChange={(e) => setAreaName(e.target.value)}
             />
 
-            <div className="mt-8">
-              <MultiSelect
-                label="Select Machines"
-                placeholder="Select machines"
-                selectClassName="py-4 px-4"
-                variant="orange"
-                value={selectedMachines}
-                onChange={setSelectedMachines}
-                options={machines}
-              />
-            </div>
-
-            <div className="mt-8">
-              <Input
-                label="Latitude (Optional)"
-                variant="orange"
-                placeholder="Enter Latitude"
-                className="w-full"
-                type="number"
-                step="any"
-                value={latitude}
-                onChange={(e) => setLatitude(e.target.value)}
-              />
-            </div>
-
-            <div className="mt-8">
-              <Input
-                label="Longitude (Optional)"
-                variant="orange"
-                placeholder="Enter Longitude"
-                className="w-full"
-                type="number"
-                step="any"
-                value={longitude}
-                onChange={(e) => setLongitude(e.target.value)}
-              />
+            <div>
+              <Label className="block text-xl font-medium mb-2 text-gray-900">
+                Status
+              </Label>
+              <div className="mt-3">
+                <Toggle
+                  enabled={isActive}
+                  onChange={setIsActive}
+                  label="Active / Inactive"
+                />
+              </div>
             </div>
           </div>
-          <div className="flex flex-col gap-8">
+
+          <div className="mt-6">
             <Textarea
               label="Area Description"
               variant="orange"
               placeholder="Enter Area Description"
               className="w-full"
-              rows={7}
+              rows={4}
               value={areaDescription}
               onChange={(e) => setAreaDescription(e.target.value)}
             />
+          </div>
+        </div>
+
+        {/* Machine Assignment Section */}
+        <div className="p-8 border-b border-gray-200">
+          <h2 className="text-lg font-semibold text-gray-900 mb-6">Machine Assignment</h2>
+          <MultiSelect
+            label="Select Machines"
+            placeholder="Select machines"
+            selectClassName="py-4 px-4"
+            variant="orange"
+            value={selectedMachines}
+            onChange={setSelectedMachines}
+            options={machines}
+          />
+        </div>
+
+        {/* Location Section */}
+        <div className="p-8 border-b border-gray-200">
+          <h2 className="text-lg font-semibold text-gray-900 mb-6">Location Details</h2>
+          <div className="space-y-6">
+            <LocationPicker
+              latitude={latitude}
+              longitude={longitude}
+              onLocationChange={handleLocationChange}
+            />
 
             <Textarea
-              label="Address (Optional)"
+              label="Address"
               variant="orange"
-              placeholder="Enter Address"
+              placeholder="Address will be auto-filled from map or you can edit"
               className="w-full"
-              rows={5}
+              rows={3}
               value={address}
               onChange={(e) => setAddress(e.target.value)}
             />
           </div>
-          <div className="mt-4">
-            <div className="mb-2">
-              <Label>Status</Label>
-            </div>
-            <Toggle
-              enabled={isActive}
-              onChange={setIsActive}
-              label="Active / Inactive"
-            />
-          </div>
         </div>
-        <div className="flex justify-center gap-4 pb-12">
+
+        {/* Action Buttons */}
+        <div className="p-8 flex justify-center gap-4">
           <Button
-            className="px-12 rounded-lg"
+            className="px-8 rounded-lg"
             variant="secondary"
             onClick={() => router.push("/route/area-definitions")}
+            disabled={isLoading}
           >
             Cancel
           </Button>
@@ -233,7 +240,7 @@ const EditArea = () => {
             onClick={handleSubmit}
             disabled={isLoading}
           >
-            {isLoading ? "Updating..." : "Update"}
+            {isLoading ? "Updating..." : "Update Area"}
           </Button>
         </div>
       </div>
