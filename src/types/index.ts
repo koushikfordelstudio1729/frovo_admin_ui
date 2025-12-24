@@ -136,3 +136,13 @@ export type {
   ArchivedInventoryResponse,
   AttachmentFile,
 } from './warehouse.types';
+
+// Area types
+export type {
+  Area,
+  CreateAreaPayload,
+  UpdateAreaPayload,
+  AreaResponse,
+  AreasResponse,
+  AreaParams,
+} from './area.types';

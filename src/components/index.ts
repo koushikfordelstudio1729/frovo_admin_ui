@@ -16,3 +16,6 @@ export { default as RegisterForm } from "./auth/SignUpForm";
 export { default as Table } from "./name&table/Table";
 export { default as TableName } from "./name&table/TableName";
 export type { Column } from "./name&table/Table";
+
+// Modal components
+export { ConfirmationModal } from "./modals/ConfirmationModal";

@@ -9,10 +9,10 @@ import {
   Textarea,
   Toggle,
 } from "@/components";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useRouter, useParams } from "next/navigation";
 import { areaAPI } from "@/services/areaAPI";
-import type { CreateAreaPayload } from "@/types";
+import type { UpdateAreaPayload, Area } from "@/types";
 
 const machines = [
   { label: "VM-101", value: "VM-101" },
@@ -26,8 +26,11 @@ const machines = [
   { label: "VM-629", value: "VM-629" },
 ];
 
-const CreateArea = () => {
+const EditArea = () => {
   const router = useRouter();
+  const params = useParams();
+  const areaId = params.id as string;
+
   const [areaName, setAreaName] = useState("");
   const [selectedMachines, setSelectedMachines] = useState<string[]>([]);
   const [areaDescription, setAreaDescription] = useState("");
@@ -36,6 +39,38 @@ const CreateArea = () => {
   const [longitude, setLongitude] = useState("");
   const [address, setAddress] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isFetching, setIsFetching] = useState(true);
+
+  // Fetch area data on mount
+  useEffect(() => {
+    const fetchArea = async () => {
+      try {
+        setIsFetching(true);
+        const response = await areaAPI.getAreaById(areaId);
+
+        if (response.success) {
+          const area = response.data;
+          setAreaName(area.area_name);
+          setSelectedMachines(area.select_machine || []);
+          setAreaDescription(area.area_description);
+          setIsActive(area.status === "active");
+          setLatitude(area.latitude?.toString() || "");
+          setLongitude(area.longitude?.toString() || "");
+          setAddress(area.address || "");
+        }
+      } catch (error: any) {
+        console.error("Error fetching area:", error);
+        alert(error?.response?.data?.message || "Failed to fetch area details");
+        router.push("/route/area-definitions");
+      } finally {
+        setIsFetching(false);
+      }
+    };
+
+    if (areaId) {
+      fetchArea();
+    }
+  }, [areaId]);
 
   const handleSubmit = async () => {
     try {
@@ -57,7 +92,7 @@ const CreateArea = () => {
         return;
       }
 
-      const payload: CreateAreaPayload = {
+      const payload: UpdateAreaPayload = {
         area_name: areaName,
         select_machine: selectedMachines,
         area_description: areaDescription,
@@ -75,25 +110,33 @@ const CreateArea = () => {
         payload.address = address;
       }
 
-      const response = await areaAPI.createArea(payload);
+      const response = await areaAPI.updateArea(areaId, payload);
 
       if (response.success) {
-        alert(response.message || "Area created successfully");
+        alert(response.message || "Area updated successfully");
         router.push("/route/area-definitions");
       } else {
-        alert("Failed to create area");
+        alert("Failed to update area");
       }
     } catch (error: any) {
-      console.error("Error creating area:", error);
-      alert(error?.response?.data?.message || "Failed to create area");
+      console.error("Error updating area:", error);
+      alert(error?.response?.data?.message || "Failed to update area");
     } finally {
       setIsLoading(false);
     }
   };
 
+  if (isFetching) {
+    return (
+      <div className="min-h-screen p-4 flex items-center justify-center">
+        <div className="text-xl">Loading area details...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen p-4">
-      <BackHeader title="Create Area" />
+      <BackHeader title="Edit Area" />
       <div className="bg-white rounded-xl w-full">
         <div className="p-10 grid grid-cols-2 gap-8">
           <div>
@@ -176,14 +219,21 @@ const CreateArea = () => {
             />
           </div>
         </div>
-        <div className="flex justify-center pb-12">
+        <div className="flex justify-center gap-4 pb-12">
+          <Button
+            className="px-12 rounded-lg"
+            variant="secondary"
+            onClick={() => router.push("/route/area-definitions")}
+          >
+            Cancel
+          </Button>
           <Button
             className="px-12 rounded-lg"
             variant="primary"
             onClick={handleSubmit}
             disabled={isLoading}
           >
-            {isLoading ? "Saving..." : "Save"}
+            {isLoading ? "Updating..." : "Update"}
           </Button>
         </div>
       </div>
@@ -191,4 +241,4 @@ const CreateArea = () => {
   );
 };
 
-export default CreateArea;
+export default EditArea;

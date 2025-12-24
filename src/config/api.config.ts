@@ -155,6 +155,15 @@ export const apiConfig = {
     vendor: {
       list: '/vendors',
     },
+
+    // Route/Area management endpoints
+    area: {
+      list: '/area-route/area',
+      create: '/area-route/area',
+      getById: (id: string) => `/area-route/area/${id}`,
+      update: (id: string) => `/area-route/area/${id}`,
+      delete: (id: string) => `/area-route/area/${id}`,
+    },
   },
 };
 

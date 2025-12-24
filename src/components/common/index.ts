@@ -22,5 +22,6 @@ export { default as Radio } from "./Radio";
 export { default as ConfirmDialog } from "./ConfirmDialog";
 export { Drawer } from "./Drawer";
 export { default as SearchableSelect } from "./SearchableSelect";
+export { default as MultiSelect } from "./MultiSelect";
 export { default as CategoryRow } from "./CategoryRow";
 export { default as SuccessDialog } from "./SuccessDialog";
