@@ -9,10 +9,13 @@ import {
   Input,
   ConfirmDialog,
   Pagination,
-  Label,
 } from "@/components";
 import { ViewPODialog } from "@/components/warehouse";
-import { usePurchaseOrders, usePurchaseOrder, useMyWarehouse } from "@/hooks/warehouse";
+import {
+  usePurchaseOrders,
+  usePurchaseOrder,
+  useMyWarehouse,
+} from "@/hooks/warehouse";
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
@@ -287,7 +290,7 @@ const PoSummery = () => {
   };
 
   return (
-    <div className="min-h-screen pt-4">
+    <div className="min-h-full pt-4 w-full overflow-x-auto">
       <div className="flex items-center justify-between">
         <BackHeader title="PO Summary Table" />
         <div className="mt-8">
@@ -316,23 +319,28 @@ const PoSummery = () => {
                 setGlobalSearch(e.target.value);
                 setCurrentPage(1);
               }}
-              variant="orange"
+              variant="default"
               startIcon={<Search className="h-4 w-4 text-gray-400" />}
             />
           </div>
 
           {/* PO Status */}
-          <Select
-            id="status-filter"
-            label="PO Status"
-            options={statusOptions}
-            value={statusFilter}
-            onChange={(val) => {
-              setStatusFilter(val);
-              setCurrentPage(1);
-            }}
-            selectClassName="px-4 py-4 border-2 border-orange-300"
-          />
+          <div>
+            <h3 className="text-gray-700 text-sm font-semibold mb-1.5">
+              PO Status
+            </h3>
+            <Select
+              id="status-filter"
+              options={statusOptions}
+              value={statusFilter}
+              variant="default"
+              onChange={(val) => {
+                setStatusFilter(val);
+                setCurrentPage(1);
+              }}
+              selectClassName="px-4 py-3 bg-gray-100"
+            />
+          </div>
 
           {/* Start Date */}
           <Input
@@ -344,7 +352,7 @@ const PoSummery = () => {
               setStartDate(e.target.value);
               setCurrentPage(1);
             }}
-            variant="orange"
+            variant="default"
           />
 
           {/* End Date */}
@@ -357,7 +365,7 @@ const PoSummery = () => {
               setEndDate(e.target.value);
               setCurrentPage(1);
             }}
-            variant="orange"
+            variant="default"
           />
         </div>
 
@@ -460,12 +468,14 @@ const PoSummery = () => {
       {/* Table */}
       {!loading && !error && (
         <>
-          <div className="mt-6">
-            <Table
-              columns={poSummaryColumns}
-              data={paginatedData}
-              renderCell={renderCell}
-            />
+          <div className="overflow-x-auto">
+            <div className="min-w-[1300px]">
+              <Table
+                columns={poSummaryColumns}
+                data={paginatedData}
+                renderCell={renderCell}
+              />
+            </div>
           </div>
 
           {/* Empty State */}

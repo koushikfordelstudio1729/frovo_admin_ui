@@ -1,6 +1,14 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Button, Input, Label, Select, StatCard, Table } from "@/components";
+import {
+  Badge,
+  Button,
+  Input,
+  Label,
+  Select,
+  StatCard,
+  Table,
+} from "@/components";
 import StackedBarChart from "@/components/charts/StackedBarChart";
 import { useMyWarehouse, useDashboard } from "@/hooks/warehouse";
 import { dispatchedOrderData, lowStockData } from "@/config/warehouse";
@@ -203,15 +211,11 @@ export default function Dashboard() {
             </div>
 
             <div className="flex items-center gap-2">
-              <span
-                className={`px-4 py-2 rounded-full text-sm font-semibold ${
-                  myWarehouse.isActive
-                    ? "bg-green-400 text-green-900"
-                    : "bg-red-400 text-red-900"
-                }`}
-              >
-                {myWarehouse.isActive ? "Active" : "Inactive"}
-              </span>
+              <Badge
+                className="ml-4"
+                showDot
+                label={myWarehouse.isActive ? "Active" : "Inactive"}
+              />
             </div>
           </div>
         </div>
@@ -298,25 +302,25 @@ export default function Dashboard() {
             title="Inbound"
             count={dashboardData.kpis.inbound.toString()}
             icon={ArrowBigDown}
-            className="p-8 w-sm"
+            className="p-4 w-sm"
           />
           <StatCard
             title="Outbound"
             count={dashboardData.kpis.outbound.toString()}
             icon={ArrowBigUp}
-            className="p-8 w-sm"
+            className="p-4 w-sm"
           />
           <StatCard
             title="Pending QC"
             count={dashboardData.kpis.pendingQC.toString()}
             icon={ClipboardClock}
-            className="p-8 w-sm"
+            className="p-4 w-sm"
           />
           <StatCard
             title="Today's Dispatches"
             count={dashboardData.kpis.todayDispatches.toString()}
             icon={TrendingUp}
-            className="p-8 w-sm"
+            className="p-4 w-sm"
           />
         </div>
       ) : null}

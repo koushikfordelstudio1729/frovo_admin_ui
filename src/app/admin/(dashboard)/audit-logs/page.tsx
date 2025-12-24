@@ -1,12 +1,44 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Search, Download, Activity, Users, FileText, TrendingUp, Eye, Calendar } from "lucide-react";
-import { Button, Badge, Pagination } from "@/components/common";
+import {
+  Search,
+  Download,
+  Activity,
+  Users,
+  FileText,
+  TrendingUp,
+  Eye,
+  Calendar,
+  X,
+} from "lucide-react";
+import {
+  Button,
+  Badge,
+  Pagination,
+  Input,
+  BackHeader,
+  StatCard,
+  Select,
+} from "@/components/common";
+import { Table } from "@/components";
+import type { Column } from "@/components";
 import { api } from "@/services/api";
 import { apiConfig } from "@/config/admin";
 import { AxiosError } from "axios";
-import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import {
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
 
 interface Actor {
   name: string;
@@ -86,6 +118,11 @@ export default function AuditLogsPage() {
     return "An unexpected error occurred";
   };
 
+  const exportOptions = [
+    { value: "csv", label: "CSV" },
+    { value: "json", label: "JSON" },
+  ];
+
   const fetchLogs = useCallback(async (page = 1) => {
     try {
       setLoading(true);
@@ -157,12 +194,22 @@ export default function AuditLogsPage() {
   }, [fetchLogs, fetchStats]);
 
   const getActionBadge = (action: string) => {
-    const variants: { [key: string]: "active" | "inactive" | "pending" } = {
-      create: "active",
-      update: "pending",
-      delete: "inactive",
+    const variants: {
+      [key: string]: "active" | "rejected" | "warning" | "delete";
+    } = {
+      approve: "active",
+      reject: "rejected",
+      update: "warning",
+      delete: "delete",
     };
-    return <Badge label={action} size="sm" variant={variants[action] || "pending"} />;
+    return (
+      <Badge
+        showDot
+        label={action}
+        size="md"
+        variant={variants[action] || "pending"}
+      />
+    );
   };
 
   const filteredLogs = logs.filter(
@@ -172,67 +219,117 @@ export default function AuditLogsPage() {
       log.module.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  // Define table columns
+  const columns: Column[] = [
+    { key: "timestamp", label: "Timestamp", minWidth: "180px" },
+    { key: "actor", label: "Actor", minWidth: "200px" },
+    { key: "action", label: "Action", minWidth: "120px" },
+    { key: "module", label: "Module", minWidth: "150px" },
+    { key: "target", label: "Target", minWidth: "150px" },
+    { key: "ipAddress", label: "IP Address", minWidth: "140px" },
+    { key: "actions", label: "Actions", minWidth: "100px" },
+  ];
+
+  // Render custom cells
+  const renderCell = (
+    key: string,
+    value: any,
+    row?: Record<string, any>
+  ): React.ReactNode => {
+    const log = row as AuditLog | undefined;
+    if (!log) return value;
+
+    switch (key) {
+      case "timestamp":
+        return (
+          <div className="text-sm text-gray-900 font-medium">
+            {new Date(log.timestamp).toLocaleString()}
+          </div>
+        );
+
+      case "actor":
+        return (
+          <div>
+            <div className="font-medium text-gray-900">{log.actor.name}</div>
+            <div className="text-sm text-gray-500">{log.actor.email}</div>
+          </div>
+        );
+
+      case "action":
+        return getActionBadge(log.action);
+
+      case "module":
+        return <Badge label={log.module} size="sm" variant="active" />;
+
+      case "target":
+        return <div className="text-sm text-gray-600">{log.target.type}</div>;
+
+      case "ipAddress":
+        return (
+          <div className="text-sm text-gray-600 font-mono">{log.ipAddress}</div>
+        );
+
+      case "actions":
+        return (
+          <div className="flex justify-center">
+            <button
+              onClick={() => {
+                setSelectedLog(log);
+                setShowDetailsModal(true);
+              }}
+              className="text-indigo-600 hover:text-indigo-800"
+              title="View details"
+            >
+              <Eye size={18} />
+            </button>
+          </div>
+        );
+
+      default:
+        return value;
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 p-4 pt-8">
+    <div className="min-h-screen bg-gray-50 pt-4 pb-12">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Audit Trail</h1>
-        <p className="text-gray-600">Monitor and track all system activities</p>
+        <BackHeader title="Audit Trail" />
+        <p className="text-gray-600 mt-2">
+          Monitor and track all system activities
+        </p>
       </div>
 
       {/* Stats Dashboard */}
       {!statsLoading && stats && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
           {/* Total Logs */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-            <div className="flex items-center justify-between mb-4">
-              <div className="bg-blue-100 p-3 rounded-lg">
-                <Activity className="text-blue-600" size={24} />
-              </div>
-              <TrendingUp className="text-green-500" size={20} />
-            </div>
-            <h3 className="text-2xl font-bold text-gray-900">{stats.totalLogs}</h3>
-            <p className="text-gray-600 text-sm mt-1">Total Logs</p>
-          </div>
+          <StatCard
+            title="Total Logs"
+            count={stats.totalLogs.toLocaleString()}
+            icon={TrendingUp}
+          />
 
           {/* Modules */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-            <div className="flex items-center justify-between mb-4">
-              <div className="bg-purple-100 p-3 rounded-lg">
-                <FileText className="text-purple-600" size={24} />
-              </div>
-            </div>
-            <h3 className="text-2xl font-bold text-gray-900">
-              {Object.keys(stats.logsByModule).length}
-            </h3>
-            <p className="text-gray-600 text-sm mt-1">Active Modules</p>
-          </div>
+          <StatCard
+            title="Activity Modules"
+            count={Object.keys(stats.logsByModule).length}
+            icon={FileText}
+          />
 
           {/* Actions */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-            <div className="flex items-center justify-between mb-4">
-              <div className="bg-green-100 p-3 rounded-lg">
-                <Activity className="text-green-600" size={24} />
-              </div>
-            </div>
-            <h3 className="text-2xl font-bold text-gray-900">
-              {Object.keys(stats.logsByAction).length}
-            </h3>
-            <p className="text-gray-600 text-sm mt-1">Action Types</p>
-          </div>
+          <StatCard
+            title="Action Type"
+            count={Object.keys(stats.logsByActor).length}
+            icon={Activity}
+          />
 
           {/* Actors */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-            <div className="flex items-center justify-between mb-4">
-              <div className="bg-orange-100 p-3 rounded-lg">
-                <Users className="text-orange-600" size={24} />
-              </div>
-            </div>
-            <h3 className="text-2xl font-bold text-gray-900">
-              {Object.keys(stats.logsByActor).length}
-            </h3>
-            <p className="text-gray-600 text-sm mt-1">Active Users</p>
-          </div>
+          <StatCard
+            title="Active Users"
+            count={Object.keys(stats.logsByActor).length}
+            icon={Users}
+          />
         </div>
       )}
 
@@ -240,69 +337,96 @@ export default function AuditLogsPage() {
       {!statsLoading && stats && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
           {/* Bar Chart - Actions Distribution */}
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Actions Distribution</h2>
+          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+            <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <div className="w-1 h-6 bg-orange-500 rounded"></div>
+              Actions Distribution
+            </h2>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart
-                data={Object.entries(stats.logsByAction).map(([action, count]) => ({
-                  name: action.charAt(0).toUpperCase() + action.slice(1),
-                  count: count,
-                }))}
+                data={Object.entries(stats.logsByAction).map(
+                  ([action, count]) => ({
+                    name: action.charAt(0).toUpperCase() + action.slice(1),
+                    count: count,
+                  })
+                )}
               >
                 <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
                 <XAxis
                   dataKey="name"
-                  tick={{ fill: '#6B7280', fontSize: 12 }}
+                  tick={{ fill: "#6B7280", fontSize: 12 }}
                 />
-                <YAxis tick={{ fill: '#6B7280' }} />
+                <YAxis tick={{ fill: "#6B7280" }} />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: '#fff',
-                    border: '1px solid #E5E7EB',
-                    borderRadius: '8px',
-                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+                    backgroundColor: "#292525",
+                    border: "1px solid #E5E7EB",
+                    borderRadius: "8px",
+                    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
                   }}
                 />
                 <Legend />
                 <Bar
                   dataKey="count"
-                  fill="#3B82F6"
+                  fill="#FB923C"
                   radius={[8, 8, 0, 0]}
                   name="Actions Count"
+                  activeBar={{ fill: "#FDBA74" }}
                 />
               </BarChart>
             </ResponsiveContainer>
           </div>
 
           {/* Pie Chart - Module Distribution */}
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Module Activity Distribution</h2>
+          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+            <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <div className="w-1 h-6 bg-green-500 rounded"></div>
+              Module Activity Distribution
+            </h2>
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie
-                  data={Object.entries(stats.logsByModule).map(([module, count]) => ({
-                    name: module,
-                    value: count,
-                  }))}
+                  data={Object.entries(stats.logsByModule).map(
+                    ([module, count]) => ({
+                      name: module,
+                      value: count,
+                    })
+                  )}
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  label={({ name, percent }) => `${name}: ${((percent || 0) * 100).toFixed(0)}%`}
+                  label={({ name, percent }) =>
+                    `${name}: ${((percent || 0) * 100).toFixed(0)}%`
+                  }
                   outerRadius={100}
                   fill="#8884d8"
                   dataKey="value"
                 >
                   {Object.entries(stats.logsByModule).map((_entry, index) => {
-                    const COLORS = ['#3B82F6', '#10B981', '#8B5CF6', '#F59E0B', '#EF4444', '#EC4899', '#06B6D4', '#84CC16'];
-                    return <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />;
+                    const COLORS = [
+                      "#3bcd4c",
+                      "#F59E0B",
+                      "#3B82F6",
+                      "#8B5CF6",
+                      "#EF4444",
+                      "#EC4899",
+                      "#06B6D4",
+                      "#84CC16",
+                    ];
+                    return (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={COLORS[index % COLORS.length]}
+                      />
+                    );
                   })}
                 </Pie>
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: '#fff',
-                    border: '1px solid #E5E7EB',
-                    borderRadius: '8px',
-                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+                    backgroundColor: "#fff",
+                    border: "1px solid #E5E7EB",
+                    borderRadius: "8px",
+                    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
                   }}
                 />
               </PieChart>
@@ -312,58 +436,65 @@ export default function AuditLogsPage() {
       )}
 
       {/* Filters and Export */}
-      <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+      <div className="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-200">
         <div className="flex flex-col lg:flex-row gap-4 items-end">
           {/* Search */}
           <div className="flex-1">
-            <label className="block text-sm font-medium text-gray-700 mb-2">Search</label>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-              <input
-                type="text"
-                placeholder="Search by actor, action, or module..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-              />
-            </div>
+            <Input
+              label="Search"
+              labelClassName="text-xl"
+              placeholder="Search by actor, action, or module..."
+              value={searchQuery}
+              startIcon={<Search size={20} />}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
           </div>
 
           {/* Date Range */}
           <div className="flex gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Start Date</label>
-              <input
+              <Input
+                label="Start Date"
                 type="date"
                 value={dateRange.startDate}
-                onChange={(e) => setDateRange({ ...dateRange, startDate: e.target.value })}
-                className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                onChange={(e) =>
+                  setDateRange({ ...dateRange, startDate: e.target.value })
+                }
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">End Date</label>
-              <input
+              <Input
+                label="End Date"
                 type="date"
                 value={dateRange.endDate}
-                onChange={(e) => setDateRange({ ...dateRange, endDate: e.target.value })}
-                className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                onChange={(e) =>
+                  setDateRange({ ...dateRange, endDate: e.target.value })
+                }
               />
             </div>
           </div>
 
           {/* Export */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Format</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Format
+            </label>
             <div className="flex gap-2">
-              <select
+              <Select
                 value={exportFormat}
-                onChange={(e) => setExportFormat(e.target.value as "csv" | "json")}
-                className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                onChange={(value) => setExportFormat(value as "csv" | "json")}
+                options={exportOptions}
+                variant="default"
+                fullWidth={false}
+                selectClassName="px-4 py-3"
+                placeholder={undefined}
+              />
+              <Button
+                variant="primary"
+                size="md"
+                onClick={handleExport}
+                className="flex items-center gap-2 rounded-lg"
               >
-                <option value="csv">CSV</option>
-                <option value="json">JSON</option>
-              </select>
-              <Button variant="primary" size="md" onClick={handleExport} className="flex items-center gap-2">
                 <Download size={18} />
                 Export
               </Button>
@@ -373,110 +504,55 @@ export default function AuditLogsPage() {
       </div>
 
       {/* Logs Table */}
-      <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-        {loading ? (
-          <div className="text-center py-12 text-gray-500">Loading audit logs...</div>
-        ) : filteredLogs.length === 0 ? (
-          <div className="text-center py-12 text-gray-500">No audit logs found</div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Timestamp
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actor
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Action
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Module
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Target
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    IP Address
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredLogs.map((log) => (
-                  <tr key={log.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {new Date(log.timestamp).toLocaleString()}
-                    </td>
-                    <td className="px-6 py-4">
-                      <div>
-                        <div className="font-medium text-gray-900">{log.actor.name}</div>
-                        <div className="text-sm text-gray-500">{log.actor.email}</div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {getActionBadge(log.action)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <Badge label={log.module} size="sm" variant="active" />
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                      {log.target.type}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-mono">
-                      {log.ipAddress}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <button
-                        onClick={() => {
-                          setSelectedLog(log);
-                          setShowDetailsModal(true);
-                        }}
-                        className="text-indigo-600 hover:text-indigo-800"
-                        title="View details"
-                      >
-                        <Eye size={18} />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+      {loading ? (
+        <div className="bg-white rounded-lg shadow-sm p-12 text-center text-gray-500">
+          Loading audit logs...
+        </div>
+      ) : (
+        <>
+          <Table
+            columns={columns}
+            data={filteredLogs}
+            renderCell={renderCell}
+            alternateRowColors={true}
+            showSeparators={true}
+            enableHorizontalScroll={true}
+            minTableWidth="1400px"
+          />
 
-        {/* Pagination */}
-        {!loading && filteredLogs.length > 0 && (
-          <div className="flex items-center justify-end px-6 py-4 bg-gray-50 border-t">
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={(page) => fetchLogs(page)}
-            />
-          </div>
-        )}
-      </div>
+          {/* Pagination */}
+          {filteredLogs.length > 0 && (
+            <div className="flex items-center justify-end">
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={(page) => fetchLogs(page)}
+              />
+            </div>
+          )}
+        </>
+      )}
 
       {/* Details Modal */}
       {showDetailsModal && selectedLog && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
           <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden shadow-2xl">
             {/* Header */}
-            <div className="bg-linear-to-r from-blue-600 to-blue-700 px-8 py-6">
+            <div className="bg-linear-to-r from-orange-500 to-orange-600 px-8 py-6">
               <div className="flex justify-between items-center">
                 <div>
-                  <h3 className="text-2xl font-bold text-white mb-1">Audit Log Details</h3>
-                  <p className="text-blue-100 text-sm">Log ID: {selectedLog.id}</p>
+                  <h3 className="text-2xl font-bold text-white mb-1">
+                    Audit Log Details
+                  </h3>
+                  <p className="text-orange-100 text-sm">
+                    Log ID: {selectedLog.id}
+                  </p>
                 </div>
                 <button
                   onClick={() => setShowDetailsModal(false)}
-                  className="text-white hover:bg-white hover:bg-opacity-20 rounded-lg p-2 transition-colors"
+                  className="text-white hover:bg-opacity-20 rounded-lg p-2 transition-colors cursor-pointer"
                 >
-                  <span className="text-2xl">&times;</span>
+                  <X size={24} />
                 </button>
               </div>
             </div>
@@ -485,11 +561,13 @@ export default function AuditLogsPage() {
             <div className="px-8 py-6 overflow-y-auto max-h-[calc(90vh-180px)]">
               <div className="space-y-6">
                 {/* Timestamp */}
-                <div className="bg-blue-50 rounded-xl p-5 border-2 border-blue-200">
+                <div className="bg-linear-to-r from-orange-50 rounded-xl p-5 border-2 border-orange-200">
                   <div className="flex items-center gap-3">
-                    <Calendar className="text-blue-600" size={24} />
+                    <Calendar className="text-orange-600" size={24} />
                     <div>
-                      <p className="text-sm font-medium text-gray-600 uppercase tracking-wide">Timestamp</p>
+                      <p className="text-sm font-medium text-gray-600 uppercase tracking-wide">
+                        Timestamp
+                      </p>
                       <p className="text-lg font-bold text-gray-900">
                         {new Date(selectedLog.timestamp).toLocaleString()}
                       </p>
@@ -500,82 +578,137 @@ export default function AuditLogsPage() {
                 {/* Actor Information */}
                 <div className="bg-linear-to-br from-gray-50 to-gray-100 rounded-xl p-6 border border-gray-200">
                   <h4 className="font-bold text-gray-900 mb-4 flex items-center gap-2 text-lg">
-                    <Users size={20} className="text-blue-600" />
+                    <Users size={20} className="text-orange-600" />
                     Actor Information
                   </h4>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Name</label>
-                      <p className="font-semibold text-gray-900 text-lg mt-1">{selectedLog.actor.name}</p>
+                      <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                        Name
+                      </label>
+                      <p className="font-semibold text-gray-900 text-lg mt-1">
+                        {selectedLog.actor.name}
+                      </p>
                     </div>
                     <div>
-                      <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Email</label>
-                      <p className="text-gray-700 mt-1">{selectedLog.actor.email}</p>
+                      <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                        Email
+                      </label>
+                      <p className="text-gray-700 mt-1">
+                        {selectedLog.actor.email}
+                      </p>
                     </div>
                   </div>
                 </div>
 
                 {/* Action Details */}
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-white rounded-xl p-6 border-2 border-gray-200">
-                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Action</label>
-                    <p className="text-xl font-bold text-gray-900 mt-2 capitalize">{selectedLog.action}</p>
+                  <div className="bg-linear-to-br from-green-50 to-emerald-50 rounded-xl p-6 border-2 border-green-200">
+                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                      Action
+                    </label>
+                    <p className="text-xl font-bold text-green-700 mt-2 capitalize">
+                      {selectedLog.action}
+                    </p>
                   </div>
-                  <div className="bg-white rounded-xl p-6 border-2 border-gray-200">
-                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Module</label>
-                    <p className="text-xl font-bold text-gray-900 mt-2">{selectedLog.module}</p>
+                  <div className="bg-linear-to-br from-purple-50 to-violet-50 rounded-xl p-6 border-2 border-purple-200">
+                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                      Module
+                    </label>
+                    <p className="text-xl font-bold text-purple-700 mt-2">
+                      {selectedLog.module}
+                    </p>
                   </div>
                 </div>
 
                 {/* Target */}
                 <div className="bg-white rounded-xl p-6 border-2 border-purple-200">
-                  <h4 className="font-bold text-gray-900 mb-3 text-lg">Target</h4>
+                  <h4 className="font-bold text-gray-900 mb-3 text-lg">
+                    Target
+                  </h4>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Type</label>
-                      <p className="font-semibold text-gray-900 mt-1">{selectedLog.target.type}</p>
+                      <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                        Type
+                      </label>
+                      <p className="font-semibold text-gray-900 mt-1">
+                        {selectedLog.target.type}
+                      </p>
                     </div>
                     <div>
-                      <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">ID</label>
-                      <p className="text-gray-700 font-mono text-sm mt-1">{selectedLog.target.id}</p>
+                      <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                        ID
+                      </label>
+                      <p className="text-gray-700 font-mono text-sm mt-1 break-all">
+                        {selectedLog.target.id}
+                      </p>
                     </div>
                   </div>
                 </div>
 
                 {/* Network Information */}
-                <div className="bg-linear-to-br from-orange-50 to-orange-100 rounded-xl p-6 border border-orange-200">
-                  <h4 className="font-bold text-gray-900 mb-4 text-lg">Network Information</h4>
+                <div className="bg-linear-to-br from-orange-50 to-amber-50 rounded-xl p-6 border-2 border-orange-200">
+                  <h4 className="font-bold text-gray-900 mb-4 text-lg">
+                    Network Information
+                  </h4>
                   <div className="space-y-3">
                     <div>
-                      <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">IP Address</label>
-                      <p className="font-mono text-gray-900 mt-1">{selectedLog.ipAddress}</p>
+                      <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                        IP Address
+                      </label>
+                      <p className="font-mono text-gray-900 mt-1 text-lg">
+                        {selectedLog.ipAddress}
+                      </p>
                     </div>
                     <div>
-                      <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">User Agent</label>
-                      <p className="text-sm text-gray-700 mt-1 break-all">{selectedLog.userAgent}</p>
+                      <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                        User Agent
+                      </label>
+                      <p className="text-sm text-gray-700 mt-1 break-all bg-white p-3 rounded border border-orange-200">
+                        {selectedLog.userAgent}
+                      </p>
                     </div>
                   </div>
                 </div>
 
                 {/* Metadata */}
                 <div className="bg-white rounded-xl p-6 border-2 border-gray-200">
-                  <h4 className="font-bold text-gray-900 mb-4 text-lg">Request Metadata</h4>
-                  <div className="grid grid-cols-3 gap-4">
-                    <div>
-                      <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Method</label>
-                      <p className="font-mono font-bold text-gray-900 mt-1">{selectedLog.metadata.method}</p>
+                  <h4 className="font-bold text-gray-900 mb-4 text-lg">
+                    Request Metadata
+                  </h4>
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="bg-gray-50 p-3 rounded-lg">
+                        <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                          Method
+                        </label>
+                        <p className="font-mono font-bold text-gray-900 mt-1">
+                          {selectedLog.metadata.method}
+                        </p>
+                      </div>
+                      <div className="col-span-2 bg-gray-50 p-3 rounded-lg">
+                        <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                          URL
+                        </label>
+                        <p className="font-mono text-sm text-gray-700 mt-1 break-all">
+                          {selectedLog.metadata.url}
+                        </p>
+                      </div>
                     </div>
-                    <div className="col-span-2">
-                      <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">URL</label>
-                      <p className="font-mono text-sm text-gray-700 mt-1 break-all">{selectedLog.metadata.url}</p>
-                    </div>
-                    <div>
-                      <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Status Code</label>
-                      <p className={`font-bold mt-1 ${
-                        selectedLog.metadata.statusCode >= 200 && selectedLog.metadata.statusCode < 300
-                          ? 'text-green-600'
-                          : 'text-red-600'
-                      }`}>
+                    <div className="bg-gray-50 p-3 rounded-lg">
+                      <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                        Status Code
+                      </label>
+                      <p
+                        className={`font-bold text-2xl mt-1 ${
+                          selectedLog.metadata.statusCode >= 200 &&
+                          selectedLog.metadata.statusCode < 300
+                            ? "text-green-600"
+                            : selectedLog.metadata.statusCode >= 400
+                            ? "text-red-600"
+                            : "text-yellow-600"
+                        }`}
+                      >
                         {selectedLog.metadata.statusCode}
                       </p>
                     </div>
@@ -586,7 +719,11 @@ export default function AuditLogsPage() {
 
             {/* Footer */}
             <div className="px-8 py-5 bg-gray-50 border-t border-gray-200 flex justify-end">
-              <Button variant="secondary" size="md" onClick={() => setShowDetailsModal(false)}>
+              <Button
+                variant="secondary"
+                size="md"
+                onClick={() => setShowDetailsModal(false)}
+              >
                 Close
               </Button>
             </div>

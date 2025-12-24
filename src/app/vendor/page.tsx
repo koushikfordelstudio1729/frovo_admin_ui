@@ -96,7 +96,7 @@ export default function VendorModulePage() {
         </div>
 
         {/* Main Menu Section */}
-        <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl p-8 shadow-sm">
+        <div className="bg-linear-to-br from-orange-50 to-orange-100 rounded-2xl p-8 shadow-sm">
           <div className="flex items-center gap-3 mb-6">
             <Building2 className="text-orange-600" size={32} />
             <h2 className="text-2xl font-semibold text-gray-900">
@@ -112,7 +112,7 @@ export default function VendorModulePage() {
         </div>
 
         {/* Settings Section */}
-        <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-8 shadow-sm">
+        <div className="bg-linear-to-br from-gray-50 to-gray-100 rounded-2xl p-8 shadow-sm">
           <div className="flex items-center gap-3 mb-6">
             <Shield className="text-gray-600" size={32} />
             <h2 className="text-2xl font-semibold text-gray-900">

@@ -17,7 +17,7 @@ export const vendorNavigation: VendorMenuItem[] = [
   //   href: "/vendor/dashboard",
   // },
   {
-    label: "Vendor Onboard",
+    label: "Brand Onboard",
     icon: "userPlus",
     href: "/vendor/vendor-onboard",
   },

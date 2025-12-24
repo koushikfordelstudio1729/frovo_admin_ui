@@ -63,6 +63,7 @@ export interface WarehousesResponse {
 }
 
 export interface WarehouseManagerDetails {
+  id: string | undefined;
   _id: string;
   name: string;
   email: string;
@@ -79,6 +80,11 @@ export interface WarehouseResponse {
   success: boolean;
   message: string;
   data: {
+    isActive: boolean | undefined;
+    location: string | undefined;
+    capacity: number | undefined;
+    code: string | undefined;
+    partner: string | undefined;
     name: string | undefined;
     warehouse: Warehouse;
     manager: WarehouseManagerDetails;

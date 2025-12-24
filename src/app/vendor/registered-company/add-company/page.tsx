@@ -7,6 +7,7 @@ import {
   Input,
   Label,
   Select,
+  SuccessDialog,
   Textarea,
 } from "@/components";
 import { useRouter } from "next/navigation";
@@ -64,6 +65,7 @@ export default function AddCompanyPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<ValidationErrors>({});
+  const [successOpen, setSuccessOpen] = useState(false);
 
   const [form, setForm] = useState<CompanyForm>({
     legalEntity: "",
@@ -103,19 +105,29 @@ export default function AddCompanyPage() {
     const newErrors: ValidationErrors = {};
 
     // Required fields
-    if (!form.companyName.trim()) newErrors.companyName = "Company name is required";
-    if (!form.legalEntity) newErrors.legalEntity = "Legal entity structure is required";
+    if (!form.companyName.trim())
+      newErrors.companyName = "Company name is required";
+    if (!form.legalEntity)
+      newErrors.legalEntity = "Legal entity structure is required";
     if (!form.cin.trim()) newErrors.cin = "CIN is required";
     if (!form.email.trim()) newErrors.email = "Email is required";
-    if (!form.officeAddress.trim()) newErrors.officeAddress = "Office address is required";
-    if (!form.website.trim()) newErrors.website = "Corporate website is required";
-    if (!form.directorName.trim()) newErrors.directorName = "Director name is required";
+    if (!form.officeAddress.trim())
+      newErrors.officeAddress = "Office address is required";
+    if (!form.website.trim())
+      newErrors.website = "Corporate website is required";
+    if (!form.directorName.trim())
+      newErrors.directorName = "Director name is required";
     if (!form.din.trim()) newErrors.din = "DIN is required";
-    if (!form.dateIncorporation) newErrors.dateIncorporation = "Date of incorporation is required";
+    if (!form.dateIncorporation)
+      newErrors.dateIncorporation = "Date of incorporation is required";
 
     // Date validation
-    if (form.dateIncorporation && new Date(form.dateIncorporation) > new Date()) {
-      newErrors.dateIncorporation = "Date of incorporation cannot be in the future";
+    if (
+      form.dateIncorporation &&
+      new Date(form.dateIncorporation) > new Date()
+    ) {
+      newErrors.dateIncorporation =
+        "Date of incorporation cannot be in the future";
     }
 
     // Format validations
@@ -140,8 +152,12 @@ export default function AddCompanyPage() {
     }
 
     if (form.website.trim()) {
-      const websiteValidation = validateCompanyField("WEBSITE", form.website.trim());
-      if (!websiteValidation.isValid) newErrors.website = websiteValidation.error;
+      const websiteValidation = validateCompanyField(
+        "WEBSITE",
+        form.website.trim()
+      );
+      if (!websiteValidation.isValid)
+        newErrors.website = websiteValidation.error;
     }
 
     setErrors(newErrors);
@@ -176,6 +192,12 @@ export default function AddCompanyPage() {
       };
 
       await createCompany(payload);
+
+      setSuccessOpen(true);
+      setTimeout(() => {
+        setSuccessOpen(false);
+        router.push("/vendor/registered-company");
+      }, 2000);
 
       toast.success("Company registered successfully!");
       router.push("/vendor/registered-company");
@@ -235,7 +257,9 @@ export default function AddCompanyPage() {
               label="Corporate Identification Number (CIN) *"
               value={form.cin}
               variant="orange"
-              onChange={(e) => handleChange("cin", e.target.value.toUpperCase())}
+              onChange={(e) =>
+                handleChange("cin", e.target.value.toUpperCase())
+              }
               onBlur={() => handleBlur("CIN")}
               placeholder="e.g., U15499DL1989PTC035955"
             />
@@ -253,7 +277,9 @@ export default function AddCompanyPage() {
               label="GST Number"
               value={form.gstNumber}
               variant="orange"
-              onChange={(e) => handleChange("gstNumber", e.target.value.toUpperCase())}
+              onChange={(e) =>
+                handleChange("gstNumber", e.target.value.toUpperCase())
+              }
               onBlur={() => handleBlur("GST")}
               placeholder="e.g., 07AABCP0634E1ZU"
             />
@@ -273,10 +299,14 @@ export default function AddCompanyPage() {
               value={form.dateIncorporation}
               max={TODAY}
               variant="orange"
-              onChange={(e) => handleChange("dateIncorporation", e.target.value)}
+              onChange={(e) =>
+                handleChange("dateIncorporation", e.target.value)
+              }
             />
             {errors.dateIncorporation && (
-              <p className="text-red-500 text-sm mt-1">{errors.dateIncorporation}</p>
+              <p className="text-red-500 text-sm mt-1">
+                {errors.dateIncorporation}
+              </p>
             )}
           </div>
 
@@ -321,7 +351,9 @@ export default function AddCompanyPage() {
               rows={6}
             />
             {errors.officeAddress && (
-              <p className="text-red-500 text-sm mt-1">{errors.officeAddress}</p>
+              <p className="text-red-500 text-sm mt-1">
+                {errors.officeAddress}
+              </p>
             )}
           </div>
 
@@ -424,6 +456,16 @@ export default function AddCompanyPage() {
           </Button>
         </div>
       </div>
+      <SuccessDialog
+        open={successOpen}
+        title="Company Added Successfully!"
+        message="Company has been registered in the system."
+        primaryText="OK"
+        onClose={() => {
+          setSuccessOpen(false);
+          router.push("/vendor/registered-company");
+        }}
+      />
     </div>
   );
 }

@@ -6,7 +6,13 @@ import { useRouter } from "next/navigation";
 import { bulkCreateVendors } from "@/services/vendor";
 import { toast } from "react-hot-toast";
 import { CreateVendorPayload } from "@/types/vendor-data.types";
-import { Upload, Download, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
+import {
+  Upload,
+  Download,
+  CheckCircle2,
+  XCircle,
+  AlertCircle,
+} from "lucide-react";
 
 export default function BulkUploadVendorPage() {
   const router = useRouter();
@@ -20,14 +26,14 @@ export default function BulkUploadVendorPage() {
 
   const sampleData: CreateVendorPayload[] = [
     {
-      vendor_name: "Sample Vendor 1",
-      vendor_billing_name: "Sample Vendor 1 Pvt Ltd",
+      vendor_name: "Sample Brand 1",
+      vendor_billing_name: "Sample Brand 1 Pvt Ltd",
       vendor_type: ["snacks"],
       vendor_category: "consumables",
       material_categories_supplied: ["Chips", "Snacks"],
       primary_contact_name: "John Doe",
       contact_phone: "+919876543210",
-      vendor_email: "vendor1@example.com",
+      vendor_email: "brand@example.com",
       vendor_address: "123 Sample Street, City, State - 123456",
       cin: "U15499DL1989PTC035955",
       bank_account_number: "1234567890123456",
@@ -39,7 +45,7 @@ export default function BulkUploadVendorPage() {
       tds_rate: 1.0,
       billing_cycle: "monthly",
       risk_rating: "low",
-      risk_notes: "Good vendor",
+      risk_notes: "Good brand",
       contract_expiry_date: "2025-12-31",
       contract_renewal_date: "2025-11-30",
     },
@@ -72,12 +78,12 @@ export default function BulkUploadVendorPage() {
         const parsed = JSON.parse(content);
 
         if (!parsed.vendors || !Array.isArray(parsed.vendors)) {
-          toast.error('JSON must have a "vendors" array');
+          toast.error('JSON must have a "brands" array');
           return;
         }
 
         setJsonData(JSON.stringify(parsed, null, 2));
-        toast.success(`Loaded ${parsed.vendors.length} vendors from file`);
+        toast.success(`Loaded ${parsed.vendors.length} brands from file`);
       } catch (error) {
         toast.error("Invalid JSON file");
         console.error(error);
@@ -88,18 +94,18 @@ export default function BulkUploadVendorPage() {
 
   const handleSubmit = async () => {
     if (!jsonData.trim()) {
-      return toast.error("Please provide vendor data");
+      return toast.error("Please provide brands data");
     }
 
     try {
       const parsed = JSON.parse(jsonData);
 
       if (!parsed.vendors || !Array.isArray(parsed.vendors)) {
-        return toast.error('JSON must have a "vendors" array');
+        return toast.error('JSON must have a "brands" array');
       }
 
       if (parsed.vendors.length === 0) {
-        return toast.error("Vendors array cannot be empty");
+        return toast.error("brands array cannot be empty");
       }
 
       setLoading(true);
@@ -113,17 +119,21 @@ export default function BulkUploadVendorPage() {
       });
 
       if (failed.length === 0) {
-        toast.success(`All ${successful.length} vendors created successfully!`);
+        toast.success(`All ${successful.length} brands created successfully!`);
       } else {
-        toast.warning(
-          `${successful.length} vendors created, ${failed.length} failed`
-        );
+        toast(`${successful.length} brands created, ${failed.length} failed`, {
+          style: {
+            border: "1px solid #facc15",
+            padding: "12px",
+            color: "#92400e",
+          },
+        });
       }
     } catch (err: any) {
       const msg =
         err?.response?.data?.error ||
         err?.response?.data?.message ||
-        "Failed to bulk create vendors";
+        "Failed to bulk create brands";
       toast.error(msg);
       console.error("Bulk Upload Error →", err);
     } finally {
@@ -133,7 +143,7 @@ export default function BulkUploadVendorPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
-      <BackHeader title="Bulk Upload Vendors" />
+      <BackHeader title="Bulk Upload brands" />
 
       <div className="bg-white rounded-xl p-8 space-y-8">
         {/* Instructions */}
@@ -144,16 +154,20 @@ export default function BulkUploadVendorPage() {
           </Label>
           <ul className="list-disc list-inside mt-4 space-y-2 text-gray-700">
             <li>Download the sample JSON template below</li>
-            <li>Fill in your vendor data following the same structure</li>
+            <li>Fill in your brand data following the same structure</li>
             <li>Upload the JSON file or paste the JSON content directly</li>
-            <li>Click "Upload Vendors" to process the bulk creation</li>
-            <li>Review the results to see which vendors were created successfully</li>
+            <li>Click "Upload Brands" to process the bulk creation</li>
+            <li>
+              Review the results to see which brands were created successfully
+            </li>
           </ul>
         </div>
 
         {/* Download Sample */}
         <div className="flex justify-between items-center">
-          <Label className="text-xl font-semibold">Download Sample Template</Label>
+          <Label className="text-xl font-semibold">
+            Download Sample Template
+          </Label>
           <Button
             variant="secondary"
             onClick={handleDownloadSample}
@@ -167,7 +181,7 @@ export default function BulkUploadVendorPage() {
         <hr className="border-gray-200" />
 
         {/* Upload Options */}
-        <Label className="text-xl font-semibold">Upload Vendor Data</Label>
+        <Label className="text-xl font-semibold">Upload Brands Data</Label>
 
         <div className="grid grid-cols-1 gap-6">
           {/* File Upload */}
@@ -191,8 +205,8 @@ export default function BulkUploadVendorPage() {
               Option 2: Paste JSON Content
             </label>
             <textarea
-              className="w-full h-96 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 font-mono text-sm"
-              placeholder='{"vendors": [...]}'
+              className="w-full h-96 px-4 text-gray-900 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 font-mono text-sm"
+              placeholder='{"Brands": [...]}'
               value={jsonData}
               onChange={(e) => setJsonData(e.target.value)}
             />
@@ -208,7 +222,7 @@ export default function BulkUploadVendorPage() {
             className="px-8 rounded-lg flex items-center gap-2"
           >
             <Upload size={18} />
-            {loading ? "Uploading..." : "Upload Vendors"}
+            {loading ? "Uploading..." : "Upload Brands"}
           </Button>
 
           <Button
@@ -240,7 +254,9 @@ export default function BulkUploadVendorPage() {
               <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-3">
                 <XCircle size={32} className="text-red-600" />
                 <div>
-                  <p className="text-2xl font-bold text-red-700">{results.failed}</p>
+                  <p className="text-2xl font-bold text-red-700">
+                    {results.failed}
+                  </p>
                   <p className="text-sm text-red-600">Failed</p>
                 </div>
               </div>
@@ -248,7 +264,9 @@ export default function BulkUploadVendorPage() {
 
             {/* Details */}
             <div className="mt-6">
-              <Label className="text-lg font-semibold mb-4">Detailed Results</Label>
+              <Label className="text-lg font-semibold mb-4">
+                Detailed Results
+              </Label>
               <div className="max-h-96 overflow-y-auto border border-gray-300 rounded-lg">
                 <table className="w-full">
                   <thead className="bg-gray-100 sticky top-0">
@@ -257,10 +275,10 @@ export default function BulkUploadVendorPage() {
                         #
                       </th>
                       <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                        Vendor Name
+                        Brand Name
                       </th>
                       <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                        Vendor ID
+                        Brand ID
                       </th>
                       <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
                         Status
@@ -306,10 +324,10 @@ export default function BulkUploadVendorPage() {
             <div className="flex justify-center mt-6">
               <Button
                 variant="primary"
-                onClick={() => router.push("/vendor/vendor-management")}
+                onClick={() => router.push("/vendor/vendor-onboard")}
                 className="px-8 rounded-lg"
               >
-                Go to Vendor List
+                Go to Brand List
               </Button>
             </div>
           </div>

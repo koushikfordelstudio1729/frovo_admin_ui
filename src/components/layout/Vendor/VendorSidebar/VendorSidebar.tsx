@@ -49,8 +49,8 @@ export const VendorSidebar: React.FC = () => {
   const handleToggle = (label: string) =>
     setOpen((prev) => ({ ...prev, [label]: !prev[label] }));
 
-  const group1 = vendorNavigation.slice(0, 3);
-  const group2 = vendorNavigation.slice(3, 5);
+  const group1 = vendorNavigation.slice(0, 2);
+  const group2 = vendorNavigation.slice(2, 4);
 
   function TopLevelSidebar(item: VendorMenuItem) {
     const Icon = iconMap[item.icon as keyof typeof iconMap] || LayoutDashboard;
