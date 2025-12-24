@@ -1,7 +1,7 @@
 "use client";
 
-import React from "react";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import React, { useEffect } from "react";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import { MapPin } from "lucide-react";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
@@ -13,6 +13,20 @@ L.Icon.Default.mergeOptions({
   iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
   shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
 });
+
+// Component to update map view when coordinates change
+function MapUpdater({ position }: { position: [number, number] }) {
+  const map = useMap();
+
+  useEffect(() => {
+    // Fly to the new position with smooth animation
+    map.flyTo(position, 15, {
+      duration: 1.5, // Animation duration in seconds
+    });
+  }, [position, map]);
+
+  return null;
+}
 
 interface LocationViewerProps {
   latitude: number;
@@ -50,6 +64,7 @@ export const LocationViewer: React.FC<LocationViewerProps> = ({
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
+          <MapUpdater position={position} />
           <Marker position={position}>
             <Popup>
               <div className="text-sm">

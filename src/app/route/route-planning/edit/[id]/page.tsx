@@ -9,6 +9,7 @@ import {
   Select,
   Textarea,
   SearchableSelect,
+  LocationViewer,
 } from "@/components";
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
@@ -67,11 +68,23 @@ const EditRoute = () => {
   const [availableMachines, setAvailableMachines] = useState<{ value: string; label: string }[]>(DUMMY_MACHINES);
   const [streetOptions, setStreetOptions] = useState<{ value: string; label: string }[]>([]);
 
+  // Selected area location data
+  const [selectedAreaLocation, setSelectedAreaLocation] = useState<{
+    latitude: number;
+    longitude: number;
+    areaName: string;
+    address?: string;
+  } | null>(null);
+
   // Loading states
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
   const [areasLoading, setAreasLoading] = useState(false);
   const [streetsLoading, setStreetsLoading] = useState(false);
+
+  // Error states
+  const [areaDataError, setAreaDataError] = useState(false);
+  const [streetsError, setStreetsError] = useState(false);
 
   // Fetch existing route data
   useEffect(() => {
@@ -147,49 +160,82 @@ const EditRoute = () => {
     fetchAreas();
   }, []);
 
-  // Fetch machines and streets when area is selected
-  useEffect(() => {
-    const fetchAreaData = async () => {
-      if (!areaId) {
-        setAvailableMachines(DUMMY_MACHINES);
-        setStreetOptions([]);
-        return;
-      }
+  // Fetch streets for selected area
+  const fetchStreets = async (latitude: number, longitude: number) => {
+    try {
+      setStreetsLoading(true);
+      setStreetsError(false);
+      const streets = await openStreetMapAPI.getStreetsNearLocation(
+        latitude,
+        longitude,
+        2000 // 2km radius
+      );
+      const formattedStreets = streets.map(s => ({ value: s.name, label: s.name }));
+      // Add "Custom" option at the top
+      formattedStreets.unshift({ value: "custom", label: "Custom (Type your own)" });
+      setStreetOptions(formattedStreets);
+    } catch (streetError) {
+      console.error("Error fetching streets:", streetError);
+      toast.error("Failed to load route suggestions");
+      // If streets fail, show custom option and set error
+      setStreetOptions([{ value: "custom", label: "Custom (Type your own)" }]);
+      setStreetsError(true);
+    } finally {
+      setStreetsLoading(false);
+    }
+  };
 
-      try {
-        const response = await areaAPI.getAreaById(areaId);
-        if (response.success && response.data) {
-          const machines = response.data.select_machine || [];
-          const machineArray = Array.isArray(machines) ? machines : [machines];
-          const formattedMachines = machineArray.map(m => ({ value: m, label: m }));
-          setAvailableMachines(formattedMachines);
+  // Fetch machines and streets when area is selected
+  const fetchAreaData = async () => {
+    if (!areaId) {
+      setAvailableMachines(DUMMY_MACHINES);
+      setStreetOptions([]);
+      setSelectedAreaLocation(null);
+      setAreaDataError(false);
+      setStreetsError(false);
+      return;
+    }
+
+    try {
+      setAreaDataError(false);
+      const response = await areaAPI.getAreaById(areaId);
+      if (response.success && response.data) {
+        const machines = response.data.select_machine || [];
+        const machineArray = Array.isArray(machines) ? machines : [machines];
+        const formattedMachines = machineArray.map(m => ({ value: m, label: m }));
+        setAvailableMachines(formattedMachines);
+
+        // Store location data if coordinates exist
+        if (response.data.latitude && response.data.longitude) {
+          setSelectedAreaLocation({
+            latitude: response.data.latitude,
+            longitude: response.data.longitude,
+            areaName: response.data.area_name,
+            address: response.data.address,
+          });
 
           // Fetch streets if area has coordinates
-          if (response.data.latitude && response.data.longitude) {
-            setStreetsLoading(true);
-            const streets = await openStreetMapAPI.getStreetsNearLocation(
-              response.data.latitude,
-              response.data.longitude,
-              2000 // 2km radius
-            );
-            const formattedStreets = streets.map(s => ({ value: s.name, label: s.name }));
-            // Add "Custom" option at the top
-            formattedStreets.unshift({ value: "custom", label: "Custom (Type your own)" });
-            setStreetOptions(formattedStreets);
-            setStreetsLoading(false);
-          } else {
-            // If no coordinates, just show custom option
-            setStreetOptions([{ value: "custom", label: "Custom (Type your own)" }]);
-          }
+          await fetchStreets(response.data.latitude, response.data.longitude);
+        } else {
+          // If no coordinates, clear location and just show custom option
+          setSelectedAreaLocation(null);
+          setStreetOptions([{ value: "custom", label: "Custom (Type your own)" }]);
+          setStreetsError(false);
         }
-      } catch (error) {
-        console.error("Error fetching area data:", error);
-        toast.error("Failed to load area data");
-        setAvailableMachines(DUMMY_MACHINES);
-        setStreetsLoading(false);
       }
-    };
+    } catch (error) {
+      console.error("Error fetching area data:", error);
+      toast.error("Failed to load area data");
+      setAvailableMachines(DUMMY_MACHINES);
+      setSelectedAreaLocation(null);
+      setStreetOptions([]);
+      setStreetsLoading(false);
+      setStreetsError(false);
+      setAreaDataError(true);
+    }
+  };
 
+  useEffect(() => {
     fetchAreaData();
   }, [areaId]);
 
@@ -208,6 +254,58 @@ const EditRoute = () => {
       setRouteName(selectedRouteOption);
     }
   }, [selectedRouteOption, customRouteName]);
+
+  // Update map location when route name is selected
+  useEffect(() => {
+    const updateMapLocation = async () => {
+      // Only geocode if we have a selected route option that's not custom
+      // and we have base area location data
+      if (!selectedRouteOption || selectedRouteOption === "custom" || !selectedAreaLocation) {
+        return;
+      }
+
+      // Check if route name looks like a real street
+      const streetKeywords = ['road', 'street', 'avenue', 'lane', 'cross', 'main', 'circle', 'layout', 'sector', 'block'];
+      const looksLikeStreet = streetKeywords.some(keyword =>
+        selectedRouteOption.toLowerCase().includes(keyword)
+      );
+
+      if (!looksLikeStreet) {
+        console.log("Route name appears to be custom, skipping geocoding:", selectedRouteOption);
+        return;
+      }
+
+      try {
+        // Get the area name for better geocoding context
+        const areaName = areaOptions.find(a => a.value === areaId)?.label;
+
+        console.log("Geocoding street:", selectedRouteOption);
+        // Search for the street coordinates
+        const streets = await openStreetMapAPI.searchStreetByName(
+          selectedRouteOption,
+          areaName
+        );
+
+        if (streets.length > 0 && streets[0].coordinates) {
+          console.log("Found street coordinates:", streets[0].coordinates);
+          // Update location to the selected street
+          setSelectedAreaLocation({
+            latitude: streets[0].coordinates[0],
+            longitude: streets[0].coordinates[1],
+            areaName: selectedRouteOption,
+            address: selectedAreaLocation.address,
+          });
+        } else {
+          console.log("No coordinates found for street, keeping area location");
+        }
+      } catch (error) {
+        console.error("Error geocoding street:", error);
+        // Keep the original area location if geocoding fails
+      }
+    };
+
+    updateMapLocation();
+  }, [selectedRouteOption, areaId]);
 
   // Handle custom date changes
   const handleCustomDateChange = (index: number, value: string) => {
@@ -334,7 +432,28 @@ const EditRoute = () => {
               Current area will be maintained. Change only if necessary.
             </p>
 
-            {areaId && (
+            {/* Error message with retry button */}
+            {areaId && areaDataError && (
+              <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="text-sm font-semibold text-red-800">Failed to load area data</p>
+                    <p className="text-xs text-red-600 mt-1">
+                      There was an error loading machines and routes for this area.
+                    </p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    className="ml-4 text-red-600 border-red-300 hover:bg-red-100 px-4 py-2"
+                    onClick={fetchAreaData}
+                  >
+                    Retry
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {areaId && !areaDataError && (
               <>
                 <div className="mt-8">
                   <SearchableSelect
@@ -355,6 +474,27 @@ const EditRoute = () => {
                     }
                   />
                 </div>
+
+                {/* Streets error with retry button */}
+                {streetsError && selectedAreaLocation && (
+                  <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <p className="text-sm font-semibold text-yellow-800">Failed to load route suggestions</p>
+                        <p className="text-xs text-yellow-600 mt-1">
+                          Unable to fetch route names from map. You can still use custom route name.
+                        </p>
+                      </div>
+                      <Button
+                        variant="outline"
+                        className="ml-4 text-yellow-600 border-yellow-300 hover:bg-yellow-100 px-4 py-2"
+                        onClick={() => fetchStreets(selectedAreaLocation.latitude, selectedAreaLocation.longitude)}
+                      >
+                        Retry
+                      </Button>
+                    </div>
+                  </div>
+                )}
 
                 {selectedRouteOption === "custom" && (
                   <div className="mt-8">
@@ -522,6 +662,16 @@ const EditRoute = () => {
                   disabled={selectedMachines.length === 0}
                 />
               </div>
+            )}
+
+            {/* Location Map */}
+            {selectedAreaLocation && (
+              <LocationViewer
+                latitude={selectedAreaLocation.latitude}
+                longitude={selectedAreaLocation.longitude}
+                areaName={selectedAreaLocation.areaName}
+                address={selectedAreaLocation.address}
+              />
             )}
 
             <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">

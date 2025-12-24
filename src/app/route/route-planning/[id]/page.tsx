@@ -1,9 +1,10 @@
 "use client";
 
-import { BackHeader, Badge, Button, Label } from "@/components";
+import { BackHeader, Badge, Button, Label, LocationViewer } from "@/components";
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { routeAPI } from "@/services/routeAPI";
+import { openStreetMapAPI } from "@/services/openStreetMapAPI";
 import { RouteData } from "@/types/route.types";
 import { toast } from "react-hot-toast";
 import { Edit2, Trash2, MapPin, Calendar, Package } from "lucide-react";
@@ -17,6 +18,13 @@ const RouteDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
+  // Route location (geocoded from route name)
+  const [routeLocation, setRouteLocation] = useState<{
+    latitude: number;
+    longitude: number;
+    name: string;
+  } | null>(null);
 
   useEffect(() => {
     const fetchRouteDetails = async () => {
@@ -40,6 +48,84 @@ const RouteDetailPage = () => {
       fetchRouteDetails();
     }
   }, [routeId]);
+
+  // Geocode route name to get exact location
+  useEffect(() => {
+    const geocodeRouteName = async () => {
+      if (!route) {
+        console.log("No route data available");
+        return;
+      }
+
+      console.log("Route data:", route);
+      console.log("Area name:", route.area_name);
+
+      // Check if area_name is an object (AreaInfo) and has coordinates
+      const areaInfo = typeof route.area_name === 'object' ? route.area_name : null;
+
+      console.log("Area info:", areaInfo);
+      console.log("Latitude:", areaInfo?.latitude);
+      console.log("Longitude:", areaInfo?.longitude);
+
+      // First, set fallback to area location if coordinates exist
+      if (areaInfo?.latitude && areaInfo?.longitude) {
+        console.log("Setting area location:", areaInfo.latitude, areaInfo.longitude);
+        setRouteLocation({
+          latitude: areaInfo.latitude,
+          longitude: areaInfo.longitude,
+          name: areaInfo.area_name || "Area Location",
+        });
+      } else {
+        console.log("No coordinates available for area");
+      }
+
+      // Check if route name looks like a real street (contains street keywords)
+      const streetKeywords = ['road', 'street', 'avenue', 'lane', 'cross', 'main', 'circle', 'layout', 'sector', 'block'];
+      const looksLikeStreet = route.route_name && streetKeywords.some(keyword =>
+        route.route_name.toLowerCase().includes(keyword)
+      );
+
+      // Only try to geocode if route name looks like a real street
+      if (looksLikeStreet && areaInfo?.area_name) {
+        try {
+          console.log("Route name looks like a street, geocoding:", route.route_name);
+          // Search for the route/street coordinates
+          let streets = await openStreetMapAPI.searchStreetByName(
+            route.route_name,
+            areaInfo.area_name
+          );
+
+          console.log("Geocoding results (with area context):", streets);
+
+          // If no results, try searching with just the route name
+          if (streets.length === 0) {
+            console.log("No results with area context, trying without area...");
+            streets = await openStreetMapAPI.searchStreetByName(route.route_name);
+            console.log("Geocoding results (without area context):", streets);
+          }
+
+          if (streets.length > 0 && streets[0].coordinates) {
+            // Update to exact route location
+            console.log("Setting exact route location:", streets[0].coordinates);
+            setRouteLocation({
+              latitude: streets[0].coordinates[0],
+              longitude: streets[0].coordinates[1],
+              name: route.route_name,
+            });
+          } else {
+            console.log("No geocoding results found, keeping area location");
+          }
+        } catch (error) {
+          console.error("Error geocoding route name:", error);
+          // Keep the area location fallback that was already set
+        }
+      } else {
+        console.log("Route name appears to be custom (not a street name), using area location only");
+      }
+    };
+
+    geocodeRouteName();
+  }, [route]);
 
   const handleEdit = () => {
     router.push(`/route/route-planning/edit/${routeId}`);
@@ -279,6 +365,30 @@ const RouteDetailPage = () => {
             )}
           </div>
         </div>
+
+        {/* Location Map */}
+        {routeLocation ? (
+          <div className="mb-8">
+            <LocationViewer
+              latitude={routeLocation.latitude}
+              longitude={routeLocation.longitude}
+              areaName={routeLocation.name}
+              address={typeof route.area_name === 'object' ? route.area_name.address : undefined}
+            />
+          </div>
+        ) : (
+          typeof route.area_name === 'object' && (
+            <div className="mb-8 p-6 bg-gray-50 border border-gray-200 rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <MapPin className="text-gray-400" size={20} />
+                <Label className="text-lg text-gray-600">Location</Label>
+              </div>
+              <p className="text-sm text-gray-500">
+                No location coordinates available for this area. Please add coordinates to the area to see the map.
+              </p>
+            </div>
+          )
+        )}
 
         {/* Notes Section */}
         {route.notes && (
